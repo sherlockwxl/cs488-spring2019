@@ -205,12 +205,23 @@ void A0::guiLogic()
 		if( ImGui::Button( "Quit Application" ) ) {
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 		}
+
+		// reset the colour, scale, rotation, position
+		if( ImGui::Button( "Reset" ) ) {
+			m_shape_color = (glm::vec3(1.0f, 1.0f, 1.0f));
+	  		m_shape_translation = (vec2(0.0f));
+	  		m_shape_size = 1.0f;
+	  		m_shape_rotation = 0.0f;
+	  		m_mouse_GL_coordinate = dvec2(0.0);
+	  		m_mouseButtonActive = false;
+		}
 		
 		// Retrieve red color component from slider and store in the first element of
 		// m_shape_color.
 		ImGui::SliderFloat("Red Channel", &m_shape_color.r, 0.0f, 1.0f);
 		ImGui::SliderFloat("Green Channel", &m_shape_color.g, 0.0f, 1.0f);
 		ImGui::SliderFloat("Blue Channel", &m_shape_color.b, 0.0f, 1.0f);
+		ImGui::SliderFloat("Rotation Angle", &m_shape_rotation, 0.0f, PI * 2);
 
 
 		// Add more gui elements here here ...
@@ -346,13 +357,15 @@ bool A0::keyInputEvent(int key, int action, int mods) {
 			cout << "+ key pressed" << endl;
 
 			// TODO - increase shape size.
+			m_shape_size = m_shape_size * 1.1;
 
 			eventHandled = true;
 		}
 		if (key == GLFW_KEY_MINUS) {
 			cout << "- key pressed" << endl;
-
+			
 			// TODO - decrease shape size.
+			m_shape_size = m_shape_size * 0.9;
 
 			eventHandled = true;
 		}
@@ -360,10 +373,25 @@ bool A0::keyInputEvent(int key, int action, int mods) {
 			cout << "Q key pressed" << endl;
 
 			eventHandled = true;
+
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 		} 
+		if (key == GLFW_KEY_R){
+			cout << "R key pressed" << endl;
+
+			eventHandled = true;
+
+			m_shape_color = (glm::vec3(1.0f, 1.0f, 1.0f));
+	  		m_shape_translation = (vec2(0.0f));
+	  		m_shape_size = 1.0f;
+	  		m_shape_rotation = 0.0f;
+	  		m_mouse_GL_coordinate = dvec2(0.0);
+	  		m_mouseButtonActive = false;
+		}
 	}
 
 
 	return eventHandled;
 }
+
+
