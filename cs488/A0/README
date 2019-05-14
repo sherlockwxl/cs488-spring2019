@@ -1,0 +1,12 @@
+===============================================================================
+Compilation: (base directory: A0)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A0
+
+Machine: Ubuntu 18
+===============================================================================
+Manual:
+In the implementation of the rotaion question, I used the PI const provided in
+the code instead of using the more accurate one from math library.
