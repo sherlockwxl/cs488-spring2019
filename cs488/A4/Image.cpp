@@ -1,4 +1,4 @@
-// Winter 2019
+// Spring 2019
 
 #include "Image.hpp"
 
@@ -84,7 +84,7 @@ double Image::operator()(uint x, uint y, uint i) const
   return m_data[m_colorComponents * (m_width * y + x) + i];
 }
 
-//--------------------------------------------------------------------------------------- Fall 2018
+//---------------------------------------------------------------------------------------
 double & Image::operator()(uint x, uint y, uint i)
 {
   return m_data[m_colorComponents * (m_width * y + x) + i];

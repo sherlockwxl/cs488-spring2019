@@ -1,4 +1,4 @@
-// Winter 2019
+// Spring 2019
 
 //
 // CS488 - Introduction to Computer Graphics

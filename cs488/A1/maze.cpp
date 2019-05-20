@@ -1,6 +1,7 @@
 // Winter 2019
 
 #include <algorithm>
+#include <cstdio>
 
 #include "maze.hpp"
 

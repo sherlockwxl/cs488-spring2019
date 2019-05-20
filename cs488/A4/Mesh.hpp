@@ -1,4 +1,4 @@
-// Winter 2019
+// Spring 2019
 
 #pragma once
 
@@ -9,6 +9,11 @@
 #include <glm/glm.hpp>
 
 #include "Primitive.hpp"
+
+// Use this #define to selectively compile your code to render the
+// bounding boxes around your mesh objects. Uncomment this option
+// to turn it on.
+//#define RENDER_BOUNDING_VOLUMES
 
 struct Triangle
 {
