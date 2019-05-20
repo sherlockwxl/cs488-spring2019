@@ -18,6 +18,46 @@ using namespace std;
 
 static const size_t DIM = 16;
 
+// const for cube vertex and indices
+// central is 0,0,0
+static const GLfloat cube_vertex[][3] = {
+	-0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	
+	-0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f
+};
+
+static const GLint face_indice[][3] = {
+		// front
+		0, 1, 4,
+		1, 5, 4,
+
+		//right
+		1, 2, 5,
+		2, 6, 5,
+
+		//back
+		2, 3, 7,
+		7, 6, 2,
+
+		//left
+		3, 0, 4,
+		4, 7, 3,
+
+		//bot
+		0, 1, 2,
+		2, 3, 0,
+
+		//top
+		4, 5, 6,
+		6, 7, 4
+};
+
 //----------------------------------------------------------------------------------------
 // Constructor
 A1::A1()
@@ -46,12 +86,6 @@ void A1::init()
 	// same random numbers
 	cout << "Random number seed = " << rseed << endl;
 	
-
-	// DELETE FROM HERE...
-	Maze m(DIM);
-	m.digMaze();
-	m.printMaze();
-	// ...TO HERE
 	
 	// Set the background colour.
 	glClearColor( 0.3, 0.5, 0.7, 1.0 );
@@ -71,6 +105,9 @@ void A1::init()
 	col_uni = m_shader.getUniformLocation( "colour" );
 
 	initGrid();
+	cout << "ini cube will call"<<endl;
+	initCubes();
+	cout << "ini cube will done"<<endl;
 
 	// Set up initial view and projection matrices (need to do this here,
 	// since it depends on the GLFW window being set up correctly).
@@ -193,6 +230,9 @@ void A1::guiLogic()
 			showTestWindow = !showTestWindow;
 		}
 */
+		if( ImGui::Button( "Dig" ) ) {
+			updateCubes();
+		}
 
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
@@ -226,6 +266,7 @@ void A1::draw()
 		glDrawArrays( GL_LINES, 0, (3+DIM)*4 );
 
 		// Draw the cubes
+		drawCubes(W);
 		// Highlight the active square.
 	m_shader.disable();
 
@@ -327,4 +368,85 @@ bool A1::keyInputEvent(int key, int action, int mods) {
 	}
 
 	return eventHandled;
+}
+
+
+//----------------------------------------------------------------------------------------
+/*
+ * Helper function. Delete previous maze info(if not null). And dig new maze
+ */
+
+void A1::updateCubes(){
+	// delete maze if exits
+	if(minfo!=nullptr){
+		delete minfo;
+	}
+
+	minfo = new Maze(DIM);
+	minfo->digMaze();
+}
+
+//----------------------------------------------------------------------------------------
+/*
+ * function to initilize cubes.
+ */
+
+void A1::initCubes(){
+
+	updateCubes();
+	
+	cout << "ini cube called"<<endl;
+
+	// Create the vertex array to record buffer assignments.
+	glGenVertexArrays( 1, &m_cube_vao );
+	glBindVertexArray( m_cube_vao );
+
+	// Create the cube vertex buffer
+	glGenBuffers( 1, &m_cube_vbo );
+	glBindBuffer( GL_ARRAY_BUFFER, m_cube_vbo );
+	glBufferData( GL_ARRAY_BUFFER, sizeof(cube_vertex),
+		cube_vertex, GL_STATIC_DRAW );
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &m_cube_ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_cube_ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof( face_indice ), face_indice, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// Specify the means of extracting the position values properly.
+	GLint posAttrib = m_shader.getAttribLocation( "position" );
+	glEnableVertexAttribArray( posAttrib );
+	glVertexAttribPointer( posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+
+	// Reset state to prevent rogue code from messing with *my* 
+	// stuff!
+	glBindVertexArray( 0 );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+	cout << "ini cube check called"<<endl;
+
+	CHECK_GL_ERRORS;
+}
+//----------------------------------------------------------------------------------------
+/*
+ * function to draw cubes.
+ */
+void A1::drawCubes(glm::mat4 W){
+	cout << "draw cube called"<<endl;
+	for(int i = 0 ; i < DIM; i++){
+		for(int j = 0 ; j < DIM; j++){
+			if(!minfo->getValue(i, j)) continue;
+			//glBindBuffer(GL_ARRAY_BUFFER, m_cube_vbo);                // 绑定之前创建好的VBO
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_cube_ibo);
+			W = glm::translate( W, vec3( i, 0, j ) );
+			glUniformMatrix4fv( M_uni, 1, GL_FALSE, value_ptr( W ) );
+			glBindVertexArray(m_cube_vao);
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+			W = glm::translate( W, vec3( -i, 0, -j ) );
+			glBindVertexArray(0);
+		}
+	}
+
+	cout << "draw cube done"<<endl;
 }
