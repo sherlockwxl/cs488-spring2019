@@ -134,6 +134,7 @@ void Maze::digMaze()
 
 	// pick random start location
 	int s=random()%(m_dim-2)+1;
+	startY = s;
 	setValue(0,s,0);
 	setValue(1,s,0);
 	recDigMaze(1,s);
@@ -143,4 +144,10 @@ void Maze::digMaze()
 			setValue(m_dim-1,s,0);
 		}
 	} while (getValue(m_dim-1,s)==1);
+}
+
+
+// helper function to get the start point of maze
+int Maze::getStartY(){
+	return startY;
 }

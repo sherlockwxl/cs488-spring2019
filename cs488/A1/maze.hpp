@@ -18,7 +18,10 @@ public:
 
 	void digMaze();
 	void printMaze(); // for debugging
+	//
+	int getStartY();
 private:
+	int startY;
 	size_t m_dim;
 	int *m_values;
 	void recDigMaze(int r, int c);

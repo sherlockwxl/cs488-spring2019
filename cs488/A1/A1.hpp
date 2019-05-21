@@ -32,9 +32,15 @@ protected:
 private:
 	Maze *minfo;
 	void initGrid();
+	// private functions
 	void updateCubes();
 	void initCubes();
 	void drawCubes(glm::mat4 W);
+	void initAvator();
+	void drawAvatar(glm::mat4 W);
+	void moveAvator(int direction);
+
+	
 
 	// Fields related to the shader and uniforms.
 	ShaderProgram m_shader;
@@ -52,10 +58,18 @@ private:
 	GLuint m_cube_vbo; // Vertex Buffer Object
 	GLuint m_cube_ibo; // Indices Buffer Object
 
+	// Fields related to avatar geometry.
+	GLuint m_avator_vao; // Vertex Array Object
+	GLuint m_avator_vbo; // Vertex Buffer Object
+
 	// Matrices controlling the camera and projection.
 	glm::mat4 proj;
 	glm::mat4 view;
 
 	float colour[3];
 	int current_col;
+	int cube_height;
+	float avatar_X;
+	float avatar_Y;
+	bool shiftheld = false;
 };

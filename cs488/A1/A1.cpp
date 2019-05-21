@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstdlib>
 
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>
@@ -105,9 +106,11 @@ void A1::init()
 	col_uni = m_shader.getUniformLocation( "colour" );
 
 	initGrid();
-	cout << "ini cube will call"<<endl;
-	initCubes();
-	cout << "ini cube will done"<<endl;
+	//cout << "ini cube will call"<<endl;
+	//initCubes();
+	//cout << "ini cube done"<<endl;
+	initAvator();
+	//cout << "ini avador done"<<endl;
 
 	// Set up initial view and projection matrices (need to do this here,
 	// since it depends on the GLFW window being set up correctly).
@@ -120,6 +123,9 @@ void A1::init()
 		glm::radians( 30.0f ),
 		float( m_framebufferWidth ) / float( m_framebufferHeight ),
 		1.0f, 1000.0f );
+
+
+	cout << " maze ini all done"<<endl;
 }
 
 void A1::initGrid()
@@ -266,7 +272,16 @@ void A1::draw()
 		glDrawArrays( GL_LINES, 0, (3+DIM)*4 );
 
 		// Draw the cubes
-		drawCubes(W);
+		
+		if(minfo != nullptr){
+			//cout << "now call draw cube"<<endl;
+			drawCubes(W);
+		}
+		
+		
+		// Draw avator
+		//cout << "now call draw avator"<<endl;
+		drawAvatar(W);
 		// Highlight the active square.
 	m_shader.disable();
 
@@ -365,6 +380,66 @@ bool A1::keyInputEvent(int key, int action, int mods) {
 	// Fill in with event handling code...
 	if( action == GLFW_PRESS ) {
 		// Respond to some key events.
+
+		// increate/decrease height
+		if (key == GLFW_KEY_SPACE){
+
+			eventHandled = true;
+
+			cube_height += 1.0f;
+		} 
+
+		if (key == GLFW_KEY_BACKSPACE){
+
+			eventHandled = true;
+
+			if ( cube_height > 1.0f){
+				cube_height -= 1.0f;
+			}
+		} 
+
+		//exit program
+		if (key == GLFW_KEY_Q){
+
+			eventHandled = true;
+
+			glfwSetWindowShouldClose(m_window, GL_TRUE);
+		} 
+
+		// Avator movement
+
+		if(key == GLFW_KEY_LEFT){
+			eventHandled = true;
+			moveAvator(0);
+		}
+
+		if(key == GLFW_KEY_RIGHT){
+			eventHandled = true;
+			moveAvator(1);
+		}
+
+		if(key == GLFW_KEY_UP){
+			eventHandled = true;
+			moveAvator(2);
+		}
+
+		if(key == GLFW_KEY_DOWN){
+			eventHandled = true;
+			moveAvator(3);
+		}
+
+		if(key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT){
+			eventHandled = true;
+			shiftheld = true;
+		}
+		
+	}
+
+	if(action == GLFW_RELEASE){
+		if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT){
+			eventHandled = true;
+			shiftheld = false;
+		}
 	}
 
 	return eventHandled;
@@ -378,12 +453,20 @@ bool A1::keyInputEvent(int key, int action, int mods) {
 
 void A1::updateCubes(){
 	// delete maze if exits
-	if(minfo!=nullptr){
+	if(minfo==nullptr){
+		minfo = new Maze(DIM);
+		minfo->digMaze();
+		initCubes();
+	}
+	else{
 		delete minfo;
+		minfo = new Maze(DIM);
+		minfo->digMaze();
 	}
 
-	minfo = new Maze(DIM);
-	minfo->digMaze();
+	
+	avatar_X = 0;
+	avatar_Y = minfo->getStartY();
 }
 
 //----------------------------------------------------------------------------------------
@@ -393,9 +476,9 @@ void A1::updateCubes(){
 
 void A1::initCubes(){
 
-	updateCubes();
+	cube_height = 1.0f;
 	
-	cout << "ini cube called"<<endl;
+	//cout << "ini cube called"<<endl;
 
 	// Create the vertex array to record buffer assignments.
 	glGenVertexArrays( 1, &m_cube_vao );
@@ -406,12 +489,10 @@ void A1::initCubes(){
 	glBindBuffer( GL_ARRAY_BUFFER, m_cube_vbo );
 	glBufferData( GL_ARRAY_BUFFER, sizeof(cube_vertex),
 		cube_vertex, GL_STATIC_DRAW );
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &m_cube_ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_cube_ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof( face_indice ), face_indice, GL_STATIC_DRAW);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// Specify the means of extracting the position values properly.
 	GLint posAttrib = m_shader.getAttribLocation( "position" );
@@ -433,20 +514,182 @@ void A1::initCubes(){
  * function to draw cubes.
  */
 void A1::drawCubes(glm::mat4 W){
-	cout << "draw cube called"<<endl;
+	
 	for(int i = 0 ; i < DIM; i++){
 		for(int j = 0 ; j < DIM; j++){
 			if(!minfo->getValue(i, j)) continue;
-			//glBindBuffer(GL_ARRAY_BUFFER, m_cube_vbo);                // 绑定之前创建好的VBO
-			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_cube_ibo);
-			W = glm::translate( W, vec3( i, 0, j ) );
-			glUniformMatrix4fv( M_uni, 1, GL_FALSE, value_ptr( W ) );
-			glBindVertexArray(m_cube_vao);
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-			W = glm::translate( W, vec3( -i, 0, -j ) );
-			glBindVertexArray(0);
+			// add height
+			for(float k = 0.0f; k < cube_height ; k++){
+
+				W = glm::translate( W, vec3( i + 0.5f, k, j + 0.5f) );
+				glUniformMatrix4fv( M_uni, 1, GL_FALSE, value_ptr( W ) );
+				glBindVertexArray(m_cube_vao);
+				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				W = glm::translate( W, vec3( -(i + 0.5f), -k, -(j + 0.5f)) );
+
+				glBindVertexArray(0);
+			}
+			
 		}
 	}
+}
 
-	cout << "draw cube done"<<endl;
+
+//----------------------------------------------------------------------------------------
+/*
+ * function to ini Avator.
+ */
+void A1::initAvator(){
+	avatar_X = 0.0f;
+	avatar_Y = 0.0f;
+}
+
+
+//----------------------------------------------------------------------------------------
+/*
+ * function to draw Avator.
+ */
+void A1::drawAvatar(glm::mat4 W){
+
+	//cout << "ini avator called"<<endl;
+
+	// Create the vertex array to record buffer assignments.
+	glGenVertexArrays( 1, &m_avator_vao );
+	glBindVertexArray( m_avator_vao );
+
+	// Create the cube vertex buffer
+	glGenBuffers( 1, &m_avator_vbo );
+	glBindBuffer( GL_ARRAY_BUFFER, m_avator_vbo );
+
+	// Specify the means of extracting the position values properly.
+	GLint posAttrib = m_shader.getAttribLocation( "position" );
+	glEnableVertexAttribArray( posAttrib );
+	CHECK_GL_ERRORS;
+	glVertexAttribPointer( posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
+	CHECK_GL_ERRORS;
+
+
+
+	//cout << "draw avator called"<<endl;
+	glUniform3f(col_uni, 1, 0.5f, 1);
+	W = glm::translate(W, vec3(avatar_X + 0.5f, 0.5f, avatar_Y + 0.5f));
+	CHECK_GL_ERRORS;
+	float R = 0.3f;
+	int stack_amt = 20;
+	float stack_angle = (float) (M_PI / stack_amt);
+	int slice_amt = 50;
+	float slice_angle = (float) ( 2 *M_PI / slice_amt);
+
+	float x0, x1, x2, x3, y1, y2, y3, y0, z1, z2, z3, z0; 
+	float alpha_x = 0.0f;
+	float alpha_z = 0.0f;
+
+	// loop for step on z axis
+	for( int i = 0;i < stack_amt;i++ ){
+
+		alpha_z = (float) (i * stack_angle);
+
+		float rsinz = R*sin(alpha_z);
+		float rsinznext = R * sin(alpha_z + stack_angle);
+		float z0 = R * cos(alpha_z);
+
+		for( int j = 0;j < slice_amt; j++ ){
+			alpha_x = j * slice_angle;
+
+			x0 = rsinz * cos(alpha_x);
+			x1 = rsinznext * cos(alpha_x);
+			x2 = rsinznext * cos(alpha_x + slice_angle);
+			x3 = rsinz * cos(alpha_x + slice_angle);
+
+
+			y0 = rsinz * sin(alpha_x);
+			y1 = rsinznext * sin(alpha_x);
+			y2 = rsinznext * sin(alpha_x + slice_angle);
+			y3 = rsinz * sin(alpha_x + slice_angle);
+
+			z0 = z0;
+			z1 = R * cos(alpha_z + stack_angle);
+			z2 = z1;
+			z3 = z0;
+
+			GLfloat coordsList[] = {
+				x0, y0, z0,
+				x1, y1, z1,
+				x2, y2, z2,
+				x2, y2, z2,
+				x3, y3, z3,
+				x1, y1, z1,
+			};
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(coordsList), coordsList, GL_STATIC_DRAW);
+			CHECK_GL_ERRORS;
+			glBindVertexArray(m_avator_vao);
+			CHECK_GL_ERRORS;
+			glUniformMatrix4fv(M_uni, 1, GL_FALSE, value_ptr(W));
+			CHECK_GL_ERRORS;
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			CHECK_GL_ERRORS;
+			glBindVertexArray(0);
+			CHECK_GL_ERRORS;
+
+		}	
+		
+	}
+
+	W = glm::translate(W, vec3(-avatar_X - 0.5f, - 0.5f, - avatar_Y - 0.5f));
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+
+}
+
+//----------------------------------------------------------------------------------------
+/*
+ * function to move Avator.
+ */
+void A1::moveAvator(int direction){
+	// 0 for left; 1 for right; 2 for down; 3 for up
+	int avatar_X_int = (int)avatar_X;
+	int avatar_Y_int = (int)avatar_Y;
+	switch(direction){
+		case 0: // move left
+			cout<<"move left called"<<endl;
+			if(avatar_X_int > 0 && (!minfo->getValue(avatar_X_int - 1, avatar_Y_int) || shiftheld == 1)){
+				cout<<"move left updated"<<endl;
+				avatar_X -= 1;
+				if(minfo->getValue(avatar_X_int - 1, avatar_Y_int)){
+					minfo->setValue(avatar_X_int - 1, avatar_Y_int, 0);
+				}
+			}
+			break;
+		case 1: // move right
+			cout<<"move right called"<<endl;
+			if(avatar_X_int < (DIM - 1) && (!minfo->getValue(avatar_X_int + 1, avatar_Y_int) || shiftheld == 1)){
+				cout<<"move right updated"<<endl;
+				avatar_X += 1;
+				if(minfo->getValue(avatar_X_int + 1, avatar_Y_int)){
+					minfo->setValue(avatar_X_int + 1, avatar_Y_int, 0);
+				}
+			}
+			break;
+		case 2: // move down
+			cout<<"move down called"<<endl;
+			if(avatar_Y_int > 0 && (!minfo->getValue(avatar_X_int, avatar_Y_int - 1) || shiftheld == 1)){
+				cout<<"move down updatd"<<endl;
+				avatar_Y -= 1;
+				if(minfo->getValue(avatar_X_int, avatar_Y_int - 1)){
+					minfo->setValue(avatar_X_int, avatar_Y_int - 1, 0);
+				}
+			}
+			break;
+		case 3: // move up
+			cout<<"move up called"<<endl;
+			if(avatar_Y_int < (DIM - 1) && (!minfo->getValue(avatar_X_int, avatar_Y_int + 1) || shiftheld == 1)){
+				cout<<"move up updated"<<endl;
+				avatar_Y += 1;
+				if(minfo->getValue(avatar_X_int, avatar_Y_int + 1)){
+					minfo->setValue(avatar_X_int, avatar_Y_int + 1, 0);
+				}
+			}
+			break;
+	}
 }
