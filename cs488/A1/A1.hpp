@@ -74,18 +74,22 @@ private:
 	glm::mat4 proj;
 	glm::mat4 view;
 
-	float colour[3];
-	int current_col;
-	int cube_height;
-	float avatar_X;
+
+	float colour[3]; // save the color slider
+	int current_col; // radio button selection
+	int cube_height; // current cube height
+	float avatar_X;  // avatar location 
 	float avatar_Y;
-	bool shiftheld = false;
-	float rotation;
+	bool shiftheld = false; 
+	// transformation parameters
+	float rotation; 
 	float scale;
+	int persistence;
+	
 	bool m_mouseButtonActive = false;
 	float prev_m_x;
 	float prev_movement;
-	int persistence;
+	
 
 	glm::vec3 color_cube;
 	glm::vec3 color_floor;

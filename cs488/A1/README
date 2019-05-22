@@ -5,7 +5,7 @@ Steps:
     2. $ make
     3. $ ./A1
 
-Machine: Ubuntu 18
+Machine: gl13
 ===============================================================================
 Manual:
 All required features implemented.
