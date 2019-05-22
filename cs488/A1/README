@@ -1,0 +1,11 @@
+===============================================================================
+Compilation: (base directory: A1)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A1
+
+Machine: Ubuntu 18
+===============================================================================
+Manual:
+All required features implemented.

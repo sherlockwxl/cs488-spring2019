@@ -38,7 +38,11 @@ private:
 	void drawCubes(glm::mat4 W);
 	void initAvator();
 	void drawAvatar(glm::mat4 W);
+	void drawFloor();
 	void moveAvator(int direction);
+	void reset();
+	void resetAttributes();
+	
 
 	
 
@@ -62,6 +66,10 @@ private:
 	GLuint m_avator_vao; // Vertex Array Object
 	GLuint m_avator_vbo; // Vertex Buffer Object
 
+	// Fields related to floor geometry.
+	GLuint m_floor_vao; // Vertex Array Object
+	GLuint m_floor_vbo; // Vertex Buffer Object
+
 	// Matrices controlling the camera and projection.
 	glm::mat4 proj;
 	glm::mat4 view;
@@ -72,4 +80,14 @@ private:
 	float avatar_X;
 	float avatar_Y;
 	bool shiftheld = false;
+	float rotation;
+	float scale;
+	bool m_mouseButtonActive = false;
+	float prev_m_x;
+	float prev_movement;
+	int persistence;
+
+	glm::vec3 color_cube;
+	glm::vec3 color_floor;
+	glm::vec3 color_avatar;
 };

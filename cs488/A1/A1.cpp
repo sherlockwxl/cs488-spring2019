@@ -59,14 +59,26 @@ static const GLint face_indice[][3] = {
 		6, 7, 4
 };
 
+
+static const GLfloat floor_vertex[][3] = {
+	0.0f, 0.0f, 0.0f,
+	16.0f, 0.0f, 0.0f,
+	16.0f, 0.0f, 16.0f,
+
+	0.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 16.0f,
+	16.0f, 0.0f, 16.0f
+};
 //----------------------------------------------------------------------------------------
 // Constructor
 A1::A1()
 	: current_col( 0 )
 {
-	colour[0] = 0.0f;
-	colour[1] = 0.0f;
-	colour[2] = 0.0f;
+	resetAttributes();
+	rotation = 0;
+	scale = 1;
+	persistence =0;
+	prev_movement = 0;
 }
 
 //----------------------------------------------------------------------------------------
@@ -106,11 +118,8 @@ void A1::init()
 	col_uni = m_shader.getUniformLocation( "colour" );
 
 	initGrid();
-	//cout << "ini cube will call"<<endl;
-	//initCubes();
-	//cout << "ini cube done"<<endl;
+
 	initAvator();
-	//cout << "ini avador done"<<endl;
 
 	// Set up initial view and projection matrices (need to do this here,
 	// since it depends on the GLFW window being set up correctly).
@@ -125,7 +134,52 @@ void A1::init()
 		1.0f, 1000.0f );
 
 
-	cout << " maze ini all done"<<endl;
+}
+
+void A1::reset(){
+
+	// 1. reset attributes
+	resetAttributes();
+
+	// if no maze was generated
+	if(minfo == nullptr) return;
+
+	// otherwise
+	// 2. reset avatar
+	initAvator();
+
+
+	// 2. reset maze
+	delete minfo;
+	minfo = nullptr;
+
+}
+
+void A1::resetAttributes(){
+	//reset all color
+	color_cube = {0.23f,0.1f,0.13f};
+	color_floor = {1.0f,0.614f,0.738f};
+	color_avatar = {0.3f,0.9f,0.25f};
+	colour[0] = 0.23f;
+	colour[1] = 0.1f;
+	colour[2] = 0.13f;
+
+	// reset radio button selection
+	current_col = 0;
+	// reset rotation
+	rotation = 0;
+	// stop rotation
+	persistence = 0;
+	// reset shift
+	shiftheld = false;
+	// reset scale
+	scale = 1;
+	// reset mouse
+	m_mouseButtonActive = false;
+	// reset previous location
+	prev_m_x = 0;
+	// reset previous movement
+	prev_movement = 0;
 }
 
 void A1::initGrid()
@@ -220,10 +274,44 @@ void A1::guiLogic()
 		// displayed.
 
 		ImGui::PushID( 0 );
-		ImGui::ColorEdit3( "##Colour", colour );
-		ImGui::SameLine();
-		if( ImGui::RadioButton( "##Col", &current_col, 0 ) ) {
-			// Select this colour.
+
+		
+		if( ImGui::RadioButton( "Cube color", &current_col, 0 ) ) {
+			colour[0] = color_cube.r;
+			colour[1] = color_cube.g;
+			colour[2] = color_cube.b;
+		}
+		if( ImGui::RadioButton( "Floor color", &current_col, 1 ) ) {
+			colour[0] = color_floor.r;
+			colour[1] = color_floor.g;
+			colour[2] = color_floor.b;
+		}
+		if( ImGui::RadioButton( "Avatar color", &current_col, 2 ) ) {
+			colour[0] = color_avatar.r;
+			colour[1] = color_avatar.g;
+			colour[2] = color_avatar.b;
+		}
+
+		ImGui::SliderFloat("Red Channel", &colour[0], 0.0f, 1.0f);
+		ImGui::SliderFloat("Green Channel", &colour[1], 0.0f, 1.0f);
+		ImGui::SliderFloat("Blue Channel", &colour[2], 0.0f, 1.0f);
+
+
+		switch(current_col){
+			case 0:
+				color_cube.r = colour[0];
+				color_cube.g = colour[1];
+				color_cube.b = colour[2];
+				break;
+			case 1:
+				color_floor.r = colour[0];
+				color_floor.g = colour[1];
+				color_floor.b = colour[2];
+				break;
+			case 2:
+				color_avatar.r = colour[0];
+				color_avatar.g = colour[1];
+				color_avatar.b = colour[2];
 		}
 		ImGui::PopID();
 
@@ -238,6 +326,10 @@ void A1::guiLogic()
 */
 		if( ImGui::Button( "Dig" ) ) {
 			updateCubes();
+		}
+
+		if( ImGui::Button( "Reset" ) ) {
+			reset();
 		}
 
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
@@ -257,7 +349,17 @@ void A1::draw()
 {
 	// Create a global transformation for the model (centre it).
 	mat4 W;
+	if(persistence){
+			rotation += prev_movement;
+			
+	}else{
+			prev_movement = 0;
+	}
+	W = glm::rotate(W, rotation, glm::vec3(0, 1.0f, 0));
+	
 	W = glm::translate( W, vec3( -float(DIM)/2.0f, 0, -float(DIM)/2.0f ) );
+	
+	W = glm::scale(W, glm::vec3(scale,scale,scale));
 
 	m_shader.enable();
 		glEnable( GL_DEPTH_TEST );
@@ -272,17 +374,15 @@ void A1::draw()
 		glDrawArrays( GL_LINES, 0, (3+DIM)*4 );
 
 		// Draw the cubes
-		
+		drawFloor();
+
+
 		if(minfo != nullptr){
-			//cout << "now call draw cube"<<endl;
 			drawCubes(W);
 		}
 		
-		
-		// Draw avator
-		//cout << "now call draw avator"<<endl;
 		drawAvatar(W);
-		// Highlight the active square.
+
 	m_shader.disable();
 
 	// Restore defaults
@@ -326,6 +426,16 @@ bool A1::mouseMoveEvent(double xPos, double yPos)
 		// Probably need some instance variables to track the current
 		// rotation amount, and maybe the previous X position (so 
 		// that you can rotate relative to the *change* in X.
+		if(m_mouseButtonActive){
+			rotation += (xPos - prev_m_x) * 0.01;
+			prev_movement = (xPos - prev_m_x) * 0.01;
+			prev_m_x = xPos;
+			
+		}else{
+			persistence = 1;
+			prev_m_x = xPos;
+		}
+
 	}
 
 	return eventHandled;
@@ -341,6 +451,19 @@ bool A1::mouseButtonInputEvent(int button, int actions, int mods) {
 	if (!ImGui::IsMouseHoveringAnyWindow()) {
 		// The user clicked in the window.  If it's the left
 		// mouse button, initiate a rotation.
+		if (actions == GLFW_PRESS) {
+			m_mouseButtonActive = true;
+			if(persistence){
+				persistence = 0;
+			}
+		}
+	
+
+		if (actions == GLFW_RELEASE) {
+			m_mouseButtonActive = false;
+			persistence = 0;
+		}
+
 	}
 
 	return eventHandled;
@@ -354,6 +477,16 @@ bool A1::mouseScrollEvent(double xOffSet, double yOffSet) {
 	bool eventHandled(false);
 
 	// Zoom in or out.
+
+	scale += yOffSet*0.1;
+	if(scale < 0.5f){
+		scale = 0.5f;
+	}
+
+	if(scale > 1.5f){
+		scale = 1.5f;
+	}
+	eventHandled = true;
 
 	return eventHandled;
 }
@@ -432,6 +565,18 @@ bool A1::keyInputEvent(int key, int action, int mods) {
 			eventHandled = true;
 			shiftheld = true;
 		}
+
+		// reset 
+		if (key == GLFW_KEY_R){
+			eventHandled = true;
+			reset();
+		}
+
+		// reset 
+		if (key == GLFW_KEY_D){
+			eventHandled = true;
+			updateCubes();
+		}
 		
 	}
 
@@ -477,8 +622,7 @@ void A1::updateCubes(){
 void A1::initCubes(){
 
 	cube_height = 1.0f;
-	
-	//cout << "ini cube called"<<endl;
+
 
 	// Create the vertex array to record buffer assignments.
 	glGenVertexArrays( 1, &m_cube_vao );
@@ -505,7 +649,6 @@ void A1::initCubes(){
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
-	cout << "ini cube check called"<<endl;
 
 	CHECK_GL_ERRORS;
 }
@@ -520,7 +663,7 @@ void A1::drawCubes(glm::mat4 W){
 			if(!minfo->getValue(i, j)) continue;
 			// add height
 			for(float k = 0.0f; k < cube_height ; k++){
-
+				glUniform3f(col_uni, color_cube.r, color_cube.g, color_cube.b);
 				W = glm::translate( W, vec3( i + 0.5f, k, j + 0.5f) );
 				glUniformMatrix4fv( M_uni, 1, GL_FALSE, value_ptr( W ) );
 				glBindVertexArray(m_cube_vao);
@@ -551,8 +694,6 @@ void A1::initAvator(){
  */
 void A1::drawAvatar(glm::mat4 W){
 
-	//cout << "ini avator called"<<endl;
-
 	// Create the vertex array to record buffer assignments.
 	glGenVertexArrays( 1, &m_avator_vao );
 	glBindVertexArray( m_avator_vao );
@@ -564,16 +705,14 @@ void A1::drawAvatar(glm::mat4 W){
 	// Specify the means of extracting the position values properly.
 	GLint posAttrib = m_shader.getAttribLocation( "position" );
 	glEnableVertexAttribArray( posAttrib );
-	CHECK_GL_ERRORS;
+
 	glVertexAttribPointer( posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
-	CHECK_GL_ERRORS;
 
 
-
-	//cout << "draw avator called"<<endl;
-	glUniform3f(col_uni, 1, 0.5f, 1);
+	glUniform3f(col_uni, color_avatar.r, color_avatar.g, color_avatar.b);
 	W = glm::translate(W, vec3(avatar_X + 0.5f, 0.5f, avatar_Y + 0.5f));
 	CHECK_GL_ERRORS;
+
 	float R = 0.3f;
 	int stack_amt = 20;
 	float stack_angle = (float) (M_PI / stack_amt);
@@ -584,7 +723,6 @@ void A1::drawAvatar(glm::mat4 W){
 	float alpha_x = 0.0f;
 	float alpha_z = 0.0f;
 
-	// loop for step on z axis
 	for( int i = 0;i < stack_amt;i++ ){
 
 		alpha_z = (float) (i * stack_angle);
@@ -622,15 +760,14 @@ void A1::drawAvatar(glm::mat4 W){
 			};
 
 			glBufferData(GL_ARRAY_BUFFER, sizeof(coordsList), coordsList, GL_STATIC_DRAW);
-			CHECK_GL_ERRORS;
+
 			glBindVertexArray(m_avator_vao);
-			CHECK_GL_ERRORS;
+
 			glUniformMatrix4fv(M_uni, 1, GL_FALSE, value_ptr(W));
 			CHECK_GL_ERRORS;
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-			CHECK_GL_ERRORS;
+			
 			glBindVertexArray(0);
-			CHECK_GL_ERRORS;
 
 		}	
 		
@@ -650,46 +787,109 @@ void A1::moveAvator(int direction){
 	// 0 for left; 1 for right; 2 for down; 3 for up
 	int avatar_X_int = (int)avatar_X;
 	int avatar_Y_int = (int)avatar_Y;
-	switch(direction){
-		case 0: // move left
-			cout<<"move left called"<<endl;
-			if(avatar_X_int > 0 && (!minfo->getValue(avatar_X_int - 1, avatar_Y_int) || shiftheld == 1)){
-				cout<<"move left updated"<<endl;
-				avatar_X -= 1;
-				if(minfo->getValue(avatar_X_int - 1, avatar_Y_int)){
-					minfo->setValue(avatar_X_int - 1, avatar_Y_int, 0);
+
+	if(minfo == nullptr){
+		switch(direction){
+			case 0: // move left
+
+				if(avatar_X_int > 0 ){
+
+					avatar_X -= 1;
 				}
-			}
-			break;
-		case 1: // move right
-			cout<<"move right called"<<endl;
-			if(avatar_X_int < (DIM - 1) && (!minfo->getValue(avatar_X_int + 1, avatar_Y_int) || shiftheld == 1)){
-				cout<<"move right updated"<<endl;
-				avatar_X += 1;
-				if(minfo->getValue(avatar_X_int + 1, avatar_Y_int)){
-					minfo->setValue(avatar_X_int + 1, avatar_Y_int, 0);
+				break;
+			case 1: // move right
+
+				if(avatar_X_int < (DIM - 1)){
+
+					avatar_X += 1;
 				}
-			}
-			break;
-		case 2: // move down
-			cout<<"move down called"<<endl;
-			if(avatar_Y_int > 0 && (!minfo->getValue(avatar_X_int, avatar_Y_int - 1) || shiftheld == 1)){
-				cout<<"move down updatd"<<endl;
-				avatar_Y -= 1;
-				if(minfo->getValue(avatar_X_int, avatar_Y_int - 1)){
-					minfo->setValue(avatar_X_int, avatar_Y_int - 1, 0);
+				break;
+			case 2: // move down
+
+				if(avatar_Y_int > 0 ){
+
+					avatar_Y -= 1;
 				}
-			}
-			break;
-		case 3: // move up
-			cout<<"move up called"<<endl;
-			if(avatar_Y_int < (DIM - 1) && (!minfo->getValue(avatar_X_int, avatar_Y_int + 1) || shiftheld == 1)){
-				cout<<"move up updated"<<endl;
-				avatar_Y += 1;
-				if(minfo->getValue(avatar_X_int, avatar_Y_int + 1)){
-					minfo->setValue(avatar_X_int, avatar_Y_int + 1, 0);
+				break;
+			case 3: // move up
+
+				if(avatar_Y_int < (DIM - 1) ){
+
+					avatar_Y += 1;
 				}
-			}
-			break;
+				break;
+		}
+	}else{
+		switch(direction){
+			case 0: // move left
+
+				if(avatar_X_int > 0 && (!minfo->getValue(avatar_X_int - 1, avatar_Y_int) || shiftheld == 1)){
+
+					avatar_X -= 1;
+					if(minfo->getValue(avatar_X_int - 1, avatar_Y_int)){
+						minfo->setValue(avatar_X_int - 1, avatar_Y_int, 0);
+					}
+				}
+				break;
+			case 1: // move right
+
+				if(avatar_X_int < (DIM - 1) && (!minfo->getValue(avatar_X_int + 1, avatar_Y_int) || shiftheld == 1)){
+
+					avatar_X += 1;
+					if(minfo->getValue(avatar_X_int + 1, avatar_Y_int)){
+						minfo->setValue(avatar_X_int + 1, avatar_Y_int, 0);
+					}
+				}
+				break;
+			case 2: // move down
+
+				if(avatar_Y_int > 0 && (!minfo->getValue(avatar_X_int, avatar_Y_int - 1) || shiftheld == 1)){
+
+					avatar_Y -= 1;
+					if(minfo->getValue(avatar_X_int, avatar_Y_int - 1)){
+						minfo->setValue(avatar_X_int, avatar_Y_int - 1, 0);
+					}
+				}
+				break;
+			case 3: // move up
+
+				if(avatar_Y_int < (DIM - 1) && (!minfo->getValue(avatar_X_int, avatar_Y_int + 1) || shiftheld == 1)){
+
+					avatar_Y += 1;
+					if(minfo->getValue(avatar_X_int, avatar_Y_int + 1)){
+						minfo->setValue(avatar_X_int, avatar_Y_int + 1, 0);
+					}
+				}
+				break;
+		}
 	}
+	
+}
+
+
+void A1::drawFloor(){
+
+	glUniform3f(col_uni, color_floor.r, color_floor.g, color_floor.b);
+	glGenVertexArrays( 1, &m_floor_vao );
+	glBindVertexArray( m_floor_vao );
+
+	// Create the cube vertex buffer
+	glGenBuffers( 1, &m_floor_vbo );
+	glBindBuffer( GL_ARRAY_BUFFER, m_floor_vbo );
+	glBufferData( GL_ARRAY_BUFFER, 18*sizeof(float),
+		floor_vertex, GL_STATIC_DRAW );
+
+	// Specify the means of extracting the position values properly.
+	GLint posAttrib = m_shader.getAttribLocation( "position" );
+	glEnableVertexAttribArray( posAttrib );
+	glVertexAttribPointer( posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr );
+
+	glDrawArrays( GL_TRIANGLES, 0, 6 );
+
+
+	// Reset state to prevent rogue code from messing with *my* 
+	// stuff!
+	glBindVertexArray( 0 );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	
 }
