@@ -13,6 +13,19 @@ using namespace std;
 #include <glm/gtx/io.hpp>
 using namespace glm;
 
+static const GLfloat cube_vertex[][3] = {
+	//bot x z y(-1)
+	-1.0f,  -1.0f, -1.0f,
+	-1.0f,   1.0f, -1.0f,
+	 1.0f,   1.0f, -1.0f,
+	 1.0f,  -1.0f, -1.0f,
+	//top
+	-1.0f,  -1.0f,  1.0f,
+	-1.0f,   1.0f,  1.0f,
+	 1.0f,   1.0f,  1.0f,
+	 1.0f,  -1.0f,  1.0f,
+};
+
 //----------------------------------------------------------------------------------------
 // Constructor
 VertexData::VertexData()
