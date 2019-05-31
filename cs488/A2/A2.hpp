@@ -72,4 +72,16 @@ protected:
 
 	glm::vec3 m_currentLineColour;
 
+	// A2 variables:
+	glm::mat4 modelTransfer;
+	glm::mat4 viewTransfer;
+	GLfloat nearPlane, farPlane, fov;
+	// A2 functions:
+	
+	glm::vec2 pieplineHandler();
+	int easyClipping(glm::vec4 *cube_vec4_VCS, int index);
+	void drawCube(GLfloat * cube_vertex);
+	void reset();
+	void resetFOV();
+
 };

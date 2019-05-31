@@ -4,6 +4,7 @@
 #include "cs488-framework/GlErrorCheck.hpp"
 
 #include <iostream>
+#include <utility> 
 using namespace std;
 
 #include <imgui/imgui.h>
@@ -13,18 +14,34 @@ using namespace std;
 #include <glm/gtx/io.hpp>
 using namespace glm;
 
-static const GLfloat cube_vertex[][3] = {
+pair<int, int> indexPair[12] = {
+	{0, 1},
+	{0, 3},
+	{0, 4},
+	{1, 2},
+	{1, 5},
+	{2, 3},
+	{2, 6},
+	{3, 7},
+	{4, 5},
+	{4, 7},
+	{5, 6},
+	{6, 7},
+}; 
+static const glm::vec3 cube_vertex[8]=
+{
 	//bot x z y(-1)
-	-1.0f,  -1.0f, -1.0f,
-	-1.0f,   1.0f, -1.0f,
-	 1.0f,   1.0f, -1.0f,
-	 1.0f,  -1.0f, -1.0f,
+	glm::vec3(-1.0f,  -1.0f, -1.0f),
+	glm::vec3(-1.0f,   1.0f, -1.0f),
+	glm::vec3(1.0f,   1.0f, -1.0f),
+	glm::vec3(1.0f,  -1.0f, -1.0f),
 	//top
-	-1.0f,  -1.0f,  1.0f,
-	-1.0f,   1.0f,  1.0f,
-	 1.0f,   1.0f,  1.0f,
-	 1.0f,  -1.0f,  1.0f,
+	glm::vec3(-1.0f,  -1.0f,  1.0f),
+	glm::vec3(-1.0f,   1.0f,  1.0f),
+	glm::vec3(1.0f,   1.0f,  1.0f),
+	glm::vec3(1.0f,  -1.0f,  1.0f),
 };
+
 
 //----------------------------------------------------------------------------------------
 // Constructor
@@ -42,6 +59,7 @@ VertexData::VertexData()
 A2::A2()
 	: m_currentLineColour(vec3(0.0f))
 {
+	
 
 }
 
@@ -70,6 +88,9 @@ void A2::init()
 	generateVertexBuffers();
 
 	mapVboDataToVertexAttributeLocation();
+
+	reset();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -203,6 +224,9 @@ void A2::appLogic()
 
 	// Call at the beginning of frame, before drawing lines:
 	initLineData();
+
+
+	// execute pipeline handler
 
 	// Draw outer square:
 	setLineColour(vec3(1.0f, 0.7f, 0.8f));
@@ -395,4 +419,86 @@ bool A2::keyInputEvent (
 	// Fill in with event handling code...
 
 	return eventHandled;
+}
+
+
+//----------------------------------------------------------------------------------------
+/*
+ * Pipeline handler, process the cube info and return vertexs ready for draw.
+ */
+
+glm::vec2 A2::pieplineHandler(){
+
+
+	// Step 1. Convert to vec4
+	glm::vec4 cube_vec4_temp[8];
+	for( int i = 0 ; i < 8 ; i++){
+		cube_vec4_temp[0] = vec4(cube_vertex[i], 1.0f);
+	}
+
+	// Step 2. Modelling Transformations
+	glm::vec4 cube_vec4_WCS[8];
+	for( int i = 0 ; i < 8 ; i++){
+		cube_vec4_WCS[0] = modelTransfer * cube_vec4_temp[i];
+	};
+
+	// Step 3. View Transformations
+
+	glm::vec4 cube_vec4_VCS[8];
+	for( int i = 0 ; i < 8 ; i++){
+		cube_vec4_VCS[i] = viewTransfer * cube_vec4_WCS[i];
+	};
+
+	// Step 4. Projection
+
+	// Step 4.1 Clipping
+
+	// Step 4.1.1 trivial condition (both < near > far and reverse order for first z < second z)
+	int easyClip[12] = {0};  // 1 for pass; -1 for neg pass; 0 for fail
+	for(int i = 0 ; i < 12; i++){
+		easyClip[i] = easyClipping(cube_vec4_VCS, i);
+	}
+
+
+
+	return res;
+}
+
+void A2::drawCube(GLfloat * cube_vertex){
+}
+
+
+void A2::reset(){
+	modelTransfer = glm::mat4(
+					glm::vec4(1.0f, 0.0f, 0.0f, 0.0f), // x
+					glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), // y 
+					glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), // z
+					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)); // w
+	resetFOV();
+}
+
+void A2::resetFOV(){
+	nearPlane = 1.0f;
+	farPlane = 20.0f;
+	fov = 30.0f;
+}
+
+int A2::easyClipping(glm::vec4 *cube_vec4_VCS, int index){
+	int res = 1;
+	int firstIndex = indexPair[index].first;
+	int secondIndex = indexPair[index].second;
+	// trivial test
+	if((cube_vec4_VCS[firstIndex].z < nearPlane && cube_vec4_VCS[secondIndex].z < nearPlane) ||
+		(cube_vec4_VCS[firstIndex].z > farPlane && cube_vec4_VCS[secondIndex].z > farPlane))
+		{
+			// both points not within range should return 0;
+			res = 0;
+			return res;
+		}
+
+	// make sure first index has larger z value
+	if(cube_vec4_VCS[firstIndex].z < cube_vec4_VCS[secondIndex].z){
+		res = -1;
+	}
+	return res;
 }
