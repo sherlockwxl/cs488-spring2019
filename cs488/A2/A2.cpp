@@ -240,7 +240,7 @@ void A2::appLogic()
 
 	// draw the model frames
 
-	
+	modelFrameHandler();
 
 
 	// Draw outer square:
@@ -532,7 +532,8 @@ void A2::pieplineHandler(){
 
 }
 
-void A2::drawCube(GLfloat * cube_vertex){
+void modelFrameHandler(){
+	
 }
 
 
