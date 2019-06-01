@@ -75,10 +75,16 @@ protected:
 	// A2 variables:
 	glm::mat4 modelTransfer;
 	glm::mat4 viewTransfer;
+	// plane info
 	GLfloat nearPlane, farPlane, fov;
+	// viewport info
+	vec2 vp1, vp2;
+
 	// A2 functions:
 	
-	glm::vec2 pieplineHandler();
+	void pieplineHandler();
+	bool clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &displayPair);
+	void sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base);
 	int easyClipping(glm::vec4 *cube_vec4_VCS, int index);
 	void drawCube(GLfloat * cube_vertex);
 	void reset();
