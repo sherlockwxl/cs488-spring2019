@@ -638,23 +638,18 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 
 
 void A2::reset(){
+	eye_origin = glm::vec3(5.0f, 2.0f, 10.0f);
+	world_origin = glm::vec3(0.0f, 0.0f, 0.0f);
+	cube_origin = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	modelTransfer = glm::mat4(
 					glm::vec4(1.0f, 0.0f, 0.0f, 0.0f), // x
 					glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), // y 
 					glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), // z
 					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)); // w
 
-	/*viewTransfer = glm::mat4(
-					glm::vec4(1.0f, 0.0f, 0.0f, 0.0f), // x
-					glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), // y 
-					glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), // z
-					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)); // w*/
-
-	glm::mat4 r = glm::transpose(mat4(vec4(m_view_x, 0.0f), vec4(m_view_y, 0.0f), vec4(m_view_z, 0.0f), vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-    //glm::mat4 t = glm::translate(mat4(1.0f), -m_view_origin);
-    glm::mat4 t =  glm::mat4(vec4(1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f),
-                     vec4(0.0f, 0.0f, 1.0f, 0.0f), vec4(-m_view_origin, 1.0f));
-    viewTransfer = r*t;				
+	viewTransfer = calculateView();
+	
 	resetFOV();
 	resetVP();
 }
@@ -843,4 +838,25 @@ void A2::sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base){
 			return;
 		}
 	}
+}
+
+// calculate worldtoview matrix follow uvn base
+glm::mat4 A2::calculateView(){
+
+	
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 new_z = glm::normalize(world_origin - eye_origin);
+	glm::vec3 new_x = glm::normalize(glm::cross(up,new_z));
+	glm::vec3 new_y = glm::normalize(glm::cross(new_z, new_x));
+
+	glm::mat4 view = glm::mat4(
+		glm::vec4(new_x.x, new_y.x, new_z.x, 0.0f),
+		glm::vec4(new_x.y, new_y.y, new_z.y, 0.0f),
+		glm::vec4(new_x.z, new_y.z, new_z.z, 0.0f),
+		glm::vec4(-glm::dot(eye_origin,new_x), -glm::dot(eye_origin,new_y), -glm::dot(eye_origin,new_z), 1)
+	);
+
+	
+	cout<<view<<endl;
+	return view;
 }

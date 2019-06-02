@@ -86,10 +86,9 @@ protected:
 	glm::vec4 base_0 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// view info
-	glm::vec3 m_view_origin = glm::vec3(0.2f, 0.2f, 10.0f);
-	glm::vec3 m_view_x = glm::vec3(-1.0f, 0.0f, 0.0f);
-    glm::vec3 m_view_y = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 m_view_z = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 eye_origin;
+	glm::vec3 world_origin;
+	glm::vec3 cube_origin;
 
 	// A2 functions:
 	
@@ -100,6 +99,8 @@ protected:
 	bool clipAndTtoViewPoint(std::pair<glm::vec2, glm::vec2 > &displayPair);
 	void sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base);
 	int easyClipping(glm::vec4 *cube_vec4_VCS, std::pair<int, int> *indexPair, int index);
+
+	glm::mat4 calculateView();
 	void reset();
 	void resetFOV();
 	void resetVP();
