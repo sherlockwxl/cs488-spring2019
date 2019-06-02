@@ -15,7 +15,7 @@ using namespace std;
 #include <glm/gtx/io.hpp>
 using namespace glm;
 
-pair<int, int> indexPair[12] = {
+pair<int, int> cubeIndexPair[12] = {
 	{0, 1},
 	{0, 3},
 	{0, 4},
@@ -29,10 +29,26 @@ pair<int, int> indexPair[12] = {
 	{5, 6},
 	{6, 7},
 }; 
+
+pair<int, int> axisIndexPair[3] = {
+	{0, 1},
+	{0, 2},
+	{0, 3},
+}; 
 static const glm::vec3 cube_vertex[8]=
 {
 	//bot x z y(-1)
-	glm::vec3(-1.0f,  -1.0f, -1.0f),
+	glm::vec3(-1.0f,  -1.0f, -1.0f), //0
+	glm::vec3(-1.0f,  -1.0f,  1.0f), //1
+	glm::vec3( 1.0f,  -1.0f,  1.0f), //2
+	glm::vec3( 1.0f,  -1.0f, -1.0f), //3
+	//top
+	glm::vec3(-1.0f,  1.0f,  -1.0f), //4
+	glm::vec3(-1.0f,  1.0f,   1.0f), //5
+	glm::vec3( 1.0f,  1.0f,   1.0f), //6
+	glm::vec3( 1.0f,  1.0f,  -1.0f), //7
+	//bot x z y(-1)
+	/*glm::vec3(-1.0f,  -1.0f, -1.0f),
 	glm::vec3(-1.0f,   1.0f, -1.0f),
 	glm::vec3(1.0f,   1.0f, -1.0f),
 	glm::vec3(1.0f,  -1.0f, -1.0f),
@@ -40,7 +56,7 @@ static const glm::vec3 cube_vertex[8]=
 	glm::vec3(-1.0f,  -1.0f,  1.0f),
 	glm::vec3(-1.0f,   1.0f,  1.0f),
 	glm::vec3(1.0f,   1.0f,  1.0f),
-	glm::vec3(1.0f,  -1.0f,  1.0f),
+	glm::vec3(1.0f,  -1.0f,  1.0f),*/
 };
 
 
@@ -232,31 +248,31 @@ void A2::appLogic()
 
 	// draw the viewpoint
 
-	setLineColour(glm::vec3(0.5f, 0.5f, 0.5f));
+	setLineColour(vec3(0.2f, 1.0f, 1.0f));
 	drawLine(vp1, vec2(vp1.x, vp2.y));//top
 	drawLine(vp1, vec2(vp2.x, vp1.y));//left
 	drawLine(vp2, vec2(vp1.x, vp2.y));//right
-	drawLine(vp1, vec2(vp2.x, vp1.y));//bot
+	drawLine(vp2, vec2(vp2.x, vp1.y));//bot
 
 	// draw the model frames
+	// Step 1 process model transfter base vec into model then view
+	// transfer base, x, y, z
+	setLineColour(vec3(0.5f, 1.0f, 0.8f));
+	glm::vec4 model_base_0 = viewTransfer * modelTransfer * base_0;
+	glm::vec4 model_base_x = viewTransfer * modelTransfer * base_x;
+	glm::vec4 model_base_y = viewTransfer * modelTransfer * base_y;
+	glm::vec4 model_base_z = viewTransfer * modelTransfer * base_z;
+	//FrameHandler(model_base_0, model_base_x, model_base_y, model_base_z);
 
-	modelFrameHandler();
+	// draw the whole model
+	setLineColour(vec3(0.9f, 0.5f, 0.1f));
+	glm::vec4 world_base_0 = viewTransfer *  base_0;
+	glm::vec4 world_base_x = viewTransfer *  base_x;
+	glm::vec4 world_base_y = viewTransfer *  base_y;
+	glm::vec4 world_base_z = viewTransfer *  base_z;
+	//FrameHandler(world_base_0, world_base_x, world_base_y, world_base_z);
 
 
-	// Draw outer square:
-	setLineColour(vec3(1.0f, 0.7f, 0.8f));
-	drawLine(vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
-	drawLine(vec2(0.5f, -0.5f), vec2(0.5f, 0.5f));
-	drawLine(vec2(0.5f, 0.5f), vec2(-0.5f, 0.5f));
-	drawLine(vec2(-0.5f, 0.5f), vec2(-0.5f, -0.5f));
-
-
-	// Draw inner square:
-	setLineColour(vec3(0.2f, 1.0f, 1.0f));
-	drawLine(vec2(-0.25f, -0.25f), vec2(0.25f, -0.25f));
-	drawLine(vec2(0.25f, -0.25f), vec2(0.25f, 0.25f));
-	drawLine(vec2(0.25f, 0.25f), vec2(-0.25f, 0.25f));
-	drawLine(vec2(-0.25f, 0.25f), vec2(-0.25f, -0.25f));
 }
 
 //----------------------------------------------------------------------------------------
@@ -444,17 +460,19 @@ bool A2::keyInputEvent (
 
 void A2::pieplineHandler(){
 
+	//cout<<" pipe line handler called"<<endl;
+
 
 	// Step 1. Convert to vec4
 	glm::vec4 cube_vec4_temp[8];
 	for( int i = 0 ; i < 8 ; i++){
-		cube_vec4_temp[0] = vec4(cube_vertex[i], 1.0f);
+		cube_vec4_temp[i] = vec4(cube_vertex[i], 1.0f);
 	}
 
 	// Step 2. Modelling Transformations
 	glm::vec4 cube_vec4_WCS[8];
 	for( int i = 0 ; i < 8 ; i++){
-		cube_vec4_WCS[0] = modelTransfer * cube_vec4_temp[i];
+		cube_vec4_WCS[i] = modelTransfer * cube_vec4_temp[i];
 	};
 
 	// Step 3. View Transformations
@@ -471,24 +489,109 @@ void A2::pieplineHandler(){
 	// Step 4.1.1 trivial condition (both < near > far and reverse order for first z < second z)
 	int easyClipFlag[12] = {0};  // 1 for pass; -1 for neg pass; 0 for fail
 	for(int i = 0 ; i < 12; i++){
-		easyClipFlag[i] = easyClipping(cube_vec4_VCS, i);
+		easyClipFlag[i] = easyClipping(cube_vec4_VCS, cubeIndexPair, i);
 	}
 
 	// step 4.1.2 clip to two planes
 	for (int i = 0;  i < 12 ; i++){
+		
 		if(easyClipFlag[i] == 0){
 			continue;
 		}
 
 		pair<glm::vec4, glm::vec4 > currentPair;
-		int firstIndex = indexPair[i].first;
-		int secondIndex = indexPair[i].second;
+		int firstIndex = cubeIndexPair[i].first;
+		int secondIndex = cubeIndexPair[i].second;
+		cout << "ori i : " << i << " " << cube_vertex[firstIndex] << " " <<  cube_vertex[secondIndex]<<endl;
 		if(easyClipFlag[i] == 1){
 			currentPair.first = cube_vec4_VCS[firstIndex];
 			currentPair.second = cube_vec4_VCS[secondIndex];
 		}else{// when second z > first z
 			currentPair.first = cube_vec4_VCS[secondIndex];
 			currentPair.second = cube_vec4_VCS[firstIndex];
+		}
+		
+		cout << " start " << currentPair.first << " " << currentPair.second<< endl;
+		// ini done
+		// clip to two planes
+		// clip to near plane, check second only since first.z > second.z
+		if(currentPair.second.z < nearPlane){ // clip required
+			currentPair.second = currentPair.second + 
+				(currentPair.first - currentPair.second) * 
+					(nearPlane - currentPair.second.z) / (
+						currentPair.first.z - currentPair.second.z);
+		}
+
+		// clip to far plane, check first only since first.z > second.z
+		if(currentPair.first.z > farPlane){ // clip required
+			currentPair.first = currentPair.second + 
+				(currentPair.first - currentPair.second) * 
+					(farPlane - currentPair.second.z) / (
+						currentPair.first.z - currentPair.second.z);
+		}
+
+		// first clip done
+
+		// step 4.2 Projection
+		// use easy approach x -> x/z y -> y/z for now
+		pair<glm::vec2, glm::vec2 > displayPair;
+		displayPair.first.x = (currentPair.first.x/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.second.x = (currentPair.second.x/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.first.y = (currentPair.first.y/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.second.y = (currentPair.second.y/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
+
+		cout << " display " << displayPair.first << " " << displayPair.second<<endl;
+		// projection done
+		// step 4.3 clip to viewing volume
+		// add helper function here
+		bool needDraw = clipAndTtoViewPoint(displayPair);
+
+		cout << " result " << needDraw<<endl;
+		// draw line
+		if(needDraw){
+			setLineColour(vec3(0.2f, 1.0f, 1.0f));
+			drawLine(displayPair.first, displayPair.second);
+			cout<<"draw line "<< displayPair.first << " " <<displayPair.second<<endl;
+		}
+	}
+
+
+}
+
+void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z){
+
+
+	// Step 2 clipping (same as cube line clipping)
+	// Step 2.1 easy clipping
+
+	// Step 2.1.1 trivial condition (both < near > far and reverse order for first z < second z)
+	glm::vec4 mode_frame_vec4_VCS[4];
+	mode_frame_vec4_VCS[0] = new_base_0;
+	mode_frame_vec4_VCS[1] = new_base_x;
+	mode_frame_vec4_VCS[2] = new_base_y;
+	mode_frame_vec4_VCS[3] = new_base_z;
+
+	int easyClipFlag[3] = {0};  // 1 for pass; -1 for neg pass; 0 for fail
+	
+	for(int i = 0 ; i < 3; i++){
+		easyClipFlag[i] = easyClipping(mode_frame_vec4_VCS, axisIndexPair, i);
+	}
+
+	// step 4.1.2 clip to two planes
+	for (int i = 0;  i < 3 ; i++){
+		if(easyClipFlag[i] == 0){
+			continue;
+		}
+
+		pair<glm::vec4, glm::vec4 > currentPair;
+		int firstIndex = axisIndexPair[i].first;
+		int secondIndex = axisIndexPair[i].second;
+		if(easyClipFlag[i] == 1){
+			currentPair.first = mode_frame_vec4_VCS[firstIndex];
+			currentPair.second = mode_frame_vec4_VCS[secondIndex];
+		}else{// when second z > first z
+			currentPair.first = mode_frame_vec4_VCS[secondIndex];
+			currentPair.second = mode_frame_vec4_VCS[firstIndex];
 		}
 		// ini done
 		// clip to two planes
@@ -513,10 +616,11 @@ void A2::pieplineHandler(){
 		// step 4.2 Projection
 		// use easy approach x -> x/z y -> y/z for now
 		pair<glm::vec2, glm::vec2 > displayPair;
-		displayPair.first.x = (currentPair.first.x/currentPair.first.z)/(tan(fov/2/180.0f*M_PI));
-		displayPair.second.x = (displayPair.second.x/currentPair.first.z)/(tan(fov/2/180.0f*M_PI));
-		displayPair.first.y = (currentPair.first.y/currentPair.first.z)/(tan(fov/2/180.0f*M_PI));
-		displayPair.second.y = (currentPair.second.y/currentPair.first.z)/(tan(fov/2/180.0f*M_PI));
+		displayPair.first.x = (currentPair.first.x/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.second.x = (currentPair.second.x/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.first.y = (currentPair.first.y/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
+		displayPair.second.y = (currentPair.second.y/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
+
 
 		// projection done
 		// step 4.3 clip to viewing volume
@@ -532,10 +636,6 @@ void A2::pieplineHandler(){
 
 }
 
-void modelFrameHandler(){
-	
-}
-
 
 void A2::reset(){
 	modelTransfer = glm::mat4(
@@ -543,7 +643,20 @@ void A2::reset(){
 					glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), // y 
 					glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), // z
 					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)); // w
+
+	/*viewTransfer = glm::mat4(
+					glm::vec4(1.0f, 0.0f, 0.0f, 0.0f), // x
+					glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), // y 
+					glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), // z
+					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)); // w*/
+
+	glm::mat4 r = glm::transpose(mat4(vec4(m_view_x, 0.0f), vec4(m_view_y, 0.0f), vec4(m_view_z, 0.0f), vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+    //glm::mat4 t = glm::translate(mat4(1.0f), -m_view_origin);
+    glm::mat4 t =  glm::mat4(vec4(1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f),
+                     vec4(0.0f, 0.0f, 1.0f, 0.0f), vec4(-m_view_origin, 1.0f));
+    viewTransfer = r*t;				
 	resetFOV();
+	resetVP();
 }
 
 void A2::resetFOV(){
@@ -552,7 +665,12 @@ void A2::resetFOV(){
 	fov = 30.0f;
 }
 
-int A2::easyClipping(glm::vec4 *cube_vec4_VCS, int index){
+void A2::resetVP(){
+	vp1 = glm::vec2(-0.9f, 0.9f);
+	vp2 = glm::vec2( 0.9f, -0.9f);
+}
+
+int A2::easyClipping(glm::vec4 *cube_vec4_VCS, std::pair<int, int> *indexPair, int index){
 	int res = 1;
 	int firstIndex = indexPair[index].first;
 	int secondIndex = indexPair[index].second;
@@ -584,20 +702,27 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 	GLfloat vp_tl_x, vp_tl_y, vp_br_x, vp_br_y;
 
+	/*vp_tl_x = -1;
+	vp_tl_y = 1;
+	vp_br_x = 1;
+	vp_br_y = -1;*/
 	vp_tl_x = std::min(vp1.x, vp2.x);
-	vp_tl_y = std::min(vp1.y, vp2.y);
+	vp_tl_y = std::max(vp1.y, vp2.y);
 	vp_br_x = std::max(vp1.x, vp2.x);
-	vp_br_y = std::max(vp1.y, vp2.y);
+	vp_br_y = std::min(vp1.y, vp2.y);
+	
+	cout << " now clip " << P1 << " " << P2<<endl;
 
+	// first clip to -1 , 1
 	// first easy check 
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
 		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
-		(P1.y < vp_tl_y && P2.x < vp_tl_y) || // all top
-		(P1.x > vp_br_y && P2.x > vp_br_y)) // all bot
+		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
+		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
+			cout << "fail test 1"<<endl;
 			return false;
 		}
-
 
 	// Step 1. clip on x = vp_tl_x and vp_br_x
 	sortTwoPoints(P1, P2, 0); // sort points base on x first
@@ -618,6 +743,18 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 					P1.x - P2.x);
 	}
 
+
+	cout << " after clip x " << P1 << " " << P2<<endl;
+	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
+		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
+		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
+		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
+		{
+			cout << "fail test 2"<<endl;
+			return false;
+		}
+
+
 	// Step 2. clip on y =  vp_tl_y and vp_br_y
 	sortTwoPoints(P1, P2, 1); // sort points base on y 
 
@@ -637,7 +774,33 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 					P1.y - P2.y);
 	}
 
+
+	cout << " after clip y " << P1 << " " << P2<<endl;
+
+	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
+		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
+		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
+		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
+		{
+			cout << "fail test 3"<<endl;
+			return false;
+		}
+
+
+	// map to view port
+	vp_tl_x = std::min(vp1.x, vp2.x);
+	vp_tl_y = std::min(vp1.y, vp2.y);
+	vp_br_x = std::max(vp1.x, vp2.x);
+	vp_br_y = std::max(vp1.y, vp2.y);
+
+
+
 	// clip done ready to draw
+	/*input2DPair.first.x = (P1.x * (vp_br_x - vp_tl_x) + (vp_br_x + vp_tl_x) )/ 2.0f;
+	input2DPair.first.y = (P1.y * (vp_tl_y - vp_br_y) + (vp_tl_y + vp_br_y) )/ 2.0f;
+	input2DPair.second.x = (P2.x * (vp_br_x - vp_tl_x) + (vp_br_x + vp_tl_x) )/ 2.0f;
+	input2DPair.second.y = (P2.y * (vp_tl_y - vp_br_y) + (vp_tl_y + vp_br_y) )/ 2.0f;*/
+
 	input2DPair.first.x = P1.x;
 	input2DPair.first.y = P1.y;
 	input2DPair.second.x = P2.x;
@@ -650,7 +813,7 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 /*
  *  helper function to sort two points base on x(base = 0) or y (base = 1); 
  */
-void sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base){
+void A2::sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base){
 	if(base == 0){
 		// sort on x let P1.x > P2.x
 		if(P1.x > P2.x){

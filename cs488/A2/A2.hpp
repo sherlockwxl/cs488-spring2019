@@ -78,23 +78,30 @@ protected:
 	// plane info
 	GLfloat nearPlane, farPlane, fov;
 	// viewport info
-	vec2 vp1, vp2;
+	glm::vec2 vp1, vp2;
 	// base v
-	glm::vec4 base_x = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	glm::vec4 base_y = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-	glm::vec4 base_z = vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	glm::vec4 base_0 = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 base_x = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 base_y = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 base_z = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	glm::vec4 base_0 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// view info
+	glm::vec3 m_view_origin = glm::vec3(0.2f, 0.2f, 10.0f);
+	glm::vec3 m_view_x = glm::vec3(-1.0f, 0.0f, 0.0f);
+    glm::vec3 m_view_y = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 m_view_z = glm::vec3(0.0f, 0.0f, -1.0f);
 
 	// A2 functions:
 	
 	void pieplineHandler(); // helper functin that process the cube data and draw the cube
-	void modelFrameHandler(); // helper function that process model frame info and draw the axis
+	void FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z); // helper function that process model frame info and draw the axis
 	void worldFrameHandler(); // helper function that process world frame info and draw the axis
 
-	bool clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &displayPair);
+	bool clipAndTtoViewPoint(std::pair<glm::vec2, glm::vec2 > &displayPair);
 	void sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base);
-	int easyClipping(glm::vec4 *cube_vec4_VCS, int index);
+	int easyClipping(glm::vec4 *cube_vec4_VCS, std::pair<int, int> *indexPair, int index);
 	void reset();
 	void resetFOV();
+	void resetVP();
 
 };
