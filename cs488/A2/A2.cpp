@@ -35,9 +35,10 @@ pair<int, int> axisIndexPair[3] = {
 	{0, 2},
 	{0, 3},
 }; 
+
 static const glm::vec3 cube_vertex[8]=
 {
-	//bot x y z(-1)
+	//bot x y z
 	glm::vec3(-1.0f,  -1.0f, -1.0f), //0
 	glm::vec3(-1.0f,  -1.0f,  1.0f), //1
 	glm::vec3( 1.0f,  -1.0f,  1.0f), //2
@@ -581,12 +582,10 @@ bool A2::keyInputEvent (
 
 //----------------------------------------------------------------------------------------
 /*
- * Pipeline handler, process the cube info and return vertexs ready for draw.
+ * Pipeline handler, process the cube info and update vertexs ready for draw.
  */
 
 void A2::pieplineHandler(){
-
-	//cout<<" pipe line handler called"<<endl;
 
 	// Step 0. Scale cube
 	glm::vec3 cube_vertex_scaled[8];
@@ -635,7 +634,6 @@ void A2::pieplineHandler(){
 		pair<glm::vec4, glm::vec4 > currentPair;
 		int firstIndex = cubeIndexPair[i].first;
 		int secondIndex = cubeIndexPair[i].second;
-		//cout << "ori i : " << i << " " << cube_vertex[firstIndex] << " " <<  cube_vertex[secondIndex]<<endl;
 		if(easyClipFlag[i] == 1){
 			currentPair.first = cube_vec4_VCS[firstIndex];
 			currentPair.second = cube_vec4_VCS[secondIndex];
@@ -644,7 +642,6 @@ void A2::pieplineHandler(){
 			currentPair.second = cube_vec4_VCS[firstIndex];
 		}
 		
-		//cout << " start " << currentPair.first << " " << currentPair.second<< endl;
 		// ini done
 		// clip to two planes
 		// clip to near plane, check second only since first.z > second.z
@@ -673,24 +670,25 @@ void A2::pieplineHandler(){
 		displayPair.first.y = (currentPair.first.y/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
 		displayPair.second.y = (currentPair.second.y/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
 
-		//cout << " display " << displayPair.first << " " << displayPair.second<<endl;
 		// projection done
 		// step 4.3 clip to viewing volume
 		// add helper function here
 		bool needDraw = clipAndTtoViewPoint(displayPair);
 
-		//cout << " result " << needDraw<<endl;
 		// draw line
 		if(needDraw){
 			setLineColour(vec3(0.8f, 1.0f, 1.0f));
 			drawLine(displayPair.first, displayPair.second);
-			//cout<<"draw line "<< displayPair.first << " " <<displayPair.second<<endl;
 		}
 	}
 
 
 }
 
+//----------------------------------------------------------------------------------------
+/*
+ * Frame handler, process the frame info and update vertexs ready for draw.
+ */
 void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z, int type){
 
 
@@ -779,6 +777,11 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 
 }
 
+//----------------------------------------------------------------------------------------
+
+/*
+ *  reset function and its helper functions.
+ */
 
 void A2::reset(){
 	//reset selection
@@ -816,6 +819,17 @@ void A2::resetVP(){
 	vp2 = glm::vec2( 0.9f, -0.9f);
 }
 
+void A2::resetMouseLocation(){
+	mouse_prev_x = 0.0f;
+	mouse_prev_y = 0.0f;
+	mouseReseted = true;
+}
+
+//----------------------------------------------------------------------------------------
+
+/*
+ *  trivial clipping test return 0 for remove, 1 for keep, -1 for reverse keep.
+ */
 int A2::easyClipping(glm::vec4 *cube_vec4_VCS, std::pair<int, int> *indexPair, int index){
 	int res = 1;
 	int firstIndex = indexPair[index].first;
@@ -848,17 +862,11 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 	GLfloat vp_tl_x, vp_tl_y, vp_br_x, vp_br_y;
 
-	/*vp_tl_x = -1;
-	vp_tl_y = 1;
-	vp_br_x = 1;
-	vp_br_y = -1;*/
 	vp_tl_x = std::min(vp1.x, vp2.x);
 	vp_tl_y = std::max(vp1.y, vp2.y);
 	vp_br_x = std::max(vp1.x, vp2.x);
 	vp_br_y = std::min(vp1.y, vp2.y);
 	
-	//cout << " now clip " << P1 << " " << P2<<endl;
-
 	// first clip to -1 , 1
 	// first easy check 
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
@@ -866,7 +874,6 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			//cout << "fail test 1"<<endl;
 			return false;
 		}
 
@@ -889,14 +896,11 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 					P1.x - P2.x);
 	}
 
-
-	//cout << " after clip x " << P1 << " " << P2<<endl;
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
 		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			//cout << "fail test 2"<<endl;
 			return false;
 		}
 
@@ -921,14 +925,12 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 	}
 
 
-	//cout << " after clip y " << P1 << " " << P2<<endl;
 
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
 		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			//cout << "fail test 3"<<endl;
 			return false;
 		}
 
@@ -942,10 +944,6 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 
 	// clip done ready to draw
-	/*input2DPair.first.x = (P1.x * (vp_br_x - vp_tl_x) + (vp_br_x + vp_tl_x) )/ 2.0f;
-	input2DPair.first.y = (P1.y * (vp_tl_y - vp_br_y) + (vp_tl_y + vp_br_y) )/ 2.0f;
-	input2DPair.second.x = (P2.x * (vp_br_x - vp_tl_x) + (vp_br_x + vp_tl_x) )/ 2.0f;
-	input2DPair.second.y = (P2.y * (vp_tl_y - vp_br_y) + (vp_tl_y + vp_br_y) )/ 2.0f;*/
 
 	input2DPair.first.x = P1.x;
 	input2DPair.first.y = P1.y;
@@ -956,6 +954,7 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 
 }
+
 /*
  *  helper function to sort two points base on x(base = 0) or y (base = 1); 
  */
@@ -991,7 +990,13 @@ void A2::sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base){
 	}
 }
 
-// calculate worldtoview matrix follow uvn base
+
+//----------------------------------------------------------------------------------------
+
+/*
+ *  calculate worldtoview matrix follow uvn base
+ */
+
 glm::mat4 A2::calculateView(){
 
 	
@@ -1010,6 +1015,8 @@ glm::mat4 A2::calculateView(){
 	
 	return view;
 }
+
+//----------------------------------------------------------------------------------------
 
 // mouse movement handler
 void A2::mouseMoveEventHandler(double xPos, double yPos){
@@ -1101,6 +1108,9 @@ void A2::mouseMoveEventHandler(double xPos, double yPos){
 		break;
 	}
 }
+
+//----------------------------------------------------------------------------------------
+// mode handlers
 
 void A2::rotateViewHandler(double offset, int axis){
 	GLfloat r = offset/angleBase; // rotation angle
@@ -1254,8 +1264,6 @@ void A2::viewPortHandler(double xPos, double yPos, int id){
 
 	}
 }
-void A2::resetMouseLocation(){
-	mouse_prev_x = 0.0f;
-	mouse_prev_y = 0.0f;
-	mouseReseted = true;
-}
+
+//----------------------------------------------------------------------------------------
+
