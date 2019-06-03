@@ -270,7 +270,7 @@ void A2::appLogic()
 	glm::vec4 world_base_x = viewTransfer *  base_x;
 	glm::vec4 world_base_y = viewTransfer *  base_y;
 	glm::vec4 world_base_z = viewTransfer *  base_z;
-	//FrameHandler(world_base_0, world_base_x, world_base_y, world_base_z,1);
+	FrameHandler(world_base_0, world_base_x, world_base_y, world_base_z,1);
 
 
 }
@@ -310,6 +310,13 @@ void A2::guiLogic()
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 		}
 
+		if( ImGui::Button( "Reset Application" ) ) {
+			reset();
+		}
+
+		ImGui::Text("Near Plane: %.1f", nearPlane);
+		ImGui::Text("Far Plane: %.1f", farPlane);
+		ImGui::Text("FOV: %.1f", fov);
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
 	ImGui::End();
@@ -393,6 +400,20 @@ bool A2::mouseMoveEvent (
 	bool eventHandled(false);
 
 	// Fill in with event handling code...
+	if (!ImGui::IsMouseHoveringAnyWindow()) {
+
+		if(mouseReseted){
+			mouseReseted = false;
+			mouse_prev_x = xPos;
+			mouse_prev_y = yPos;
+		}
+		if(mouse_left_pressed||mouse_mid_pressed||mouse_right_pressed){
+			mouseMoveEventHandler(xPos, yPos);
+			eventHandled = true;
+		}
+		mouse_prev_x = xPos;
+		mouse_prev_y = yPos;
+	}
 
 	return eventHandled;
 }
@@ -409,6 +430,52 @@ bool A2::mouseButtonInputEvent (
 	bool eventHandled(false);
 
 	// Fill in with event handling code...
+	if (!ImGui::IsMouseHoveringAnyWindow()) {
+		
+		if (button == GLFW_MOUSE_BUTTON_LEFT){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_left_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_left_pressed = false;
+			}
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_mid_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_mid_pressed = false;
+			}
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_right_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_right_pressed = false;
+			}
+		}
+		
+
+	}
 
 	return eventHandled;
 }
@@ -879,4 +946,163 @@ glm::mat4 A2::calculateView(){
 	
 	cout<<view<<endl;
 	return view;
+}
+
+// mouse movement handler
+void A2::mouseMoveEventHandler(double xPos, double yPos){
+	double offset = xPos - mouse_prev_x;
+	switch (modeSelection)
+	{
+	case 0: // rotate view mode
+		if(mouse_left_pressed){
+			rotateViewHandler(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			rotateViewHandler(offset, 1);
+		}
+		if(mouse_right_pressed){
+			rotateViewHandler(offset, 2);
+		}
+		break;
+
+	case 1: // translate view mode
+		if(mouse_left_pressed){
+			translateViewHandler(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			translateViewHandler(offset, 1);
+		}
+		if(mouse_right_pressed){
+			translateViewHandler(offset, 2);
+		}
+		break;
+
+	case 2: // perspective mode
+		if(mouse_left_pressed){
+			perspectiveHanlder(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			perspectiveHanlder(offset, 1);
+		}
+		if(mouse_right_pressed){
+			perspectiveHanlder(offset, 2);
+		}
+		break;
+
+	case 3: // rotate model mode
+		if(mouse_left_pressed){
+			rotateModelHandler(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			rotateModelHandler(offset, 1);
+		}
+		if(mouse_right_pressed){
+			rotateModelHandler(offset, 2);
+		}
+		break;
+
+
+	case 4: // translate model mode
+		if(mouse_left_pressed){
+			translateModelHandler(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			translateModelHandler(offset, 1);
+		}
+		if(mouse_right_pressed){
+			translateModelHandler(offset, 2);
+		}
+		break;
+
+	case 5: // scale model mode
+		if(mouse_left_pressed){
+			scaleModelHandler(offset, 0);
+		}
+		if(mouse_mid_pressed){
+			scaleModelHandler(offset, 1);
+		}
+		if(mouse_right_pressed){
+			scaleModelHandler(offset, 2);
+		}
+		break;
+	
+	case 6: // viewport mode
+
+		break;
+
+
+	default:
+		break;
+	}
+}
+
+void A2::rotateViewHandler(double offset, int axis){
+	GLfloat r = offset/angleBase; // rotation angle
+	glm::vec3 a;
+	switch(axis){
+		case 0:  // x axis
+			a = glm::vec3(1.0f, 0.0f, 0.0f);
+			break;
+		case 1: // y axis
+			a = glm::vec3(0.0f, 1.0f, 0.0f);
+			break;
+		case 2: // z axis
+			a = glm::vec3(0.0f, 0.0f, 1.0f);
+			break;
+	}
+
+	glm::mat4 rotationMatrix;
+	rotationMatrix = glm::mat4(
+		glm::vec4(a.x * a.x * (1 - cos(r)) + cos(r),       a.x * a.y * (1 - cos(r)) + a.z * sin(r),  a.x * a.z * (1 - cos(r)) - a.y * sin(r), 0.0f),
+		glm::vec4(a.x * a.y * (1 - cos(r)) - a.z * sin(r), a.y * a.y * (1 - cos(r)) + cos(r),        a.y * a.z * (1 - cos(r)) + a.x * sin(r), 0.0f),
+		glm::vec4(a.x * a.z * (1 - cos(r)) + a.y * sin(r), a.y * a.z * (1 - cos(r)) - a.x * sin(r),  a.z * a.z * (1 - cos(r)) + cos(r),       0.0f),
+		glm::vec4(0.0f,                                    0.0f,                                     0.0f,                                    1.0f)
+	);
+
+	viewTransfer = rotationMatrix  * viewTransfer;
+
+}
+void A2::translateViewHandler(double offset, int axis){
+	GLfloat o = offset/angleBase; // translate offset
+	glm::vec3 a;
+	switch(axis){
+		case 0:  // x axis
+			a = glm::vec3(o, 0.0f, 0.0f);
+			break;
+		case 1: // y axis
+			a = glm::vec3(0.0f, o, 0.0f);
+			break;
+		case 2: // z axis
+			a = glm::vec3(0.0f, 0.0f, o);
+			break;
+	}
+
+	glm::mat4 translateMatrix;
+	translateMatrix = glm::mat4(
+		glm::vec4(glm::vec3(base_x), 0.0f),
+		glm::vec4(glm::vec3(base_y), 0.0f),
+		glm::vec4(glm::vec3(base_z), 0.0f),
+		glm::vec4(a,                 1.0f)
+	);
+	
+
+	viewTransfer = translateMatrix  * viewTransfer;
+
+}
+void A2::perspectiveHanlder(double offset, int type){
+
+}
+void A2::rotateModelHandler(double offset, int axis){
+
+}
+void A2::translateModelHandler(double offset, int axis){
+
+}
+void A2::scaleModelHandler(double offset, int axis){
+	
+}
+void A2::resetMouseLocation(){
+	mouse_prev_x = 0.0f;
+	mouse_prev_y = 0.0f;
+	mouseReseted = true;
 }

@@ -106,19 +106,43 @@ protected:
 	// enum for mode
 	std::string Mode[7] = {"Rotate View", "Translate View", "Perspective", "Rotate Model", "Translate Model", "Scale Model", "Viewport"};
 	int modeSelection;
+
+	// variables for mouse data
+	double mouse_prev_x;
+	double mouse_prev_y;
+	bool mouseReseted;
+	bool mouse_left_pressed;
+	bool mouse_mid_pressed;
+	bool mouse_right_pressed;
+
+	GLfloat angleBase = 150.0f;
 	// A2 functions:
 	
+	// handlers:
 	void pieplineHandler(); // helper functin that process the cube data and draw the cube
 	void FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z, int type); // helper function that process model frame info and draw the axis
 	void worldFrameHandler(); // helper function that process world frame info and draw the axis
+	void mouseMoveEventHandler(double xPos, double yPos);
 
+	// mode handler
+	void rotateViewHandler(double offset, int axis);
+	void translateViewHandler(double offset, int axis);
+	void perspectiveHanlder(double offset, int type);
+	void rotateModelHandler(double offset, int axis);
+	void translateModelHandler(double offset, int axis);
+	void scaleModelHandler(double offset, int axis);
+
+
+	// calculation helper functions
 	bool clipAndTtoViewPoint(std::pair<glm::vec2, glm::vec2 > &displayPair);
 	void sortTwoPoints(glm::vec2 &P1, glm::vec2 &P2, int base);
 	int easyClipping(glm::vec4 *cube_vec4_VCS, std::pair<int, int> *indexPair, int index);
-
 	glm::mat4 calculateView();
+
+	// reset helper
 	void reset();
 	void resetFOV();
 	void resetVP();
+	void resetMouseLocation();
 
 };
