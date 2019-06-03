@@ -262,15 +262,15 @@ void A2::appLogic()
 	glm::vec4 model_base_x = viewTransfer * modelTransfer * base_x;
 	glm::vec4 model_base_y = viewTransfer * modelTransfer * base_y;
 	glm::vec4 model_base_z = viewTransfer * modelTransfer * base_z;
-	//FrameHandler(model_base_0, model_base_x, model_base_y, model_base_z);
+	FrameHandler(model_base_0, model_base_x, model_base_y, model_base_z,0);
 
-	// draw the whole model
+	// draw the world model
 	setLineColour(vec3(0.9f, 0.5f, 0.1f));
 	glm::vec4 world_base_0 = viewTransfer *  base_0;
 	glm::vec4 world_base_x = viewTransfer *  base_x;
 	glm::vec4 world_base_y = viewTransfer *  base_y;
 	glm::vec4 world_base_z = viewTransfer *  base_z;
-	//FrameHandler(world_base_0, world_base_x, world_base_y, world_base_z);
+	//FrameHandler(world_base_0, world_base_x, world_base_y, world_base_z,1);
 
 
 }
@@ -297,6 +297,13 @@ void A2::guiLogic()
 
 		// Add more gui elements here here ...
 
+		for (int i = 0; i < 7; i++) {
+            ImGui::PushID(i);
+            if (ImGui::RadioButton(Mode[i].c_str(), &modeSelection, i)) {
+                
+            }
+		    ImGui::PopID();
+        }
 
 		// Create Button, and check if it was clicked:
 		if( ImGui::Button( "Quit Application" ) ) {
@@ -502,7 +509,7 @@ void A2::pieplineHandler(){
 		pair<glm::vec4, glm::vec4 > currentPair;
 		int firstIndex = cubeIndexPair[i].first;
 		int secondIndex = cubeIndexPair[i].second;
-		cout << "ori i : " << i << " " << cube_vertex[firstIndex] << " " <<  cube_vertex[secondIndex]<<endl;
+		//cout << "ori i : " << i << " " << cube_vertex[firstIndex] << " " <<  cube_vertex[secondIndex]<<endl;
 		if(easyClipFlag[i] == 1){
 			currentPair.first = cube_vec4_VCS[firstIndex];
 			currentPair.second = cube_vec4_VCS[secondIndex];
@@ -511,7 +518,7 @@ void A2::pieplineHandler(){
 			currentPair.second = cube_vec4_VCS[firstIndex];
 		}
 		
-		cout << " start " << currentPair.first << " " << currentPair.second<< endl;
+		//cout << " start " << currentPair.first << " " << currentPair.second<< endl;
 		// ini done
 		// clip to two planes
 		// clip to near plane, check second only since first.z > second.z
@@ -540,25 +547,25 @@ void A2::pieplineHandler(){
 		displayPair.first.y = (currentPair.first.y/currentPair.first.z)/(tan(fov/2.0f/180.0f*M_PI));
 		displayPair.second.y = (currentPair.second.y/currentPair.second.z)/(tan(fov/2.0f/180.0f*M_PI));
 
-		cout << " display " << displayPair.first << " " << displayPair.second<<endl;
+		//cout << " display " << displayPair.first << " " << displayPair.second<<endl;
 		// projection done
 		// step 4.3 clip to viewing volume
 		// add helper function here
 		bool needDraw = clipAndTtoViewPoint(displayPair);
 
-		cout << " result " << needDraw<<endl;
+		//cout << " result " << needDraw<<endl;
 		// draw line
 		if(needDraw){
 			setLineColour(vec3(0.2f, 1.0f, 1.0f));
 			drawLine(displayPair.first, displayPair.second);
-			cout<<"draw line "<< displayPair.first << " " <<displayPair.second<<endl;
+			//cout<<"draw line "<< displayPair.first << " " <<displayPair.second<<endl;
 		}
 	}
 
 
 }
 
-void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z){
+void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z, int type){
 
 
 	// Step 2 clipping (same as cube line clipping)
@@ -630,7 +637,17 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 
 		// draw line
 		if(needDraw)
-		drawLine(displayPair.first, displayPair.second);
+		{
+			glm::vec3 color;
+			if(type == 0){// model Frame
+				color = modelFrame_color[i];
+			}else{
+				color = worldFrame_color[i];
+			}
+			setLineColour(color);
+			drawLine(displayPair.first, displayPair.second);
+		}
+		
 	}
 
 
@@ -638,6 +655,9 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 
 
 void A2::reset(){
+	//reset selection
+	modeSelection = 0;
+
 	eye_origin = glm::vec3(5.0f, 2.0f, 10.0f);
 	world_origin = glm::vec3(0.0f, 0.0f, 0.0f);
 	cube_origin = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -706,7 +726,7 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 	vp_br_x = std::max(vp1.x, vp2.x);
 	vp_br_y = std::min(vp1.y, vp2.y);
 	
-	cout << " now clip " << P1 << " " << P2<<endl;
+	//cout << " now clip " << P1 << " " << P2<<endl;
 
 	// first clip to -1 , 1
 	// first easy check 
@@ -715,7 +735,7 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			cout << "fail test 1"<<endl;
+			//cout << "fail test 1"<<endl;
 			return false;
 		}
 
@@ -739,13 +759,13 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 	}
 
 
-	cout << " after clip x " << P1 << " " << P2<<endl;
+	//cout << " after clip x " << P1 << " " << P2<<endl;
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
 		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			cout << "fail test 2"<<endl;
+			//cout << "fail test 2"<<endl;
 			return false;
 		}
 
@@ -770,14 +790,14 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 	}
 
 
-	cout << " after clip y " << P1 << " " << P2<<endl;
+	//cout << " after clip y " << P1 << " " << P2<<endl;
 
 	if((P1.x < vp_tl_x && P2.x < vp_tl_x) || // all left
 		(P1.x > vp_br_x && P2.x > vp_br_x) || // all right
 		(P1.y > vp_tl_y && P2.y > vp_tl_y) || // all top
 		(P1.y < vp_br_y && P2.y < vp_br_y)) // all bot
 		{
-			cout << "fail test 3"<<endl;
+			//cout << "fail test 3"<<endl;
 			return false;
 		}
 

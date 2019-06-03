@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <string>
 
 // Set a global maximum number of vertices in order to pre-allocate VBO data
 // in one shot, rather than reallocating each frame.
@@ -72,6 +73,7 @@ protected:
 
 	glm::vec3 m_currentLineColour;
 
+
 	// A2 variables:
 	glm::mat4 modelTransfer;
 	glm::mat4 viewTransfer;
@@ -90,10 +92,24 @@ protected:
 	glm::vec3 world_origin;
 	glm::vec3 cube_origin;
 
+	// color info
+	glm::vec3 framecolorbase_x1 = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 framecolorbase_y1 = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 framecolorbase_z1 = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 framecolorbase_x2 = glm::vec3(0.0f, 1.0f, 1.0f);
+	glm::vec3 framecolorbase_y2 = glm::vec3(1.0f, 1.0f, 0.0f);
+	glm::vec3 framecolorbase_z2 = glm::vec3(1.0f, 0.0f, 1.0f);
+
+	glm::vec3 modelFrame_color[3] = {framecolorbase_x1, framecolorbase_y1, framecolorbase_z1};
+	glm::vec3 worldFrame_color[3] = {framecolorbase_x2, framecolorbase_y2, framecolorbase_z2};
+
+	// enum for mode
+	std::string Mode[7] = {"Rotate View", "Translate View", "Perspective", "Rotate Model", "Translate Model", "Scale Model", "Viewport"};
+	int modeSelection;
 	// A2 functions:
 	
 	void pieplineHandler(); // helper functin that process the cube data and draw the cube
-	void FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z); // helper function that process model frame info and draw the axis
+	void FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_base_y, glm::vec4 new_base_z, int type); // helper function that process model frame info and draw the axis
 	void worldFrameHandler(); // helper function that process world frame info and draw the axis
 
 	bool clipAndTtoViewPoint(std::pair<glm::vec2, glm::vec2 > &displayPair);
