@@ -37,7 +37,7 @@ pair<int, int> axisIndexPair[3] = {
 }; 
 static const glm::vec3 cube_vertex[8]=
 {
-	//bot x z y(-1)
+	//bot x y z(-1)
 	glm::vec3(-1.0f,  -1.0f, -1.0f), //0
 	glm::vec3(-1.0f,  -1.0f,  1.0f), //1
 	glm::vec3( 1.0f,  -1.0f,  1.0f), //2
@@ -47,16 +47,6 @@ static const glm::vec3 cube_vertex[8]=
 	glm::vec3(-1.0f,  1.0f,   1.0f), //5
 	glm::vec3( 1.0f,  1.0f,   1.0f), //6
 	glm::vec3( 1.0f,  1.0f,  -1.0f), //7
-	//bot x z y(-1)
-	/*glm::vec3(-1.0f,  -1.0f, -1.0f),
-	glm::vec3(-1.0f,   1.0f, -1.0f),
-	glm::vec3(1.0f,   1.0f, -1.0f),
-	glm::vec3(1.0f,  -1.0f, -1.0f),
-	//top
-	glm::vec3(-1.0f,  -1.0f,  1.0f),
-	glm::vec3(-1.0f,   1.0f,  1.0f),
-	glm::vec3(1.0f,   1.0f,  1.0f),
-	glm::vec3(1.0f,  -1.0f,  1.0f),*/
 };
 
 
@@ -248,7 +238,7 @@ void A2::appLogic()
 
 	// draw the viewpoint
 
-	setLineColour(vec3(0.2f, 1.0f, 1.0f));
+	setLineColour(vec3(0.6f, 0.9f, 0.4f));
 	drawLine(vp1, vec2(vp1.x, vp2.y));//top
 	drawLine(vp1, vec2(vp2.x, vp1.y));//left
 	drawLine(vp2, vec2(vp1.x, vp2.y));//right
@@ -434,6 +424,10 @@ bool A2::mouseButtonInputEvent (
 		
 		if (button == GLFW_MOUSE_BUTTON_LEFT){
 			if (actions == GLFW_PRESS) {
+				if( modeSelection == 6 ){ // set y2
+					viewPortHandler(mouse_prev_x, mouse_prev_y,1);
+					viewPortHandler(mouse_prev_x, mouse_prev_y,2);
+				}
 				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
 					resetMouseLocation();
 				}
@@ -522,6 +516,64 @@ bool A2::keyInputEvent (
 	bool eventHandled(false);
 
 	// Fill in with event handling code...
+	if( action == GLFW_PRESS ) {
+		// Respond to some key events.
+
+		// reset
+		if (key == GLFW_KEY_A){
+
+			eventHandled = true;
+
+			reset();
+		} 
+
+		//exit program
+		if (key == GLFW_KEY_Q){
+
+			eventHandled = true;
+
+			glfwSetWindowShouldClose(m_window, GL_TRUE);
+		} 
+
+		// Avator movement
+
+		if(key == GLFW_KEY_O){
+			eventHandled = true;
+			modeSelection = 0;
+		}
+
+		if(key == GLFW_KEY_E){
+			eventHandled = true;
+			modeSelection = 1;
+		}
+
+		if(key == GLFW_KEY_P){
+			eventHandled = true;
+			modeSelection = 2;
+		}
+
+		if(key == GLFW_KEY_R){
+			eventHandled = true;
+			modeSelection = 3;
+		}
+
+		if (key == GLFW_KEY_T){
+			eventHandled = true;
+			modeSelection = 4;
+		}
+
+		if (key == GLFW_KEY_S){
+			eventHandled = true;
+			modeSelection = 5;
+		}
+
+		if (key == GLFW_KEY_V){
+			eventHandled = true;
+			modeSelection = 6;
+		}
+		
+	}
+
 
 	return eventHandled;
 }
@@ -536,11 +588,18 @@ void A2::pieplineHandler(){
 
 	//cout<<" pipe line handler called"<<endl;
 
+	// Step 0. Scale cube
+	glm::vec3 cube_vertex_scaled[8];
+	for(int i = 0; i < 8; i++){
+		cube_vertex_scaled[i].x = cube_vertex[i].x * scale_X;
+		cube_vertex_scaled[i].y = cube_vertex[i].y * scale_Y;
+		cube_vertex_scaled[i].z = cube_vertex[i].z * scale_Z;
+	}
 
 	// Step 1. Convert to vec4
 	glm::vec4 cube_vec4_temp[8];
 	for( int i = 0 ; i < 8 ; i++){
-		cube_vec4_temp[i] = vec4(cube_vertex[i], 1.0f);
+		cube_vec4_temp[i] = vec4(cube_vertex_scaled[i], 1.0f);
 	}
 
 	// Step 2. Modelling Transformations
@@ -623,7 +682,7 @@ void A2::pieplineHandler(){
 		//cout << " result " << needDraw<<endl;
 		// draw line
 		if(needDraw){
-			setLineColour(vec3(0.2f, 1.0f, 1.0f));
+			setLineColour(vec3(0.8f, 1.0f, 1.0f));
 			drawLine(displayPair.first, displayPair.second);
 			//cout<<"draw line "<< displayPair.first << " " <<displayPair.second<<endl;
 		}
@@ -724,6 +783,11 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 void A2::reset(){
 	//reset selection
 	modeSelection = 0;
+	
+	// reset scale
+	scale_X = 1.0f;
+	scale_Y = 1.0f;
+	scale_Z = 1.0f;
 
 	eye_origin = glm::vec3(5.0f, 2.0f, 10.0f);
 	world_origin = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -742,8 +806,8 @@ void A2::reset(){
 }
 
 void A2::resetFOV(){
-	nearPlane = 1.0f;
-	farPlane = 20.0f;
+	nearPlane = 5.0f;
+	farPlane = 15.0f;
 	fov = 30.0f;
 }
 
@@ -944,7 +1008,6 @@ glm::mat4 A2::calculateView(){
 	);
 
 	
-	cout<<view<<endl;
 	return view;
 }
 
@@ -1027,7 +1090,10 @@ void A2::mouseMoveEventHandler(double xPos, double yPos){
 		break;
 	
 	case 6: // viewport mode
-
+		if(mouse_left_pressed){
+			viewPortHandler(xPos, yPos, 1);
+		}
+		
 		break;
 
 
@@ -1090,16 +1156,103 @@ void A2::translateViewHandler(double offset, int axis){
 
 }
 void A2::perspectiveHanlder(double offset, int type){
+	switch(type){
+		case 0: // fov change
+			fov = std::max(std::min((fov + (float)offset), 160.0f), 5.0f);
+			break;
+		case 1: // change near plane
+			nearPlane = std::max(std::min((nearPlane + (float)offset/numBase), farPlane), 0.0f);
+			break;
+		case 2:
+			farPlane = std::max(std::min((farPlane + (float)offset/numBase), 150.0f), nearPlane);
+			break;
+	}
 
 }
 void A2::rotateModelHandler(double offset, int axis){
 
-}
-void A2::translateModelHandler(double offset, int axis){
+	GLfloat r = offset/angleBase; // rotation angle
+	glm::vec3 a;
+	switch(axis){
+		case 0:  // x axis
+			a = glm::vec3(1.0f, 0.0f, 0.0f);
+			break;
+		case 1: // y axis
+			a = glm::vec3(0.0f, 1.0f, 0.0f);
+			break;
+		case 2: // z axis
+			a = glm::vec3(0.0f, 0.0f, 1.0f);
+			break;
+	}
+
+	glm::mat4 rotationMatrix;
+	rotationMatrix = glm::mat4(
+		glm::vec4(a.x * a.x * (1 - cos(r)) + cos(r),       a.x * a.y * (1 - cos(r)) + a.z * sin(r),  a.x * a.z * (1 - cos(r)) - a.y * sin(r), 0.0f),
+		glm::vec4(a.x * a.y * (1 - cos(r)) - a.z * sin(r), a.y * a.y * (1 - cos(r)) + cos(r),        a.y * a.z * (1 - cos(r)) + a.x * sin(r), 0.0f),
+		glm::vec4(a.x * a.z * (1 - cos(r)) + a.y * sin(r), a.y * a.z * (1 - cos(r)) - a.x * sin(r),  a.z * a.z * (1 - cos(r)) + cos(r),       0.0f),
+		glm::vec4(0.0f,                                    0.0f,                                     0.0f,                                    1.0f)
+	);
+
+	modelTransfer = rotationMatrix  * modelTransfer;
 
 }
-void A2::scaleModelHandler(double offset, int axis){
+void A2::translateModelHandler(double offset, int axis){
+	GLfloat o = offset/angleBase; // translate offset
+	glm::vec3 a;
+	switch(axis){
+		case 0:  // x axis
+			a = glm::vec3(o, 0.0f, 0.0f);
+			break;
+		case 1: // y axis
+			a = glm::vec3(0.0f, o, 0.0f);
+			break;
+		case 2: // z axis
+			a = glm::vec3(0.0f, 0.0f, o);
+			break;
+	}
+
+	glm::mat4 translateMatrix;
+	translateMatrix = glm::mat4(
+		glm::vec4(glm::vec3(base_x), 0.0f),
+		glm::vec4(glm::vec3(base_y), 0.0f),
+		glm::vec4(glm::vec3(base_z), 0.0f),
+		glm::vec4(a,                 1.0f)
+	);
 	
+
+	modelTransfer = translateMatrix  * modelTransfer;
+}
+void A2::scaleModelHandler(double offset, int axis){
+	offset = offset/100.0f;
+	switch(axis){
+		case 0: // scale on X
+			scale_X = std::max(std::min((scale_X + (float)offset), 2.0f), 0.1f);
+			break;
+		case 1: // scale on Y
+			scale_Y = std::max(std::min((scale_Y + (float)offset), 2.0f), 0.1f);			break;
+		case 2: // scale on Z
+			scale_Z = std::max(std::min((scale_Z + (float)offset), 2.0f), 0.1f);
+			break;
+	}
+}
+
+void A2::viewPortHandler(double xPos, double yPos, int id){
+	// id 1 for vp1, 2 for vp2
+	GLfloat new_X = xPos*2.0f/m_windowWidth - 1.0f;
+	GLfloat new_Y = (-yPos*2.0f/m_windowHeight) + 1.0f;
+	new_X = std::max(std::min((new_X), 1.0f), -1.0f);
+	new_Y = std::max(std::min((new_Y), 1.0f), -1.0f);
+	switch(id){
+		case 1: // update vp1
+			vp1.x = new_X;
+			vp1.y = new_Y;
+			break;
+		case 2: // update vp2
+			vp2.x = new_X;
+			vp2.y = new_Y;			
+			break;
+
+	}
 }
 void A2::resetMouseLocation(){
 	mouse_prev_x = 0.0f;

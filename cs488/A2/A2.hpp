@@ -81,6 +81,7 @@ protected:
 	GLfloat nearPlane, farPlane, fov;
 	// viewport info
 	glm::vec2 vp1, vp2;
+	GLfloat window_width, window_height;
 	// base v
 	glm::vec4 base_x = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 base_y = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -103,6 +104,9 @@ protected:
 	glm::vec3 modelFrame_color[3] = {framecolorbase_x1, framecolorbase_y1, framecolorbase_z1};
 	glm::vec3 worldFrame_color[3] = {framecolorbase_x2, framecolorbase_y2, framecolorbase_z2};
 
+	// cube sacle
+	GLfloat scale_X, scale_Y, scale_Z;
+
 	// enum for mode
 	std::string Mode[7] = {"Rotate View", "Translate View", "Perspective", "Rotate Model", "Translate Model", "Scale Model", "Viewport"};
 	int modeSelection;
@@ -115,7 +119,8 @@ protected:
 	bool mouse_mid_pressed;
 	bool mouse_right_pressed;
 
-	GLfloat angleBase = 150.0f;
+	GLfloat angleBase = 250.0f;
+	GLfloat numBase = 50.0f;
 	// A2 functions:
 	
 	// handlers:
@@ -131,6 +136,7 @@ protected:
 	void rotateModelHandler(double offset, int axis);
 	void translateModelHandler(double offset, int axis);
 	void scaleModelHandler(double offset, int axis);
+	void viewPortHandler(double xPos, double yPos, int id);
 
 
 	// calculation helper functions

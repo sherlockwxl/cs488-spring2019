@@ -1,0 +1,30 @@
+===============================================================================
+Compilation: (base directory: A2)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A2
+
+Machine: gl13
+===============================================================================
+Manual:
+
+All required features implemented.
+
+The default values:
+near plane: 5.0f;
+far plane: 15.0f;
+fov: 30.0f;
+eye pos = (5.0f, 2.0f, 10.0f);
+
+I used 6 different color for gnomons.
+
+Model Frame:
+framecolorbase_x1 = glm::vec3(0.0f, 1.0f, 0.0f);
+framecolorbase_y1 = glm::vec3(1.0f, 0.0f, 0.0f);
+framecolorbase_z1 = glm::vec3(0.0f, 0.0f, 1.0f);
+
+World Frame:
+framecolorbase_x2 = glm::vec3(0.0f, 1.0f, 1.0f);
+framecolorbase_y2 = glm::vec3(1.0f, 1.0f, 0.0f);
+framecolorbase_z2 = glm::vec3(1.0f, 0.0f, 1.0f);
