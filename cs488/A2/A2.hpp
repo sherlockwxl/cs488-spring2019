@@ -88,6 +88,11 @@ protected:
 	glm::vec4 base_z = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	glm::vec4 base_0 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
+	// base for model
+	glm::vec4 model_base_x_i = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 model_base_y_i = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 model_base_z_i = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
 	// view info
 	glm::vec3 eye_origin;
 	glm::vec3 world_origin;

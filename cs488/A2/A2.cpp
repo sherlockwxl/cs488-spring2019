@@ -795,6 +795,13 @@ void A2::reset(){
 	scale_Y = 1.0f;
 	scale_Z = 1.0f;
 
+	// reset base for model
+
+	model_base_x_i = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	model_base_y_i = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	model_base_z_i = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+
 	eye_origin = glm::vec3(5.0f, 2.0f, 10.0f);
 	world_origin = glm::vec3(0.0f, 0.0f, 0.0f);
 	cube_origin = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -1137,7 +1144,6 @@ void A2::rotateViewHandler(double offset, int axis){
 		glm::vec4(a.x * a.z * (1 - cos(r)) + a.y * sin(r), a.y * a.z * (1 - cos(r)) - a.x * sin(r),  a.z * a.z * (1 - cos(r)) + cos(r),       0.0f),
 		glm::vec4(0.0f,                                    0.0f,                                     0.0f,                                    1.0f)
 	);
-
 	viewTransfer = rotationMatrix  * viewTransfer;
 
 }
@@ -1164,7 +1170,6 @@ void A2::translateViewHandler(double offset, int axis){
 		glm::vec4(a,                 1.0f)
 	);
 	
-
 	viewTransfer = translateMatrix  * viewTransfer;
 
 }
@@ -1206,6 +1211,9 @@ void A2::rotateModelHandler(double offset, int axis){
 		glm::vec4(0.0f,                                    0.0f,                                     0.0f,                                    1.0f)
 	);
 
+	model_base_x_i = rotationMatrix * model_base_x_i;
+	model_base_y_i = rotationMatrix * model_base_y_i;
+	model_base_z_i = rotationMatrix * model_base_z_i;
 	modelTransfer = rotationMatrix  * modelTransfer;
 
 }
@@ -1223,6 +1231,14 @@ void A2::translateModelHandler(double offset, int axis){
 			a = glm::vec3(0.0f, 0.0f, o);
 			break;
 	}
+	glm::mat4 reverseMatrix;
+	reverseMatrix = glm::mat4(
+		glm::vec4(glm::vec3(base_x), 0.0f),
+		glm::vec4(glm::vec3(base_y), 0.0f),
+		glm::vec4(glm::vec3(base_z), 0.0f),
+		glm::vec4(-model_base_x_i.x, -model_base_y_i.y, -model_base_z_i.z, 1.0f)
+	);
+	modelTransfer = reverseMatrix * modelTransfer;
 
 	glm::mat4 translateMatrix;
 	translateMatrix = glm::mat4(
@@ -1232,8 +1248,19 @@ void A2::translateModelHandler(double offset, int axis){
 		glm::vec4(a,                 1.0f)
 	);
 
-	modelTransfer = translateMatrix * modelTransfer;
+	modelTransfer = modelTransfer * translateMatrix;
+
+	glm::mat4 reverseBackMatrix;
+	reverseBackMatrix = glm::mat4(
+		glm::vec4(glm::vec3(base_x), 0.0f),
+		glm::vec4(glm::vec3(base_y), 0.0f),
+		glm::vec4(glm::vec3(base_z), 0.0f),
+		glm::vec4(model_base_x_i.x, model_base_y_i.y, model_base_z_i.z, 1.0f)
+	);
+
+	modelTransfer = reverseBackMatrix * modelTransfer;
 }
+
 void A2::scaleModelHandler(double offset, int axis){
 	offset = offset/100.0f;
 	switch(axis){
