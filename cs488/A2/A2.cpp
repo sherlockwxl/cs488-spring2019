@@ -786,6 +786,9 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 void A2::reset(){
 	//reset selection
 	modeSelection = 0;
+	mouse_left_pressed = false;
+	mouse_mid_pressed = false;
+	mouse_right_pressed = false;
 	
 	// reset scale
 	scale_X = 1.0f;
@@ -1228,9 +1231,8 @@ void A2::translateModelHandler(double offset, int axis){
 		glm::vec4(glm::vec3(base_z), 0.0f),
 		glm::vec4(a,                 1.0f)
 	);
-	
 
-	modelTransfer = translateMatrix  * modelTransfer;
+	modelTransfer = translateMatrix * modelTransfer;
 }
 void A2::scaleModelHandler(double offset, int axis){
 	offset = offset/100.0f;
