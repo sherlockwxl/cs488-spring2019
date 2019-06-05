@@ -874,10 +874,17 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 	GLfloat vp_tl_x, vp_tl_y, vp_br_x, vp_br_y;
 
-	vp_tl_x = std::min(vp1.x, vp2.x);
+	/*vp_tl_x = std::min(vp1.x, vp2.x);
 	vp_tl_y = std::max(vp1.y, vp2.y);
 	vp_br_x = std::max(vp1.x, vp2.x);
-	vp_br_y = std::min(vp1.y, vp2.y);
+	vp_br_y = std::min(vp1.y, vp2.y);*/
+
+	vp_tl_x = -1;
+	vp_tl_y = 1;
+	vp_br_x = 1;
+	vp_br_y = -1;
+
+
 	
 	// first clip to -1 , 1
 	// first easy check 
@@ -949,18 +956,18 @@ bool A2::clipAndTtoViewPoint(pair<glm::vec2, glm::vec2 > &input2DPair){
 
 	// map to view port
 	vp_tl_x = std::min(vp1.x, vp2.x);
-	vp_tl_y = std::min(vp1.y, vp2.y);
+	vp_tl_y = std::max(vp1.y, vp2.y);
 	vp_br_x = std::max(vp1.x, vp2.x);
-	vp_br_y = std::max(vp1.y, vp2.y);
+	vp_br_y = std::min(vp1.y, vp2.y);
 
 
 
 	// clip done ready to draw
 
-	input2DPair.first.x = P1.x;
-	input2DPair.first.y = P1.y;
-	input2DPair.second.x = P2.x;
-	input2DPair.second.y = P2.y;
+	input2DPair.first.x = (P1.x + 1)/2.0f * (vp_br_x - vp_tl_x) + vp_tl_x;
+	input2DPair.first.y = (P1.y + 1)/2.0f * (vp_tl_y - vp_br_y) + vp_br_y;
+	input2DPair.second.x = (P2.x + 1)/2.0f * (vp_br_x - vp_tl_x) + vp_tl_x;
+	input2DPair.second.y = (P2.y + 1)/2.0f * (vp_tl_y - vp_br_y) + vp_br_y;
 	
 	return true;
 
