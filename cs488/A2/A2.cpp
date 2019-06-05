@@ -84,6 +84,7 @@ A2::~A2()
  */
 void A2::init()
 {
+	reset();
 	// Set the background colour.
 	glClearColor(0.3, 0.5, 0.7, 1.0);
 
@@ -97,7 +98,7 @@ void A2::init()
 
 	mapVboDataToVertexAttributeLocation();
 
-	reset();
+	
 
 }
 
@@ -295,6 +296,7 @@ void A2::guiLogic()
             }
 		    ImGui::PopID();
         }
+
 
 		// Create Button, and check if it was clicked:
 		if( ImGui::Button( "Quit Application" ) ) {
@@ -785,7 +787,7 @@ void A2::FrameHandler(glm::vec4 new_base_0, glm::vec4 new_base_x, glm::vec4 new_
 
 void A2::reset(){
 	//reset selection
-	modeSelection = 0;
+	modeSelection = 3;
 	mouse_left_pressed = false;
 	mouse_mid_pressed = false;
 	mouse_right_pressed = false;
