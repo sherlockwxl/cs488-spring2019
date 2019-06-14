@@ -79,4 +79,7 @@ protected:
 	std::string m_luaSceneFile;
 
 	std::shared_ptr<SceneNode> m_rootNode;
+
+	// model variable
+	int i_mode; // 0 for position 1 for orientation 
 };

@@ -50,7 +50,7 @@ A3::~A3()
 void A3::init()
 {
 	// Set the background colour.
-	glClearColor(0.85, 0.85, 0.85, 1.0);
+	glClearColor(0.15, 0.15, 0.15, 1.0);
 
 	createShaderProgram();
 
@@ -84,7 +84,6 @@ void A3::init()
 	initViewMatrix();
 
 	initLightSources();
-
 
 	// Exiting the current scope calls delete automatically on meshConsolidator freeing
 	// all vertex data resources.  This is fine since we already copied this data to
@@ -259,8 +258,8 @@ void A3::initViewMatrix() {
 //----------------------------------------------------------------------------------------
 void A3::initLightSources() {
 	// World-space position
-	m_light.position = vec3(-1.0f, 2.0f, 0.2f);
-	m_light.rgbIntensity = vec3(1.0f); // light
+	m_light.position = vec3(-1.0f, 10.0f, -0.8f);
+	m_light.rgbIntensity = vec3(0.6f); // light
 }
 
 //----------------------------------------------------------------------------------------
@@ -321,7 +320,7 @@ void A3::guiLogic()
 	}
 
 	static bool showDebugWindow(true);
-	ImGuiWindowFlags windowFlags(ImGuiWindowFlags_AlwaysAutoResize);
+	ImGuiWindowFlags windowFlags(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 	float opacity(0.5f);
 
 	ImGui::Begin("Properties", &showDebugWindow, ImVec2(100,100), opacity,
@@ -331,10 +330,57 @@ void A3::guiLogic()
 		// Add more gui elements here here ...
 
 
-		// Create Button, and check if it was clicked:
-		if( ImGui::Button( "Quit Application" ) ) {
-			glfwSetWindowShouldClose(m_window, GL_TRUE);
+		// Create Button, and check if it was clicked
+
+		if(ImGui::BeginMainMenuBar()){
+
+			// Application Menu
+			if(ImGui::BeginMenu("Application")){
+				if(ImGui::MenuItem("Reset Position (I)")) {
+				}
+				if(ImGui::MenuItem("Reset Orientation (O)")) {
+				}
+				if(ImGui::MenuItem("Reset Joints (S)")) {
+				}
+				if(ImGui::MenuItem("Reset All (A)")) {
+				}
+				if(ImGui::MenuItem("Quit (Q)")) {
+					glfwSetWindowShouldClose(m_window, GL_TRUE);
+				}
+				ImGui::EndMenu();
+			}
+
+			// Edit Menu
+			if(ImGui::BeginMenu("Edit")){
+				if(ImGui::MenuItem("Undo (U)")) {
+				}
+				if(ImGui::MenuItem("Redo (R)")) {
+				}
+				ImGui::EndMenu();
+			}
+
+			// Options Menu
+			if(ImGui::BeginMenu("Options")){
+				if(ImGui::MenuItem("Circle (C)")) {
+				}
+				if(ImGui::MenuItem("Z-buffer (Z)")) {
+				}
+				if(ImGui::MenuItem("Backface culling (B)")) {
+				}
+				if(ImGui::MenuItem("Frontface culling (F)")) {
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
 		}
+		
+		if (ImGui::RadioButton("Position (P)", &i_mode, 0)) {
+                
+        }
+
+		if (ImGui::RadioButton("Orientation (P)", &i_mode, 1)) {
+                
+        }
 
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
@@ -354,6 +400,11 @@ static void updateShaderUniforms(
 		//-- Set ModelView matrix:
 		GLint location = shader.getUniformLocation("ModelView");
 		mat4 modelView = viewMatrix * node.trans;
+		//cout << " node matrix" << node.trans<<endl;
+		//cout << " view matrix" << viewMatrix<<endl;
+		//cout<<"location" << location<<endl;
+		//cout << " model view " << modelView<<endl;
+		//exit(0);
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(modelView));
 		CHECK_GL_ERRORS;
 
@@ -399,6 +450,8 @@ void A3::draw() {
 //----------------------------------------------------------------------------------------
 void A3::renderSceneGraph(const SceneNode & root) {
 
+	// debug use
+	//cout << " display node: "<< root.m_name<<endl;
 	// Bind the VAO once here, and reuse for all GeometryNode rendering below.
 	glBindVertexArray(m_vao_meshData);
 
@@ -415,7 +468,7 @@ void A3::renderSceneGraph(const SceneNode & root) {
 	// could put a set of mutually recursive functions in this class, which
 	// walk down the tree from nodes of different types.
 
-	for (const SceneNode * node : root.children) {
+	for (SceneNode * node : root.children) {
 
 		if (node->m_nodeType != NodeType::GeometryNode)
 			continue;
@@ -423,7 +476,6 @@ void A3::renderSceneGraph(const SceneNode & root) {
 		const GeometryNode * geometryNode = static_cast<const GeometryNode *>(node);
 
 		updateShaderUniforms(m_shader, *geometryNode, m_view);
-
 
 		// Get the BatchInfo corresponding to the GeometryNode's unique MeshId.
 		BatchInfo batchInfo = m_batchInfoMap[geometryNode->meshId];
@@ -436,6 +488,10 @@ void A3::renderSceneGraph(const SceneNode & root) {
 
 	glBindVertexArray(0);
 	CHECK_GL_ERRORS;
+
+	for(const SceneNode * node : root.children){
+		renderSceneGraph(*node);
+	}
 }
 
 //----------------------------------------------------------------------------------------
