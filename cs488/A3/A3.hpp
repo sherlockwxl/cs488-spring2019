@@ -81,5 +81,37 @@ protected:
 	std::shared_ptr<SceneNode> m_rootNode;
 
 	// model variable
-	int i_mode; // 0 for position 1 for orientation 
+	int i_mode; // 0 for position 1 for joint 
+	bool z_buffer = true; 
+	bool circle = true;
+	bool backface_culling = false;
+	bool frontface_culling = false;
+
+	bool selection = false;
+
+
+	// variables for mouse data
+	double mouse_prev_x;
+	double mouse_prev_y;
+	bool mouseReseted;
+	bool mouse_left_pressed;
+	bool mouse_mid_pressed;
+	bool mouse_right_pressed;
+
+	int movementBase = 50; // deivder for mouse movement
+
+	// variable for ini location and transformtaion
+	glm::mat4 ini_translation;
+
+
+
+	// helper functions
+	void resetAll();
+	void resetMouseLocation();
+	void resetVariables();
+
+	// mouse movement handler
+	void mouseMoveEventHandler(double xPos, double yPos);
+	void rotateP_OHandler(double offsetX, double offsetY, int axis);
+	void rotateJointHandler(double offsetX, double offsetY,  int axis);
 };

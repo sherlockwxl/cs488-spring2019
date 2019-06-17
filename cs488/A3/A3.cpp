@@ -89,6 +89,13 @@ void A3::init()
 	// all vertex data resources.  This is fine since we already copied this data to
 	// VBOs on the GPU.  We have no use for storing vertex data on the CPU side beyond
 	// this point.
+
+	// backup ini translation
+	ini_translation = m_rootNode->trans;
+
+	// reset all variables abd mouse location
+	resetAll();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -374,11 +381,11 @@ void A3::guiLogic()
 			ImGui::EndMainMenuBar();
 		}
 		
-		if (ImGui::RadioButton("Position (P)", &i_mode, 0)) {
+		if (ImGui::RadioButton("Position/Orientation (P)", &i_mode, 0)) {
                 
         }
 
-		if (ImGui::RadioButton("Orientation (P)", &i_mode, 1)) {
+		if (ImGui::RadioButton("Joints (J)", &i_mode, 1)) {
                 
         }
 
@@ -551,6 +558,21 @@ bool A3::mouseMoveEvent (
 
 	// Fill in with event handling code...
 
+	if (!ImGui::IsMouseHoveringAnyWindow()) {
+
+		if(mouseReseted){
+			mouseReseted = false;
+			mouse_prev_x = xPos;
+			mouse_prev_y = yPos;
+		}
+		if(mouse_left_pressed||mouse_mid_pressed||mouse_right_pressed){
+			mouseMoveEventHandler(xPos, yPos);
+			eventHandled = true;
+		}
+		mouse_prev_x = xPos;
+		mouse_prev_y = yPos;
+	}
+
 	return eventHandled;
 }
 
@@ -566,6 +588,52 @@ bool A3::mouseButtonInputEvent (
 	bool eventHandled(false);
 
 	// Fill in with event handling code...
+	if (!ImGui::IsMouseHoveringAnyWindow()) {
+		
+		if (button == GLFW_MOUSE_BUTTON_LEFT){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_left_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_left_pressed = false;
+			}
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_mid_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_mid_pressed = false;
+			}
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT){
+			if (actions == GLFW_PRESS) {
+				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
+					resetMouseLocation();
+				}
+				mouse_right_pressed = true;
+				
+			}
+	
+			if (actions == GLFW_RELEASE) {
+				mouse_right_pressed = false;
+			}
+		}
+		
+
+	}
 
 	return eventHandled;
 }
@@ -618,4 +686,76 @@ bool A3::keyInputEvent (
 	// Fill in with event handling code...
 
 	return eventHandled;
+}
+
+// reset helper functions
+void A3::resetAll(){
+	resetVariables();
+	resetMouseLocation();
+}
+
+void A3::resetVariables(){
+	i_mode = 0; 
+	z_buffer = true; 
+	circle = true;
+	backface_culling = false;
+	frontface_culling = false;
+	selection = false;
+}
+
+void A3::resetMouseLocation(){
+	mouse_prev_x = 0.0f;
+	mouse_prev_y = 0.0f;
+	mouseReseted = true;
+}
+
+
+// mouse movement handler
+void A3::mouseMoveEventHandler(double xPos, double yPos){
+	double offsetX = xPos - mouse_prev_x;
+	double offsetY = yPos - mouse_prev_y;
+	switch (i_mode)
+	{
+	case 0: // rotate position/poientation
+		if(mouse_left_pressed){
+			rotateP_OHandler(offsetX, offsetY, 0);
+		}
+		if(mouse_mid_pressed){
+			rotateP_OHandler(offsetX, offsetY, 1);
+		}
+		if(mouse_right_pressed){
+			rotateP_OHandler(offsetX, offsetY, 2);
+		}
+		break;
+
+	case 1: // rotate joint
+	if(mouse_left_pressed){
+			rotateJointHandler(offsetX, offsetY, 0);
+		}
+		if(mouse_mid_pressed){
+			rotateJointHandler(offsetX, offsetY, 1);
+		}
+		if(mouse_right_pressed){
+			rotateJointHandler(offsetX, offsetY, 2);
+		}
+		break;
+
+	}
+}
+
+// position/orientation move handler
+void A3::rotateP_OHandler(double offsetX, double offsetY, int axis){
+	switch (axis){
+		case 0: //left button move x/y
+			m_rootNode->translate(vec3(offsetX/movementBase, -offsetY/movementBase, 0.0f));
+			break;
+		case 1:
+			m_rootNode->translate(vec3(0.0f, 0.0f, offsetY/movementBase));
+			break;
+	}
+}
+
+// joint move handler
+void A3::rotateJointHandler(double offsetX, double offsetY, int axis){
+
 }
