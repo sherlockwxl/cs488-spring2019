@@ -805,7 +805,7 @@ void A3::mouseMoveEventHandler(double xPos, double yPos){
 
 	case 1: // rotate joint
 	if(mouse_left_pressed){
-			rotateJointHandler(offsetX, offsetY, 0);
+			
 		}
 		if(mouse_mid_pressed){
 			rotateJointHandler(offsetX, offsetY, 1);
@@ -831,18 +831,71 @@ void A3::rotateP_OHandler(double offsetX, double offsetY, int axis){
 }
 
 // joint move handler
-void A3::rotateJointHandler(double offsetX, double offsetY, int axis){
+void A3::rotateJointHandler(double offsetX, double offsetY, int type){
+	GLfloat angleY = offsetY/angleBase;
+	GLfloat angleX = offsetX/angleBase;
+	switch (type){
+		case 1:
+			rotateJointHelper(angleY, *m_rootNode, type);
+			break;
+		case 2:
+			rotateJointHelper(angleX, *m_rootNode, type);
+			break;
 
+	}
+	
+
+}
+
+void A3::rotateJointHelper(GLfloat angle, SceneNode & root, int type){
+	
+	for (SceneNode * node : root.children) {
+		if(node->isSelected && node->m_name == "head" && type == 2){
+			GLfloat newAngle = head_rotation + angle;
+			if((newAngle < head_rotation_max) && (newAngle > head_rotation_min)){
+				head_rotation = newAngle;
+				glm::mat4 y_rotateMatrix = glm::rotate(mat4(), angle, vec3(0.0f, 1.0f, 0.0f));
+				recursiveRotate(node->trans, *node, y_rotateMatrix);
+				return;
+			}
+		}
+		if(node->isSelected && node->m_nodeType == NodeType::JointNode && type == 1){
+
+			JointNode * jointNode = static_cast<JointNode*>(node);
+
+			GLfloat newAngle = jointNode->m_joint_x.init + angle;
+
+			if((newAngle < jointNode->m_joint_x.max) && (newAngle > jointNode->m_joint_x.min)){
+				jointNode->m_joint_x.init = newAngle;
+				glm::mat4 x_rotateMatrix = glm::rotate(mat4(), angle, vec3(1.0f, 0.0f, 0.0f));
+				recursiveRotate(node->trans, *node->children.front(), x_rotateMatrix);
+			}
+		}
+	}
+	for( SceneNode * nextnode : root.children){
+		rotateJointHelper(angle, *nextnode, type);
+	}
+	
 }
 
 void A3::selectNodeById(SceneNode &node, unsigned int id){
 	if(node.m_nodeId == id){
 		node.isSelected = !node.isSelected;
-		cout << "found!! "<<endl;
+		if(node.parent->m_nodeType == NodeType::JointNode){
+			node.parent->isSelected = !node.parent->isSelected;
+		}
 		return;
 	}else{
 		for(SceneNode * nextNode : node.children){
 			selectNodeById(*nextNode, id);
 		}
+	}
+}
+
+void A3::recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix) {
+	glm::mat4 revserseMatrix = glm::inverse(revserseTargetMatrix);
+	root.trans = revserseTargetMatrix*rotatematrix*revserseMatrix*root.trans;
+	for(SceneNode* node: root.children) {
+		recursiveRotate(revserseTargetMatrix, *node, rotatematrix);
 	}
 }

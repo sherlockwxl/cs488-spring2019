@@ -100,6 +100,11 @@ protected:
 	bool mouse_right_pressed;
 
 	int movementBase = 50; // deivder for mouse movement
+	int angleBase = 20; // deivder for mouse movement
+
+	GLfloat head_rotation = 0.0f;
+	GLfloat head_rotation_min = -3.14/2;
+	GLfloat head_rotation_max = 3.14/2;
 
 	// variable for ini location and transformtaion
 	glm::mat4 ini_translation;
@@ -114,9 +119,14 @@ protected:
 	// mouse movement handler
 	void mouseMoveEventHandler(double xPos, double yPos);
 	void rotateP_OHandler(double offsetX, double offsetY, int axis);
-	void rotateJointHandler(double offsetX, double offsetY,  int axis);
+	void rotateJointHandler(double offsetX, double offsetY,  int type);
+	
 
 	// update helper function
 	void selectNodeById(SceneNode &node, unsigned int id);
 	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix);
+	void rotateJointHelper(GLfloat angle, SceneNode & node, int type);
+
+	void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix);
 };
+
