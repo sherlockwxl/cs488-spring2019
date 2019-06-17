@@ -112,6 +112,7 @@ void A3::processLuaSceneFile(const std::string & filename) {
 	if (!m_rootNode) {
 		std::cerr << "Could Not Open " << filename << std::endl;
 	}
+	
 }
 
 //----------------------------------------------------------------------------------------
@@ -898,4 +899,8 @@ void A3::recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::m
 	for(SceneNode* node: root.children) {
 		recursiveRotate(revserseTargetMatrix, *node, rotatematrix);
 	}
+}
+
+void A3::resetUndoRedo(){
+
 }

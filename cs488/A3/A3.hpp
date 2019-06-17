@@ -109,12 +109,19 @@ protected:
 	// variable for ini location and transformtaion
 	glm::mat4 ini_translation;
 
+	// variable for redo/undo
+	int totalNode;
+	std::stack<std::vector<GLfloat>> joint_rotation_undo;
+	std::stack<std::vector<GLfloat>> joint_rotation_redo;
+	
+
 
 
 	// helper functions
 	void resetAll();
 	void resetMouseLocation();
 	void resetVariables();
+	void resetUndoRedo();
 
 	// mouse movement handler
 	void mouseMoveEventHandler(double xPos, double yPos);
