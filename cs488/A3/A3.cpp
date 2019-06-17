@@ -50,7 +50,7 @@ A3::~A3()
 void A3::init()
 {
 	// Set the background colour.
-	glClearColor(0.15, 0.15, 0.15, 1.0);
+	glClearColor(0.35, 0.35, 0.35, 1.0);
 
 	createShaderProgram();
 
@@ -278,23 +278,29 @@ void A3::uploadCommonSceneUniforms() {
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(m_perpsective));
 		CHECK_GL_ERRORS;
 
+		location = m_shader.getUniformLocation("picking");
+		glUniform1i( location, need_reRender ? 1 : 0 );
 
-		//-- Set LightSource uniform for the scene:
-		{
-			location = m_shader.getUniformLocation("light.position");
-			glUniform3fv(location, 1, value_ptr(m_light.position));
-			location = m_shader.getUniformLocation("light.rgbIntensity");
-			glUniform3fv(location, 1, value_ptr(m_light.rgbIntensity));
-			CHECK_GL_ERRORS;
+		if(!need_reRender){
+			//-- Set LightSource uniform for the scene:
+			{
+				location = m_shader.getUniformLocation("light.position");
+				glUniform3fv(location, 1, value_ptr(m_light.position));
+				location = m_shader.getUniformLocation("light.rgbIntensity");
+				glUniform3fv(location, 1, value_ptr(m_light.rgbIntensity));
+				CHECK_GL_ERRORS;
+			}
+
+			//-- Set background light ambient intensity
+			{
+				location = m_shader.getUniformLocation("ambientIntensity");
+				vec3 ambientIntensity(0.05f);
+				glUniform3fv(location, 1, value_ptr(ambientIntensity));
+				CHECK_GL_ERRORS;
+			}
 		}
 
-		//-- Set background light ambient intensity
-		{
-			location = m_shader.getUniformLocation("ambientIntensity");
-			vec3 ambientIntensity(0.05f);
-			glUniform3fv(location, 1, value_ptr(ambientIntensity));
-			CHECK_GL_ERRORS;
-		}
+		
 	}
 	m_shader.disable();
 }
@@ -396,7 +402,7 @@ void A3::guiLogic()
 
 //----------------------------------------------------------------------------------------
 // Update mesh specific shader uniforms:
-static void updateShaderUniforms(
+void A3::updateShaderUniforms(
 		const ShaderProgram & shader,
 		const GeometryNode & node,
 		const glm::mat4 & viewMatrix
@@ -421,24 +427,37 @@ static void updateShaderUniforms(
 		glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
 		CHECK_GL_ERRORS;
 
+		if( need_reRender ) {
+		int id = node.m_nodeId;
+		float r = float(id&0xff) / 255.0f;
+		float g = float((id>>8)&0xff) / 255.0f;
+		float b = float((id>>16)&0xff) / 255.0f;
 
-		//-- Set Material values:
-		location = shader.getUniformLocation("material.kd");
-		vec3 kd = node.material.kd;
-		glUniform3fv(location, 1, value_ptr(kd));
+		location = m_shader.getUniformLocation("material.kd");
+		cout<<" actual id " << id << " " << r << " " << g << " " << b << endl;
+		glUniform3f( location, r, g, b );
 		CHECK_GL_ERRORS;
-		location = shader.getUniformLocation("material.ks");
-		vec3 ks = node.material.ks;
-		glUniform3fv(location, 1, value_ptr(ks));
-		CHECK_GL_ERRORS;
-		location = shader.getUniformLocation("material.shininess");
-		glUniform1f(location, node.material.shininess);
-		CHECK_GL_ERRORS;
+		}
+		else{
+			//-- Set Material values:
+			location = shader.getUniformLocation("material.kd");
+			vec3 kd = node.material.kd;
+			glUniform3fv(location, 1, value_ptr(kd));
+			CHECK_GL_ERRORS;
+			location = shader.getUniformLocation("material.ks");
+			vec3 ks = node.material.ks;
+			glUniform3fv(location, 1, value_ptr(ks));
+			CHECK_GL_ERRORS;
+			location = shader.getUniformLocation("material.shininess");
+			glUniform1f(location, node.material.shininess);
+			CHECK_GL_ERRORS;
+		}
 
 	}
 	shader.disable();
 
 }
+
 
 //----------------------------------------------------------------------------------------
 /*
@@ -451,7 +470,7 @@ void A3::draw() {
 
 
 	glDisable( GL_DEPTH_TEST );
-	renderArcCircle();
+	//renderArcCircle();
 }
 
 //----------------------------------------------------------------------------------------
@@ -480,9 +499,14 @@ void A3::renderSceneGraph(const SceneNode & root) {
 		if (node->m_nodeType != NodeType::GeometryNode)
 			continue;
 
-		const GeometryNode * geometryNode = static_cast<const GeometryNode *>(node);
+		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
 
+		if(geometryNode->isSelected){
+			geometryNode->material.kd = glm::vec3(1.0f);
+		}
 		updateShaderUniforms(m_shader, *geometryNode, m_view);
+
+		
 
 		// Get the BatchInfo corresponding to the GeometryNode's unique MeshId.
 		BatchInfo batchInfo = m_batchInfoMap[geometryNode->meshId];
@@ -592,9 +616,59 @@ bool A3::mouseButtonInputEvent (
 		
 		if (button == GLFW_MOUSE_BUTTON_LEFT){
 			if (actions == GLFW_PRESS) {
+				if(i_mode == 1){ // when joint mode enbaled
+					double xpos, ypos;
+					
+					glfwGetCursorPos( m_window, &xpos, &ypos );
+
+					need_reRender = true;
+
+					uploadCommonSceneUniforms();
+					glClearColor(1.0, 1.0, 1.0, 1.0 );
+					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+					glClearColor(0.35, 0.35, 0.35, 1.0);
+
+					draw();
+
+					// I don't know if these are really necessary anymore.
+					// glFlush();
+					// glFinish();
+
+					CHECK_GL_ERRORS;
+
+					// Ugly -- FB coordinates might be different than Window coordinates
+					// (e.g., on a retina display).  Must compensate.
+					xpos *= double(m_framebufferWidth) / double(m_windowWidth);
+					// WTF, don't know why I have to measure y relative to the bottom of
+					// the window in this case.
+					ypos = m_windowHeight - ypos;
+					ypos *= double(m_framebufferHeight) / double(m_windowHeight);
+
+					GLubyte buffer[ 4 ] = { 0, 0, 0, 0 };
+					// A bit ugly -- don't want to swap the just-drawn false colours
+					// to the screen, so read from the back buffer.
+					glReadBuffer( GL_BACK );
+					// Actually read the pixel at the mouse location.
+					cout << xpos << " " << ypos << endl;
+					glReadPixels( int(xpos), int(ypos), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
+					CHECK_GL_ERRORS;
+
+					// Reassemble the object ID.
+					unsigned int targetId = buffer[0] + (buffer[1] << 8) + (buffer[2] << 16);
+					cout<<" id " << targetId << " " << buffer[0] << " " << (buffer[1]) << " " << (buffer[2]) << endl;
+					selectNodeById(*m_rootNode, targetId);
+
+					need_reRender = false;
+
+					CHECK_GL_ERRORS;
+					
+
+
+				}
 				if(!mouse_left_pressed && !mouse_mid_pressed && !mouse_right_pressed){
 					resetMouseLocation();
 				}
+				
 				mouse_left_pressed = true;
 				
 			}
@@ -701,6 +775,7 @@ void A3::resetVariables(){
 	backface_culling = false;
 	frontface_culling = false;
 	selection = false;
+	need_reRender = false;
 }
 
 void A3::resetMouseLocation(){
@@ -758,4 +833,16 @@ void A3::rotateP_OHandler(double offsetX, double offsetY, int axis){
 // joint move handler
 void A3::rotateJointHandler(double offsetX, double offsetY, int axis){
 
+}
+
+void A3::selectNodeById(SceneNode &node, unsigned int id){
+	if(node.m_nodeId == id){
+		node.isSelected = !node.isSelected;
+		cout << "found!! "<<endl;
+		return;
+	}else{
+		for(SceneNode * nextNode : node.children){
+			selectNodeById(*nextNode, id);
+		}
+	}
 }

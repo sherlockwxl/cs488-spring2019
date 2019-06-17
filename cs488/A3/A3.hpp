@@ -8,6 +8,7 @@
 #include "cs488-framework/MeshConsolidator.hpp"
 
 #include "SceneNode.hpp"
+#include "GeometryNode.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -86,7 +87,7 @@ protected:
 	bool circle = true;
 	bool backface_culling = false;
 	bool frontface_culling = false;
-
+	bool need_reRender = false;
 	bool selection = false;
 
 
@@ -114,4 +115,8 @@ protected:
 	void mouseMoveEventHandler(double xPos, double yPos);
 	void rotateP_OHandler(double offsetX, double offsetY, int axis);
 	void rotateJointHandler(double offsetX, double offsetY,  int axis);
+
+	// update helper function
+	void selectNodeById(SceneNode &node, unsigned int id);
+	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix);
 };
