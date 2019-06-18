@@ -114,6 +114,9 @@ protected:
 	GLfloat head_rotation_max = 3.14/2;
 	int head_id= 0;
 
+	glm::vec4 root_ori;
+	glm::mat4 root_ori_m;
+
 	// variable for ini location and transformtaion
 	glm::mat4 ini_translation;
 
@@ -130,11 +133,16 @@ protected:
 	// trackball hander
 	void trackballHandler(double xPos, double yPos);
 
-	// helper functions
+	// reset helper functions
 	void resetAll();
 	void resetMouseLocation();
 	void resetVariables();
 	void resetUndoRedo();
+	void resetHandler(int type);
+	void resetPosition();
+	void resetOrietation();
+	void resetJoints();
+	void unselectJoints();
 
 	// mouse movement handler
 	void mouseMoveEventHandler(double xPos, double yPos);

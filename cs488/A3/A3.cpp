@@ -113,7 +113,8 @@ void A3::processLuaSceneFile(const std::string & filename) {
 
 	// get the total node
 	totalNode = m_rootNode->totalSceneNodes();
-
+	root_ori = m_rootNode->trans*vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	root_ori_m =  m_rootNode->trans;
 	// get the index of all joint node
 	for(int id = 0 ; id < totalNode; id++){
 		SceneNode * node = findNodeById(*m_rootNode, id);
@@ -380,12 +381,16 @@ void A3::guiLogic()
 			// Application Menu
 			if(ImGui::BeginMenu("Application")){
 				if(ImGui::MenuItem("Reset Position (I)")) {
+					resetHandler(0);
 				}
 				if(ImGui::MenuItem("Reset Orientation (O)")) {
+					resetHandler(1);
 				}
 				if(ImGui::MenuItem("Reset Joints (S)")) {
+					resetHandler(2);
 				}
 				if(ImGui::MenuItem("Reset All (A)")) {
+					resetHandler(3);
 				}
 				if(ImGui::MenuItem("Quit (Q)")) {
 					glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -867,7 +872,9 @@ bool A3::keyInputEvent (
 
 // reset helper functions
 void A3::resetAll(){
-	resetUndoRedo();
+	resetOrietation();
+	resetPosition();
+	resetJoints();
 	resetVariables();
 	resetMouseLocation();
 }
@@ -1013,8 +1020,12 @@ void A3::recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::m
 }
 
 void A3::resetUndoRedo(){
-	joint_rotation_undo.empty();
-	joint_rotation_redo.empty();
+	while(joint_rotation_redo.size() > 0){
+		joint_rotation_redo.pop();
+	}
+	while(joint_rotation_undo.size() > 0){
+		joint_rotation_undo.pop();
+	}
 	joint_rotation_undo.push(ori_joint_angle);
 }
 
@@ -1041,7 +1052,7 @@ void A3::undo(){
 	
 	if(joint_rotation_undo.size() > 1){
 		joint_rotation_undo.pop();
-		while(lastAngleVector == joint_rotation_undo.top()){
+		while(lastAngleVector == joint_rotation_undo.top() && joint_rotation_undo.size() > 1){
 			joint_rotation_undo.pop();
 		}
 		joint_rotation_redo.push(lastAngleVector);
@@ -1129,4 +1140,57 @@ void A3::trackballHandler(double xPos, double yPos){
 	glm::mat4 rotationMatrix = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ, rotationMatrix);
 	rotationMatrix = glm::scale(glm::transpose(rotationMatrix),glm::vec3(1.0f,1.0f,1.0f));
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
+}
+
+void A3::resetHandler(int type){
+	switch(type){
+		case 0: // reset position
+			resetPosition();
+			break;
+		case 1:
+			resetOrietation();
+			break;
+		case 2:
+			resetJoints();
+			break;
+		case 3:
+			resetAll();
+			break;
+	}
+}
+
+
+void A3::resetPosition(){
+	glm::mat4 resetPMatrix = glm::translate(mat4(), vec3(root_ori - m_rootNode->trans*vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	recursiveRotate(glm::mat4(), *m_rootNode, resetPMatrix);
+}
+
+void A3::resetOrietation(){
+	glm::mat4 resetPMatrix = glm::translate(mat4(), vec3(root_ori - m_rootNode->trans*vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	recursiveRotate(glm::mat4(), *m_rootNode, resetPMatrix);
+
+	glm::mat4 resetOMatrix = glm::inverse(m_rootNode->trans*glm::translate(mat4(), -vec3(root_ori)));
+	recursiveRotate(glm::mat4(), *m_rootNode, resetOMatrix);
+
+	glm::mat4 revsersePMatrix = glm::inverse(resetPMatrix);
+	recursiveRotate(glm::mat4(), *m_rootNode, revsersePMatrix);
+}
+
+void A3::resetJoints(){
+	while(joint_rotation_undo.size() > 1){
+		undo();
+	}
+	resetUndoRedo();
+	unselectJoints();
+}
+
+void A3::unselectJoints(){
+	for(int i = 0; i < jointIndexVector.size(); i++) {
+		SceneNode * node = findNodeById(*m_rootNode, jointIndexVector[i]);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		if(jointNode->isSelected){
+			jointNode->isSelected = !jointNode->isSelected;
+			jointNode->children.front()->isSelected = !jointNode->children.front()->isSelected;
+		}
+	}
 }
