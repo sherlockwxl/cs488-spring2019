@@ -109,6 +109,30 @@ void A3::processLuaSceneFile(const std::string & filename) {
 	// This version of the code treats the main program argument
 	// as a straightforward pathname.
 	m_rootNode = std::shared_ptr<SceneNode>(import_lua(filename));
+
+	// get the total node
+	totalNode = m_rootNode->totalSceneNodes();
+
+	// get the index of all joint node
+	for(int id = 0 ; id < totalNode; id++){
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		if(node->m_nodeType == NodeType::JointNode){
+			jointIndex.push(id);
+		}
+	}
+	// push all joint node index into vector for easy access
+	while(!jointIndex.empty()) {
+        jointIndexVector.push_back(jointIndex.top());
+        jointIndex.pop();
+    }
+
+	// store all ori angle
+	for(auto const& id: jointIndexVector) {
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		ori_joint_angle.push_back(jointNode->m_joint_x.init);
+	}
+
 	if (!m_rootNode) {
 		std::cerr << "Could Not Open " << filename << std::endl;
 	}
@@ -367,8 +391,10 @@ void A3::guiLogic()
 			// Edit Menu
 			if(ImGui::BeginMenu("Edit")){
 				if(ImGui::MenuItem("Undo (U)")) {
+					undo();
 				}
 				if(ImGui::MenuItem("Redo (R)")) {
+					redo();
 				}
 				ImGui::EndMenu();
 			}
@@ -395,6 +421,35 @@ void A3::guiLogic()
 		if (ImGui::RadioButton("Joints (J)", &i_mode, 1)) {
                 
         }
+
+
+		if(!undo_succeed) {
+			ImGui::OpenPopup("Undo Fail");
+		}
+
+		if(ImGui::BeginPopupModal("Undo Fail")) {
+			ImGui::Text("Undo operation is not availiable");
+			if(ImGui::Button("OK", ImVec2(100, 10))) {
+				ImGui::CloseCurrentPopup();
+				undo_succeed = true;
+			}
+
+			ImGui::EndPopup();
+		}
+
+		if(!redo_succeed) {
+			ImGui::OpenPopup("Redo Fail");
+		}
+
+		if(ImGui::BeginPopupModal("Redo Fail")) {
+			ImGui::Text("Redo operation is not availiable");
+			if(ImGui::Button("OK", ImVec2(120, 0))) {
+				ImGui::CloseCurrentPopup();
+				redo_succeed = true;
+			}
+
+			ImGui::EndPopup();
+		}
 
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
@@ -435,7 +490,7 @@ void A3::updateShaderUniforms(
 		float b = float((id>>16)&0xff) / 255.0f;
 
 		location = m_shader.getUniformLocation("material.kd");
-		cout<<" actual id " << id << " " << r << " " << g << " " << b << endl;
+		//cout<<" actual id " << id << " " << r << " " << g << " " << b << endl;
 		glUniform3f( location, r, g, b );
 		CHECK_GL_ERRORS;
 		}
@@ -650,13 +705,13 @@ bool A3::mouseButtonInputEvent (
 					// to the screen, so read from the back buffer.
 					glReadBuffer( GL_BACK );
 					// Actually read the pixel at the mouse location.
-					cout << xpos << " " << ypos << endl;
+					//cout << xpos << " " << ypos << endl;
 					glReadPixels( int(xpos), int(ypos), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
 					CHECK_GL_ERRORS;
 
 					// Reassemble the object ID.
 					unsigned int targetId = buffer[0] + (buffer[1] << 8) + (buffer[2] << 16);
-					cout<<" id " << targetId << " " << buffer[0] << " " << (buffer[1]) << " " << (buffer[2]) << endl;
+					//cout<<" id " << targetId << " " << buffer[0] << " " << (buffer[1]) << " " << (buffer[2]) << endl;
 					selectNodeById(*m_rootNode, targetId);
 
 					need_reRender = false;
@@ -689,6 +744,16 @@ bool A3::mouseButtonInputEvent (
 			}
 	
 			if (actions == GLFW_RELEASE) {
+				if(i_mode == 1){ // for joint mode
+					std::vector<GLfloat> cur_joint_angle;
+					for(auto const& id: jointIndexVector) {
+						SceneNode * node = findNodeById(*m_rootNode, id);
+						JointNode * jointNode = static_cast<JointNode*>(node);
+						cur_joint_angle.push_back(jointNode->m_joint_x.init);
+					}
+					joint_rotation_undo.push(cur_joint_angle);
+
+				}
 				mouse_mid_pressed = false;
 			}
 		}
@@ -765,6 +830,7 @@ bool A3::keyInputEvent (
 
 // reset helper functions
 void A3::resetAll(){
+	resetUndoRedo();
 	resetVariables();
 	resetMouseLocation();
 }
@@ -777,6 +843,8 @@ void A3::resetVariables(){
 	frontface_culling = false;
 	selection = false;
 	need_reRender = false;
+	undo_succeed = true;
+	redo_succeed = true;
 }
 
 void A3::resetMouseLocation(){
@@ -860,7 +928,8 @@ void A3::rotateJointHelper(GLfloat angle, SceneNode & root, int type){
 				return;
 			}
 		}
-		if(node->isSelected && node->m_nodeType == NodeType::JointNode && type == 1){
+
+		else if(node->isSelected && node->m_nodeType == NodeType::JointNode && type == 1 && node->m_name != "head" ){
 
 			JointNode * jointNode = static_cast<JointNode*>(node);
 
@@ -902,5 +971,71 @@ void A3::recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::m
 }
 
 void A3::resetUndoRedo(){
+	joint_rotation_undo.empty();
+	joint_rotation_redo.empty();
+	joint_rotation_undo.push(ori_joint_angle);
+}
 
+SceneNode * A3::findNodeById(SceneNode& rootNode, unsigned int id){
+	if(rootNode.m_nodeId == id){
+		return &rootNode;
+	}
+	for(SceneNode * nextNode : rootNode.children){
+		SceneNode * res = findNodeById(*nextNode, id);
+		if(res!= NULL){
+			return res;
+		}
+	}
+	return NULL;
+}
+
+void A3::undo(){
+	// check if any change has been made
+	if(joint_rotation_undo.size() == 1){
+		undo_succeed = false;
+		return;
+	}
+	std::vector<GLfloat> lastAngleVector = joint_rotation_undo.top();
+	if(joint_rotation_undo.size() > 1){
+		joint_rotation_undo.pop();
+		joint_rotation_redo.push(lastAngleVector);
+	}
+
+	for(int i = 0; i < jointIndexVector.size(); i++) {
+		SceneNode * node = findNodeById(*m_rootNode, jointIndexVector[i]);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		std::vector<GLfloat> targetAngleVector = joint_rotation_undo.top();
+		GLfloat reverseAngle = -(jointNode->m_joint_x.init - targetAngleVector[i]);
+
+		//reverse
+		jointNode->m_joint_x.init = targetAngleVector[i];
+		glm::mat4 x_rotateMatrix = glm::rotate(mat4(), reverseAngle, vec3(1.0f, 0.0f, 0.0f));
+		recursiveRotate(node->trans, *node->children.front(), x_rotateMatrix);
+	}
+}
+
+void A3::redo(){
+	// check if any change has been made
+	if(joint_rotation_redo.size() == 0){
+		redo_succeed = false;
+		return;
+	}
+
+	std::vector<GLfloat> lastAngleVector = joint_rotation_redo.top();
+	if(joint_rotation_redo.size() > 0){
+		joint_rotation_redo.pop();
+		joint_rotation_undo.push(lastAngleVector);
+	}
+
+	for(int i = 0; i < jointIndexVector.size(); i++) {
+		SceneNode * node = findNodeById(*m_rootNode, jointIndexVector[i]);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		std::vector<GLfloat> targetAngleVector = lastAngleVector;
+		GLfloat reverseAngle = -(jointNode->m_joint_x.init - targetAngleVector[i]);
+
+		//reverse
+		jointNode->m_joint_x.init = targetAngleVector[i];
+		glm::mat4 x_rotateMatrix = glm::rotate(mat4(), reverseAngle, vec3(1.0f, 0.0f, 0.0f));
+		recursiveRotate(node->trans, *node->children.front(), x_rotateMatrix);
+	}
 }

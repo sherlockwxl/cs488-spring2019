@@ -12,7 +12,11 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <vector>
+#include <stack>
+#include <queue>
 
+using namespace std;
 struct LightSource {
 	glm::vec3 position;
 	glm::vec3 rgbIntensity;
@@ -89,6 +93,8 @@ protected:
 	bool frontface_culling = false;
 	bool need_reRender = false;
 	bool selection = false;
+	bool undo_succeed = true;
+	bool redo_succeed = true;
 
 
 	// variables for mouse data
@@ -111,8 +117,12 @@ protected:
 
 	// variable for redo/undo
 	int totalNode;
+	std::priority_queue<int, vector<int>, greater<int> > jointIndex;
+	std::vector<int> jointIndexVector;
+	std::vector<GLfloat> ori_joint_angle;
 	std::stack<std::vector<GLfloat>> joint_rotation_undo;
 	std::stack<std::vector<GLfloat>> joint_rotation_redo;
+	
 	
 
 
@@ -133,7 +143,12 @@ protected:
 	void selectNodeById(SceneNode &node, unsigned int id);
 	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix);
 	void rotateJointHelper(GLfloat angle, SceneNode & node, int type);
-
+	
 	void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix);
+	SceneNode * findNodeById(SceneNode& rootNode, unsigned int id);
+
+	// helper function for undo and redo
+	void undo();
+	void redo();
 };
 
