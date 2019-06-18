@@ -112,6 +112,7 @@ protected:
 	GLfloat head_rotation = 0.0f;
 	GLfloat head_rotation_min = -3.14/2;
 	GLfloat head_rotation_max = 3.14/2;
+	int head_id= 0;
 
 	// variable for ini location and transformtaion
 	glm::mat4 ini_translation;
