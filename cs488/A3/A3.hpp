@@ -10,6 +10,7 @@
 #include "SceneNode.hpp"
 #include "GeometryNode.hpp"
 
+
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
@@ -125,7 +126,8 @@ protected:
 	
 	
 
-
+	// trackball hander
+	void trackballHandler(double xPos, double yPos);
 
 	// helper functions
 	void resetAll();

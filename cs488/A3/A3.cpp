@@ -2,6 +2,7 @@
 
 #include "A3.hpp"
 #include "scene_lua.hpp"
+#include "trackball.hpp"
 using namespace std;
 
 #include "cs488-framework/GlErrorCheck.hpp"
@@ -868,12 +869,12 @@ void A3::mouseMoveEventHandler(double xPos, double yPos){
 			rotateP_OHandler(offsetX, offsetY, 1);
 		}
 		if(mouse_right_pressed){
-			rotateP_OHandler(offsetX, offsetY, 2);
+			rotateP_OHandler(xPos, yPos, 2);
 		}
 		break;
 
 	case 1: // rotate joint
-	if(mouse_left_pressed){
+		if(mouse_left_pressed){
 			
 		}
 		if(mouse_mid_pressed){
@@ -896,6 +897,10 @@ void A3::rotateP_OHandler(double offsetX, double offsetY, int axis){
 		case 1:
 			m_rootNode->translate(vec3(0.0f, 0.0f, offsetY/movementBase));
 			break;
+		case 2:
+			trackballHandler(offsetX, offsetY);
+			break;
+			
 	}
 }
 
@@ -1038,4 +1043,27 @@ void A3::redo(){
 		glm::mat4 x_rotateMatrix = glm::rotate(mat4(), reverseAngle, vec3(1.0f, 0.0f, 0.0f));
 		recursiveRotate(node->trans, *node->children.front(), x_rotateMatrix);
 	}
+}
+
+void A3::trackballHandler(double xPos, double yPos){
+	float fDiameter = (m_framebufferWidth < m_framebufferHeight) ? m_framebufferWidth * 0.5 : m_framebufferHeight * 0.5;
+	float iCenterX = m_framebufferWidth / 2;
+	float iCenterY = m_framebufferHeight / 2;
+	float fOldModX = mouse_prev_x - iCenterX;
+	float fOldModY = mouse_prev_y - iCenterY;
+	float fNewModX = xPos - iCenterX;
+	float fNewModY = yPos - iCenterY;
+	float fRotVecX, fRotVecY, fRotVecZ;
+	vCalcRotVec(fNewModX, fNewModY,
+					fOldModX, fOldModY,
+					fDiameter,
+					&fRotVecX, &fRotVecY, &fRotVecZ);
+	/* Negate Y component since Y axis increases downwards
+		* in screen space and upwards in OpenGL.
+		*/
+	
+	
+	glm::mat4 rotationMatrix = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ, rotationMatrix);
+	rotationMatrix = glm::scale(glm::transpose(rotationMatrix),glm::vec3(1.0f,1.0f,1.0f));
+	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
 }
