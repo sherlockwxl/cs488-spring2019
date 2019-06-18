@@ -470,11 +470,7 @@ void A3::updateShaderUniforms(
 		//-- Set ModelView matrix:
 		GLint location = shader.getUniformLocation("ModelView");
 		mat4 modelView = viewMatrix * node.trans;
-		//cout << " node matrix" << node.trans<<endl;
-		//cout << " view matrix" << viewMatrix<<endl;
-		//cout<<"location" << location<<endl;
-		//cout << " model view " << modelView<<endl;
-		//exit(0);
+
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(modelView));
 		CHECK_GL_ERRORS;
 
@@ -485,24 +481,30 @@ void A3::updateShaderUniforms(
 		CHECK_GL_ERRORS;
 
 		if( need_reRender ) {
-		int id = node.m_nodeId;
-		float r = float(id&0xff) / 255.0f;
-		float g = float((id>>8)&0xff) / 255.0f;
-		float b = float((id>>16)&0xff) / 255.0f;
+			int id = node.m_nodeId;
+			float r = float(id&0xff) / 255.0f;
+			float g = float((id>>8)&0xff) / 255.0f;
+			float b = float((id>>16)&0xff) / 255.0f;
 
-		location = m_shader.getUniformLocation("material.kd");
-		//cout<<" actual id " << id << " " << r << " " << g << " " << b << endl;
-		glUniform3f( location, r, g, b );
-		CHECK_GL_ERRORS;
+			location = m_shader.getUniformLocation("material.kd");
+			glUniform3f( location, r, g, b );
+			CHECK_GL_ERRORS;
 		}
 		else{
 			//-- Set Material values:
 			location = shader.getUniformLocation("material.kd");
+			
 			vec3 kd = node.material.kd;
+			if(node.isSelected){
+				kd = vec3(1.0f);
+			}
 			glUniform3fv(location, 1, value_ptr(kd));
 			CHECK_GL_ERRORS;
 			location = shader.getUniformLocation("material.ks");
 			vec3 ks = node.material.ks;
+			if(node.isSelected){
+				ks = vec3(0.5f);
+			}
 			glUniform3fv(location, 1, value_ptr(ks));
 			CHECK_GL_ERRORS;
 			location = shader.getUniformLocation("material.shininess");
@@ -558,9 +560,6 @@ void A3::renderSceneGraph(const SceneNode & root) {
 
 		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
 
-		if(geometryNode->isSelected){
-			geometryNode->material.kd = glm::vec3(1.0f);
-		}
 		updateShaderUniforms(m_shader, *geometryNode, m_view);
 
 		
@@ -955,8 +954,9 @@ void A3::rotateJointHelper(GLfloat angle, SceneNode & root, int type){
 
 void A3::selectNodeById(SceneNode &node, unsigned int id){
 	if(node.m_nodeId == id){
-		node.isSelected = !node.isSelected;
+		
 		if(node.parent->m_nodeType == NodeType::JointNode){
+			node.isSelected = !node.isSelected;
 			node.parent->isSelected = !node.parent->isSelected;
 		}
 		return;
