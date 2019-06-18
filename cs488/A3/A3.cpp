@@ -402,13 +402,13 @@ void A3::guiLogic()
 
 			// Options Menu
 			if(ImGui::BeginMenu("Options")){
-				if(ImGui::MenuItem("Circle (C)")) {
+				if(ImGui::Checkbox("Circle (C)", &circle)) {
 				}
-				if(ImGui::MenuItem("Z-buffer (Z)")) {
+				if(ImGui::Checkbox("Z-buffer (Z)", &z_buffer)) {
 				}
-				if(ImGui::MenuItem("Backface culling (B)")) {
+				if(ImGui::Checkbox("Backface culling (B)", &backface_culling)) {
 				}
-				if(ImGui::MenuItem("Frontface culling (F)")) {
+				if(ImGui::Checkbox("Frontface culling (F)", &frontface_culling)) {
 				}
 				ImGui::EndMenu();
 			}
@@ -523,13 +523,33 @@ void A3::updateShaderUniforms(
  * Called once per frame, after guiLogic().
  */
 void A3::draw() {
-
-	glEnable( GL_DEPTH_TEST );
+	if(z_buffer){
+		glEnable( GL_DEPTH_TEST );
+	}
+	if(backface_culling || frontface_culling){
+		glEnable(GL_CULL_FACE);
+		if(backface_culling && frontface_culling){
+			glCullFace(GL_FRONT_AND_BACK);
+		}else if(backface_culling){
+			glCullFace(GL_BACK);
+		}else if(frontface_culling){
+			glCullFace(GL_FRONT);
+		}
+	}
+	
 	renderSceneGraph(*m_rootNode);
 
+	if(z_buffer){
+		glDisable( GL_DEPTH_TEST );
+	}
+	if(backface_culling || frontface_culling){
+		glDisable( GL_CULL_FACE );
+	}
+		
+	if(circle){
+		renderArcCircle();
+	}
 
-	glDisable( GL_DEPTH_TEST );
-	//renderArcCircle();
 }
 
 //----------------------------------------------------------------------------------------
