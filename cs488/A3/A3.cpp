@@ -860,10 +860,104 @@ bool A3::keyInputEvent (
 	bool eventHandled(false);
 
 	if( action == GLFW_PRESS ) {
-		if( key == GLFW_KEY_M ) {
-			show_gui = !show_gui;
+		// Respond to some key events.
+
+		// reset position
+		if (key == GLFW_KEY_I){
+
 			eventHandled = true;
+
+			resetHandler(0);
+		} 
+
+		//reset orientation
+		if (key == GLFW_KEY_O){
+
+			eventHandled = true;
+
+			resetHandler(1);
+		} 
+
+		//reset Joints
+		if (key == GLFW_KEY_S){
+
+			eventHandled = true;
+
+			resetHandler(2);
+		} 
+
+		//reset Joints
+		if (key == GLFW_KEY_A){
+
+			eventHandled = true;
+
+			resetHandler(3);
 		}
+
+		// Exit
+		if (key == GLFW_KEY_Q){
+
+			eventHandled = true;
+
+			glfwSetWindowShouldClose(m_window, GL_TRUE);
+		}
+
+
+		// Undo
+		if(key == GLFW_KEY_U){
+			eventHandled = true;
+			undo();
+		}
+
+		// Redo
+		if(key == GLFW_KEY_R){
+			eventHandled = true;
+			redo();
+		}
+
+		// circle
+		if(key == GLFW_KEY_C){
+			eventHandled = true;
+			circle = !circle;
+		}
+
+		// z_buffer
+		if(key == GLFW_KEY_Z){
+			eventHandled = true;
+			z_buffer = !z_buffer;
+		}
+
+		// Backface culling
+		if(key == GLFW_KEY_B){
+			eventHandled = true;
+			backface_culling = !backface_culling;
+		}
+
+		// Frontface culling
+		if(key == GLFW_KEY_F){
+			eventHandled = true;
+			frontface_culling = !frontface_culling;
+		}
+		// Position/Orientation (P)
+		if(key == GLFW_KEY_P){
+			eventHandled = true;
+			i_mode = 0;
+		}
+
+		// Joints (J)
+		if(key == GLFW_KEY_J){
+			eventHandled = true;
+			i_mode = 1;
+		}
+
+		// Joints (J)
+		if(key == GLFW_KEY_M){
+			eventHandled = true;
+			show_gui = !show_gui;
+		}
+
+		
+		
 	}
 	// Fill in with event handling code...
 
@@ -880,6 +974,7 @@ void A3::resetAll(){
 }
 
 void A3::resetVariables(){
+	show_gui = true;
 	i_mode = 0; 
 	z_buffer = true; 
 	circle = true;
