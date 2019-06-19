@@ -51,7 +51,7 @@ A3::~A3()
 void A3::init()
 {
 	// Set the background colour.
-	glClearColor(0.35, 0.35, 0.35, 1.0);
+	glClearColor(0.45, 0.45, 0.45, 1.0);
 
 	createShaderProgram();
 
@@ -68,7 +68,8 @@ void A3::init()
 	unique_ptr<MeshConsolidator> meshConsolidator (new MeshConsolidator{
 			getAssetFilePath("cube.obj"),
 			getAssetFilePath("sphere.obj"),
-			getAssetFilePath("suzanne.obj")
+			getAssetFilePath("suzanne.obj"),
+			getAssetFilePath("Fractal.obj"),
 	});
 
 
@@ -296,8 +297,8 @@ void A3::initViewMatrix() {
 //----------------------------------------------------------------------------------------
 void A3::initLightSources() {
 	// World-space position
-	m_light.position = vec3(-1.0f, 10.0f, -0.8f);
-	m_light.rgbIntensity = vec3(0.6f); // light
+	m_light.position = vec3(0.0f, 10.0f, 5.0f);
+	m_light.rgbIntensity = vec3(1.0f); // light
 }
 
 //----------------------------------------------------------------------------------------
@@ -505,7 +506,7 @@ void A3::updateShaderUniforms(
 			
 			vec3 kd = node.material.kd;
 			if(node.isSelected){
-				kd = vec3(1.0f);
+				kd = vec3(0.19f, 0.82f, 0.55f);
 			}
 			glUniform3fv(location, 1, value_ptr(kd));
 			CHECK_GL_ERRORS;
@@ -711,7 +712,7 @@ bool A3::mouseButtonInputEvent (
 					uploadCommonSceneUniforms();
 					glClearColor(1.0, 1.0, 1.0, 1.0 );
 					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-					glClearColor(0.35, 0.35, 0.35, 1.0);
+					glClearColor(0.45, 0.45, 0.45, 1.0);
 
 					draw();
 
