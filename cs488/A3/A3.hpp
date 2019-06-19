@@ -101,10 +101,10 @@ protected:
 	// variables for mouse data
 	double mouse_prev_x;
 	double mouse_prev_y;
-	bool mouseReseted;
-	bool mouse_left_pressed;
-	bool mouse_mid_pressed;
-	bool mouse_right_pressed;
+	bool mouseReseted = false;
+	bool mouse_left_pressed = false;
+	bool mouse_mid_pressed = false;
+	bool mouse_right_pressed = false;
 
 	int movementBase = 50; // deivder for mouse movement
 	int angleBase = 20; // deivder for mouse movement

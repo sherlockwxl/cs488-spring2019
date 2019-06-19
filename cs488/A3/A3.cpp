@@ -981,6 +981,10 @@ void A3::resetVariables(){
 	need_reRender = false;
 	undo_succeed = true;
 	redo_succeed = true;
+	mouseReseted = false;
+	mouse_left_pressed = false;
+	mouse_mid_pressed = false;
+	mouse_right_pressed = false;
 }
 
 void A3::resetMouseLocation(){
