@@ -68,8 +68,7 @@ void A3::init()
 	unique_ptr<MeshConsolidator> meshConsolidator (new MeshConsolidator{
 			getAssetFilePath("cube.obj"),
 			getAssetFilePath("sphere.obj"),
-			getAssetFilePath("suzanne.obj"),
-			getAssetFilePath("Fractal.obj"),
+			getAssetFilePath("suzanne.obj")
 	});
 
 
@@ -565,8 +564,7 @@ void A3::draw() {
 //----------------------------------------------------------------------------------------
 void A3::renderSceneGraph(const SceneNode & root) {
 
-	// debug use
-	//cout << " display node: "<< root.m_name<<endl;
+
 	// Bind the VAO once here, and reuse for all GeometryNode rendering below.
 	glBindVertexArray(m_vao_meshData);
 
@@ -735,13 +733,11 @@ bool A3::mouseButtonInputEvent (
 					// to the screen, so read from the back buffer.
 					glReadBuffer( GL_BACK );
 					// Actually read the pixel at the mouse location.
-					//cout << xpos << " " << ypos << endl;
 					glReadPixels( int(xpos), int(ypos), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
 					CHECK_GL_ERRORS;
 
 					// Reassemble the object ID.
 					unsigned int targetId = buffer[0] + (buffer[1] << 8) + (buffer[2] << 16);
-					//cout<<" id " << targetId << " " << buffer[0] << " " << (buffer[1]) << " " << (buffer[2]) << endl;
 					selectNodeById(*m_rootNode, targetId);
 
 					need_reRender = false;

@@ -1,0 +1,49 @@
+===============================================================================
+Compilation: (base directory: A3)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A3 Assets/puppet.lua
+
+Machine: gl13
+===============================================================================
+Manual:
+
+All required features implemented.
+
+Data structure change: 
+1. add a parent member in the SceneNode for picking implementation.
+2. update the translate function for correctly displaying the model
+
+Undo/Redo structure:
+I used two stacks for store undo/redo operations. Each time mouse button is released, all current joint info will be saved into a
+vector of GLfloat( the head angle will be pushed into the vector at the end). Then the vector will be pushed into undo stack.
+when user perform undo, the program will check if undo stack contains more than one operation( one base operation which is the default value is always in undo stack)
+, if not a warning popup will be displayed. Then, the program will pop a joint info vector from the top and reverse the change and push the vector into  the redo stack.
+For redo, it is a similar process.
+
+trackball:
+I reused the provided code with minor change.
+
+
+puppet model: It is a baymax!
+
+torso --------> |-------->neckJoint-------->neck-------->headJoint-------->head--------> |-------->leftEye
+                |                                                                        |-------->rightEye
+                |                                                                        |-------->line
+                |
+                |-------->absJoint-------->abs--------> |-------->tailJoint-------->tail
+                |                                       |-------->leftHipJoint-------->leftThigh-------->leftThighJoint-------->leftFoot
+                |                                       |-------->rightHipJoint-------->rightThigh-------->rightThighJoint-------->rightFoot
+                |
+                |-------->leftShoulder-------->leftShoulderJoint-------->leftUpArm-------->leftUpArmJoint-------->leftHand
+                |
+                |-------->rightShoulder-------->rightShoulderJoint-------->rightUpArm-------->rightUpArmJoint-------->rightHand
+                |
+                |-------->leftWingBaseJoint-------->leftWingBase-------->leftWingJoint-------->leftWing
+                |
+                |-------->rightWingBaseJoint-------->rightWingBase-------->rightWingJoint-------->rightWing
+                |
+
+
+There are 16 joints(DOFs) in total(including the tail one at the back, you may need to rotate the baymax in order to see it).
