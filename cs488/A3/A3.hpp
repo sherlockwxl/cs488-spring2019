@@ -8,10 +8,16 @@
 #include "cs488-framework/MeshConsolidator.hpp"
 
 #include "SceneNode.hpp"
+#include "GeometryNode.hpp"
+
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <vector>
+#include <stack>
+#include <queue>
 
+using namespace std;
 struct LightSource {
 	glm::vec3 position;
 	glm::vec3 rgbIntensity;
@@ -79,4 +85,81 @@ protected:
 	std::string m_luaSceneFile;
 
 	std::shared_ptr<SceneNode> m_rootNode;
+
+	// model variable
+	int i_mode; // 0 for position 1 for joint 
+	bool z_buffer = true; 
+	bool circle = true;
+	bool backface_culling = false;
+	bool frontface_culling = false;
+	bool need_reRender = false;
+	bool selection = false;
+	bool undo_succeed = true;
+	bool redo_succeed = true;
+
+
+	// variables for mouse data
+	double mouse_prev_x;
+	double mouse_prev_y;
+	bool mouseReseted = false;
+	bool mouse_left_pressed = false;
+	bool mouse_mid_pressed = false;
+	bool mouse_right_pressed = false;
+
+	int movementBase = 50; // deivder for mouse movement
+	int angleBase = 20; // deivder for mouse movement
+
+	GLfloat head_rotation = 0.0f;
+	GLfloat head_rotation_min = -3.14/2;
+	GLfloat head_rotation_max = 3.14/2;
+	int head_id= 0;
+
+	glm::vec4 root_ori;
+	glm::mat4 root_ori_m;
+
+	// variable for ini location and transformtaion
+	glm::mat4 ini_translation;
+
+	// variable for redo/undo
+	int totalNode;
+	std::priority_queue<int, vector<int>, greater<int> > jointIndex;
+	std::vector<int> jointIndexVector;
+	std::vector<GLfloat> ori_joint_angle;
+	std::stack<std::vector<GLfloat>> joint_rotation_undo;
+	std::stack<std::vector<GLfloat>> joint_rotation_redo;
+	
+	
+
+	// trackball hander
+	void trackballHandler(double xPos, double yPos);
+
+	// reset helper functions
+	void resetAll();
+	void resetMouseLocation();
+	void resetVariables();
+	void resetUndoRedo();
+	void resetHandler(int type);
+	void resetPosition();
+	void resetOrietation();
+	void resetJoints();
+	void unselectJoints();
+
+	// mouse movement handler
+	void mouseMoveEventHandler(double xPos, double yPos);
+	void rotateP_OHandler(double offsetX, double offsetY, int axis);
+	void rotateJointHandler(double offsetX, double offsetY,  int type);
+	
+
+	// update helper function
+	void selectNodeById(SceneNode &node, unsigned int id);
+	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix);
+	void rotateJointHelper(GLfloat angle, SceneNode & node, int type);
+	
+	void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix);
+	SceneNode * findNodeById(SceneNode& rootNode, unsigned int id);
+
+	// helper function for undo and redo
+	void undo();
+	void redo();
 };
+
