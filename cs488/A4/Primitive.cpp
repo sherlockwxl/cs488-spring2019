@@ -9,7 +9,7 @@ Primitive::~Primitive()
 Sphere::~Sphere()
 {
 }
-
+double Sphere::
 Cube::~Cube()
 {
 }

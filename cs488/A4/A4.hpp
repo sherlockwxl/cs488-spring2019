@@ -7,7 +7,12 @@
 #include "SceneNode.hpp"
 #include "Light.hpp"
 #include "Image.hpp"
+#include "Primitive.hpp"
 
+glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & ambient,
+				const std::list<Light *> & lights){
+
+};
 void A4_Render(
 		// What to render
 		SceneNode * root,

@@ -3,6 +3,16 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "polyroots.hpp"
+
+struct Ray{
+	glm::vec4 start;
+	glm::vec4 target;
+	glm::vec4 locAtDist(float dist){
+		return start + (target - start)*dist;
+	}
+	Ray(glm::vec4 start, glm::vec4 target): start(start), target(target){}
+};
 
 class Primitive {
 public:
@@ -12,6 +22,7 @@ public:
 class Sphere : public Primitive {
 public:
   virtual ~Sphere();
+  virtual double checkIntersection(const Ray ray, ) 
 };
 
 class Cube : public Primitive {
