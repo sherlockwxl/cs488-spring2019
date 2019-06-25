@@ -26,8 +26,10 @@ SceneNode * findNodeById(SceneNode& rootNode, unsigned int id){
 Ray generateReflection(Ray startRay, glm::vec3 newOri, intersection int_neat){
 	
 	glm::vec4 newOri_v4 = glm::vec4(newOri, 1.0f);
-	glm::vec4 newDir = glm::vec4(startRay.direction - 
-			2 * glm::vec4(glm::dot(glm::vec3(startRay.direction), int_neat.norm_v)  * int_neat.norm_v, 0.0f));
+	//glm::vec4 newDir = glm::vec4(glm::normalize(2*glm::dot(glm::vec3(startRay.direction),int_neat.norm_v)*int_neat.norm_v - glm::vec3(startRay.direction)), 0.0f);
+
+	glm::vec4 newDir = glm::normalize(glm::vec4(startRay.direction - 
+			2 * glm::vec4(glm::dot(glm::vec3(startRay.direction), int_neat.norm_v)  * int_neat.norm_v, 0.0f)));
 	Ray reflectionRay;
 	reflectionRay.start = newOri_v4;
 	reflectionRay.direction = newDir;
@@ -103,7 +105,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 				double tempCurLim = exp_test;
 				intersection int_w_light = getNearestIntersection(tempResNode, rootNode, curRay, tempCurLim);
 				double diss = glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction));
-				if(tempResNode == resNode ){// has interection
+				if(tempResNode == resNode && diss < 0.01 ){// has interection
 					
 					const GeometryNode * geometryNode_2 = static_cast<const GeometryNode*>(tempResNode);
 					PhongMaterial* pMaterial_2 = static_cast<PhongMaterial*>(geometryNode_2->m_material);		
@@ -116,14 +118,14 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 					glm::vec3 R = glm::normalize(2*glm::dot(L, N)*N - L);
 					// Steps based on course notes page 171
 					//Step 1. calculate diffuse
-					//glm::vec3 Diffuse = pMaterial->get_m_kd() * n_dot_l;
-					glm::vec3 Diffuse = pMaterial->get_m_kd() * glm::dot(glm::vec3(curRay.direction), int_near.norm_v);
+					glm::vec3 Diffuse = pMaterial->get_m_kd() * n_dot_l;
+					//glm::vec3 Diffuse = pMaterial->get_m_kd() * glm::dot(glm::vec3(curRay.direction), int_near.norm_v);
 
 
 					//Step 2. calculate Specular
 					//float pf = std::pow( glm::dot(R, V), pMaterial->get_m_shine() );
 					//float pf = std::pow( n_dot_h, pMaterial->get_m_shine() );
-					float specAmt = std::pow(glm::dot(-1* (glm::vec3(ray.direction)), 
+					float specAmt = std::pow(glm::dot((glm::vec3(ray.direction)), 
 						2*glm::dot(int_near.norm_v, glm::vec3(curRay.direction))* 
 						int_near.norm_v - glm::vec3(curRay.direction)),  pMaterial->get_m_shine());
 
@@ -132,17 +134,17 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 					//Step 3. calculate attenuation
 					double dis = glm::distance(glm::vec3(newOri), light->position);
-					//double devider = (light->falloff[0] + light->falloff[1] * dis + light->falloff[2] * dis * dis);
+					double devider = (light->falloff[0] + light->falloff[1] * dis + light->falloff[2] * dis * dis);
 
 					// step 4 update color
 
-					col += light->colour*(Diffuse + Specular);
+					col += light->colour*(Diffuse + Specular)/devider;
 				}
 
 			}
 			if(maxHit > 0){
 				Ray reflectRay = generateReflection(ray, newOri, int_near);
-				//col += pMaterial->get_m_ks() * rayTrace(reflectRay, maxHit--, rootNode, ambient, lights);
+				col += pMaterial->get_m_ks() * rayTrace(reflectRay, maxHit--, rootNode, ambient, lights);
 			}
 			return col; 
 		}else{
@@ -244,7 +246,7 @@ void A4_Render(
 			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f);
 			//cout << " will ray trace " << glm::to_string(curRay.start) << " dir" << glm::to_string(curRay.direction) <<endl;
 			
-			col += rayTrace(curRay, 5, root, ambient, lights);
+			col += rayTrace(curRay, 6, root, ambient, lights);
 			//if(y == 66 && x == 185){
 				//std::cout << " will ray trace " << glm::to_string(curRay.start) << " dir" << glm::to_string(curRay.direction) << std::endl;
 				//exit(0);

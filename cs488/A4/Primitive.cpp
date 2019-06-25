@@ -105,7 +105,8 @@ intersection NonhierSphere::checkIntersection(const Ray & ray){
         }else{
             int_res.t =  (float)std::min(roots[0], roots[1]);
         }
-        int_res.norm_v = glm::vec3(glm::normalize(ray.start + float(int_res.t) * (ray.direction)));
+        int_res.norm_v = glm::vec3(glm::normalize(centerPos - glm::vec3(ray.start + float(int_res.t) * (ray.direction)) ));
+        //int_res.norm_v = glm::vec3(glm::normalize(ray.start + float(int_res.t) * (ray.direction)));
         //std::cout << " NonhierBox check slove res:  " <<res<< " " << int_res.t << " " << glm::to_string(int_res.norm_v)<<std::endl;
     }
 
