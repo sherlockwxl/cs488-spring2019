@@ -81,7 +81,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 		//cout << " intersection : "<< int_near.t << " "<<endl;
 		}
 		
-		if(resNode !=NULL && int_near.t >= 0.1){
+		if(resNode !=NULL && int_near.t>= 0.01){
 			//cout<< " with node " << resNode->m_name << " and id : "<< resNode->m_nodeId<<endl;
 			//cout << " intersection : "<< int_near.t << " "<<endl;
 			// set up base color
@@ -104,15 +104,15 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 				SceneNode *tempResNode = NULL;
 				double tempCurLim = exp_test;
 				intersection int_w_light = getNearestIntersection(tempResNode, rootNode, curRay, tempCurLim);
-				double diss = glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction));
-				if(tempResNode == resNode && diss < 0.01 ){// has interection
+				double diss = glm::abs(glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction)));
+				if(tempResNode == resNode){// has interection
 					
 					const GeometryNode * geometryNode_2 = static_cast<const GeometryNode*>(tempResNode);
 					PhongMaterial* pMaterial_2 = static_cast<PhongMaterial*>(geometryNode_2->m_material);		
 					glm::vec3 N = int_near.norm_v;
 					glm::vec3 L = glm::vec3(curRay.direction);
 					glm::vec3 V = glm::vec3(-1*ray.direction);
-					glm::vec3 h = glm::normalize(V + L);
+					glm::vec3 h = glm::normalize(L + glm::vec3(ray.direction));
 					float n_dot_l = std::max((float)glm::dot(N, L), 0.0f);
 					float n_dot_h = std::max((float)glm::dot(N, h), 0.0f);
 					glm::vec3 R = glm::normalize(2*glm::dot(L, N)*N - L);
@@ -123,7 +123,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 
 					//Step 2. calculate Specular
-					//float pf = std::pow( glm::dot(R, V), pMaterial->get_m_shine() );
+					float pf = std::pow(n_dot_h, pMaterial->get_m_shine() );
 					//float pf = std::pow( n_dot_h, pMaterial->get_m_shine() );
 					float specAmt = std::pow(glm::dot((glm::vec3(ray.direction)), 
 						2*glm::dot(int_near.norm_v, glm::vec3(curRay.direction))* 
@@ -144,7 +144,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 			}
 			if(maxHit > 0){
 				Ray reflectRay = generateReflection(ray, newOri, int_near);
-				col += pMaterial->get_m_ks() * rayTrace(reflectRay, maxHit--, rootNode, ambient, lights);
+				//col += pMaterial->get_m_ks() * rayTrace(reflectRay, maxHit--, rootNode, ambient, lights);
 			}
 			return col; 
 		}else{
