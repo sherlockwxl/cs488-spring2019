@@ -11,3 +11,17 @@ PhongMaterial::PhongMaterial(
 
 PhongMaterial::~PhongMaterial()
 {}
+
+
+glm::vec3 PhongMaterial::get_m_kd(){
+	return m_kd;
+}
+
+
+glm::vec3 PhongMaterial::get_m_ks(){
+	return m_ks;
+}
+
+double PhongMaterial::get_m_shine(){
+	return m_shininess;
+}

@@ -3,31 +3,41 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <algorithm>
+#include <iostream>
 #include "polyroots.hpp"
+//debug
+#include <glm/gtx/string_cast.hpp>
+
+
+using namespace std;
 
 struct Ray{
 	glm::vec4 start;
-	glm::vec4 target;
-	glm::vec4 locAtDist(float dist){
-		return start + (target - start)*dist;
-	}
-	Ray(glm::vec4 start, glm::vec4 target): start(start), target(target){}
+	glm::vec4 direction;
+};
+
+struct intersection{
+  double t;
+  glm::vec3 norm_v;
 };
 
 class Primitive {
 public:
   virtual ~Primitive();
+  virtual intersection checkIntersection(const Ray &ray) = 0;
 };
 
 class Sphere : public Primitive {
 public:
   virtual ~Sphere();
-  virtual double checkIntersection(const Ray ray, ) 
+  virtual intersection checkIntersection(const Ray &ray);
 };
 
 class Cube : public Primitive {
 public:
   virtual ~Cube();
+  virtual intersection checkIntersection(const Ray &ray);
 };
 
 class NonhierSphere : public Primitive {
@@ -37,6 +47,7 @@ public:
   {
   }
   virtual ~NonhierSphere();
+  virtual intersection checkIntersection(const Ray &ray);
 
 private:
   glm::vec3 m_pos;
@@ -51,6 +62,7 @@ public:
   }
   
   virtual ~NonhierBox();
+  virtual intersection checkIntersection(const Ray &ray);
 
 private:
   glm::vec3 m_pos;

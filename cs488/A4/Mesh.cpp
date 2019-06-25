@@ -48,3 +48,7 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
   out << "}";
   return out;
 }
+intersection Mesh::checkIntersection(const Ray & ray){
+	intersection int_res = {};
+	return int_res;
+}
