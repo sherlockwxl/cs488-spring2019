@@ -1,0 +1,18 @@
+===============================================================================
+Compilation: (base directory: A3)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A4 Assets/simple.lua
+
+Machine: gl36
+===============================================================================
+Manual:
+
+All required features implemented.
+
+Extra Feature:
+super sampling.
+In the A4.cpp file, there is a variable named supersamplingAmt. It control the 
+size of sample grid. Eg: if the variable is set to 3, color will be sampled on a 
+3 * 3 grid averge on the nine color values returned.

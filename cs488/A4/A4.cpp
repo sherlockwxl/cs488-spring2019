@@ -35,7 +35,6 @@ void transWholeTree(SceneNode *root) {
 Ray generateReflection(Ray startRay, glm::vec3 newOri, intersection int_neat){
 	
 	glm::vec4 newOri_v4 = glm::vec4(newOri, 1.0f);
-	//glm::vec4 newDir = glm::vec4(glm::normalize(2*glm::dot(glm::vec3(startRay.direction),int_neat.norm_v)*int_neat.norm_v - glm::vec3(startRay.direction)), 0.0f);
 
 	glm::vec4 newDir = glm::normalize(glm::vec4(startRay.direction - 
 			2 * glm::vec4(glm::dot(glm::vec3(startRay.direction), int_neat.norm_v)  * int_neat.norm_v, 0.0f)));
@@ -46,45 +45,60 @@ Ray generateReflection(Ray startRay, glm::vec3 newOri, intersection int_neat){
 
 }
 intersection getNearestIntersection(SceneNode *&resNode, SceneNode *rootNode, Ray &ray, double limit){
-	//cout << " get interection called "<< limit<<endl;
 	intersection int_res;
 	int_res.t = -1;
+	glm::vec4 start;
+	glm::vec4 direction;
 	for(int i = 0 ; i < rootNode->totalSceneNodes(); i++){
 		const GeometryNode *geometryNode;
 		SceneNode *node = findNodeById(*rootNode, i);
+		
 		if(node !=NULL){
 			if(node->m_nodeType == NodeType::GeometryNode){ // only check intersection with geometrynode
-			
-			geometryNode = static_cast<const GeometryNode*>(node);
-			
-			Ray transferd_ray;
-			transferd_ray.start = node->invtrans*ray.start;
-			transferd_ray.direction = glm::normalize(node->invtrans*(ray.start + ray.direction) - node->invtrans*ray.start);
+				if(node->linkNextNode != NULL){
+					geometryNode = static_cast<const GeometryNode*>(node->linkNextNode);
+				}else{
+					geometryNode = static_cast<const GeometryNode*>(node);
+				}
+				
+				
+				Ray transferd_ray;
 
-			intersection temp_int_res = geometryNode->m_primitive->checkIntersection(transferd_ray);
-			if (temp_int_res.t > exp_test_glo){
-				if(temp_int_res.t < limit){
+				transferd_ray.start = node->invtrans*ray.start;
+				transferd_ray.direction = glm::normalize(node->invtrans*(ray.start + ray.direction) - node->invtrans*ray.start);
+				
+				
 
-					resNode = node;
-					limit = temp_int_res.t;
-					int_res.t = temp_int_res.t;
-					int_res.norm_v = temp_int_res.norm_v;
+				intersection temp_int_res;
+				if(node->trans != glm::mat4()){
 
-					int_res.t = glm::distance(glm::vec3(resNode->trans*(transferd_ray.start + int_res.t * transferd_ray.direction)), glm::vec3(transferd_ray.start));
-					int_res.norm_v = glm::normalize(glm::transpose(glm::mat3(resNode->invtrans))*int_res.norm_v);
-					limit = int_res.t;
+					temp_int_res = geometryNode->m_primitive->checkIntersection(transferd_ray);
+				}else{
+					temp_int_res = geometryNode->m_primitive->checkIntersection(ray);
+				}
+				
+				if (temp_int_res.t > exp_test_glo){
+					if(node->trans != glm::mat4()){
+						temp_int_res.t = glm::distance(glm::vec3(node->trans*(transferd_ray.start + temp_int_res.t * transferd_ray.direction)), glm::vec3(ray.start));
+						temp_int_res.norm_v = glm::normalize(glm::transpose(glm::mat3(node->invtrans))*temp_int_res.norm_v);
+					}
+
+					if(temp_int_res.t < limit){
+						resNode = node;
+						limit = temp_int_res.t;
+						int_res.t = temp_int_res.t;
+						int_res.norm_v = temp_int_res.norm_v;
 					} 
 				}
 			}
 		}	
 	}
+
 	return int_res;
 }
 glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & ambient,
 				const std::list<Light *> & lights){
-		//cout << " executed with max : "<< maxHit<<endl;
 		double exp_test = 1e10; 
-		// step 1. check for intersection
 		SceneNode *resNode = NULL;
 		double curLim = exp_test;
 		intersection int_near = getNearestIntersection(resNode, rootNode, ray, curLim);
@@ -95,9 +109,14 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 		if(resNode !=NULL && int_near.t != -1){
 
 			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f); 
-
+			GeometryNode * geometryNode;
 			// add ambient
-			const GeometryNode * geometryNode = static_cast<const GeometryNode*>(resNode);
+			if(resNode->linkNextNode !=NULL){
+				geometryNode = static_cast<GeometryNode*>(resNode->linkNextNode);
+			}else{
+				geometryNode = static_cast<GeometryNode*>(resNode);
+			}
+			
 			PhongMaterial* pMaterial = static_cast<PhongMaterial*>(geometryNode->m_material);
 			col += pMaterial->get_m_kd()*ambient;
 
@@ -111,24 +130,15 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 				curRay.start = glm::vec4(newOri, 1.0f);
 				curRay.direction = glm::normalize(glm::vec4(light->position - newOri, 0.0f));
 
-				if(resNode->m_nodeType == NodeType::GeometryNode){
-					curRay.start = resNode->invtrans*curRay.start;
-					curRay.direction = glm::normalize(resNode->invtrans*(curRay.start  + curRay.direction) - resNode->invtrans*curRay.start);
-
-				}
-				
-				//Ray curRay = Ray(glm::vec4(newOri, 1.0f), glm::vec4(light->position, 1.0f));
 				SceneNode *tempResNode = NULL;
 				double tempCurLim = exp_test;
 				intersection int_w_light = getNearestIntersection(tempResNode, rootNode, curRay, tempCurLim);
-				double diss = glm::abs(glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction)));
-				if(int_w_light.t == -1 || (int_w_light.t >0 && diss < 0.01)){// has interection
-					
-					const GeometryNode * geometryNode_2 = static_cast<const GeometryNode*>(tempResNode);
-					PhongMaterial* pMaterial_2 = static_cast<PhongMaterial*>(geometryNode_2->m_material);		
+				double diss = glm::abs( glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction)));
+				if(int_w_light.t == -1 || (int_w_light.t > 0 && diss < 0.01)){// has interection
+	
 					glm::vec3 N = int_near.norm_v;
 					glm::vec3 L = glm::vec3(curRay.direction);
-					glm::vec3 V = glm::vec3(-1*ray.direction);
+					glm::vec3 V = glm::vec3(ray.direction);
 					glm::vec3 h = glm::normalize(L - glm::vec3(ray.direction));
 					float n_dot_l = std::max((float)glm::dot(N, L), 0.0f);
 					float n_dot_h = std::max((float)glm::dot(N, h), 0.0f);
@@ -136,15 +146,9 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 					// Steps based on course notes page 171
 					//Step 1. calculate diffuse
 					glm::vec3 Diffuse = pMaterial->get_m_kd() * n_dot_l;
-					//glm::vec3 Diffuse = pMaterial->get_m_kd() * glm::dot(glm::vec3(curRay.direction), int_near.norm_v);
-
 
 					//Step 2. calculate Specular
 					float pf = std::pow(n_dot_h, pMaterial->get_m_shine() );
-					//float pf = std::pow( n_dot_h, pMaterial->get_m_shine() );
-					float specAmt = std::pow(glm::dot((glm::vec3(-1 * ray.direction)), 
-						2*glm::dot(int_near.norm_v, glm::vec3(curRay.direction))* 
-						int_near.norm_v - glm::vec3(curRay.direction)),  pMaterial->get_m_shine());
 
 					glm::vec3 Specular =  pMaterial->get_m_ks() * pf;
 
@@ -155,16 +159,19 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 					// step 4 update color
 
-					col += light->colour*(Diffuse + Specular)/devider;
+					col += light->colour*(Diffuse + Specular);
+				}else{
+
 				}
 
 			}
 			if(maxHit > 0){
-				Ray reflectRay = generateReflection(ray, newOri, int_near);
-				//col += pMaterial->get_m_ks() * rayTrace(reflectRay, maxHit--, rootNode, ambient, lights);
+				//TODO
 			}
 			return col; 
 		}else{
+
+			// for background color
 			double y = ray.direction.y;
 			glm::vec3 color = glm::vec3(y/10*1.0f, y/10*3*1.0f,y/10*7*1.0f);
 			return color;
@@ -252,6 +259,7 @@ void A4_Render(
 
 	int perc = ceil(((double)imageh/10));
 	glm::vec4 eye_v4 = glm::vec4(eye, 1.0f);
+	int supersamplingAmt = 1;
 
 	for (int y = 0; y < imageh; ++y) {
 		if(y% perc == 0){
@@ -260,10 +268,20 @@ void A4_Render(
 		for (int x = 0; x < imagew; ++x) {
 			Ray curRay;
 			curRay.start = eye_v4;
-			glm::vec4 dir = glm::normalize( t_matrix * glm::vec4(x, y, 0, 1) - eye_v4);
-			curRay.direction = dir;
-			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f);			
-			col += rayTrace(curRay, 6, root, ambient, lights);
+			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f);
+			for(int x_s = 0; x_s < supersamplingAmt; x_s++){
+				for(int y_s = 0; y_s < supersamplingAmt; y_s++){
+					glm::vec4 dir = glm::normalize( t_matrix * glm::vec4((float)x + (float)x_s/supersamplingAmt*3.0f, (float)y + (float)y_s/supersamplingAmt*3.0f, 0, 1) - eye_v4);
+					curRay.direction = dir;
+								
+					col += rayTrace(curRay, 6, root, ambient, lights);
+					//cout<<x + x_s/supersamplingAmt*3.0f<<"  ";
+					//cout<<glm::to_string(rayTrace(curRay, 6, root, ambient, lights))<<endl;
+				}
+			}
+
+			
+			col /= (supersamplingAmt * supersamplingAmt);
 			
 			// Red: 
 			image(x, y, 0) = col.r;

@@ -20,7 +20,7 @@ class SceneNode {
 public:
     SceneNode(const std::string & name);
 
-	SceneNode(const SceneNode & other);
+	SceneNode(SceneNode & other);
 
     virtual ~SceneNode();
     
@@ -48,6 +48,8 @@ public:
     glm::mat4 invtrans;
     
     std::list<SceneNode*> children;
+    SceneNode *parent = NULL;
+    SceneNode *linkNextNode = NULL;
 
 	NodeType m_nodeType;
 	std::string m_name;

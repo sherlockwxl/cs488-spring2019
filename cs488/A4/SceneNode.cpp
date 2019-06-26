@@ -32,11 +32,13 @@ SceneNode::SceneNode(const std::string& name)
 
 //---------------------------------------------------------------------------------------
 // Deep copy
-SceneNode::SceneNode(const SceneNode & other)
+SceneNode::SceneNode( SceneNode & other)
 	: m_nodeType(other.m_nodeType),
 	  m_name(other.m_name),
 	  trans(other.trans),
-	  invtrans(other.invtrans)
+	  invtrans(other.invtrans),
+	  m_nodeId(nodeInstanceCount++),
+	  linkNextNode(&other)
 {
 	for(SceneNode * child : other.children) {
 		this->children.push_front(new SceneNode(*child));
@@ -68,7 +70,15 @@ const glm::mat4& SceneNode::get_inverse() const {
 
 //---------------------------------------------------------------------------------------
 void SceneNode::add_child(SceneNode* child) {
-	children.push_back(child);
+	if(child->parent == NULL) {
+		children.push_back(child);
+		child->parent = this;
+	}
+	else {
+		SceneNode *node = new SceneNode(*child);
+		add_child(node);
+		node->parent = this;
+	}
 }
 
 //---------------------------------------------------------------------------------------
