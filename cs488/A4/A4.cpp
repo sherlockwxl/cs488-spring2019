@@ -23,6 +23,13 @@ SceneNode * findNodeById(SceneNode& rootNode, unsigned int id){
 	return NULL;
 }
 
+void transWholeTree(SceneNode *root) {
+	for(SceneNode *node: root->children) {
+		node->trans = root->trans*node->trans;
+		node->invtrans = glm::inverse(node->trans);
+		transWholeTree(node);
+	}
+}
 
 
 Ray generateReflection(Ray startRay, glm::vec3 newOri, intersection int_neat){
@@ -49,24 +56,27 @@ intersection getNearestIntersection(SceneNode *&resNode, SceneNode *rootNode, Ra
 			if(node->m_nodeType == NodeType::GeometryNode){ // only check intersection with geometrynode
 			
 			geometryNode = static_cast<const GeometryNode*>(node);
-			//cout << " after  convert  "<< geometryNode->m_name<<endl; 
-			//cout << " get next interection called "<< limit<<endl;
-			intersection temp_int_res = geometryNode->m_primitive->checkIntersection(ray);
+			
+			Ray transferd_ray;
+			transferd_ray.start = node->invtrans*ray.start;
+			transferd_ray.direction = glm::normalize(node->invtrans*(ray.start + ray.direction) - node->invtrans*ray.start);
+
+			intersection temp_int_res = geometryNode->m_primitive->checkIntersection(transferd_ray);
 			if (temp_int_res.t > exp_test_glo){
 				if(temp_int_res.t < limit){
-					//std::cout << "found!!"<<std::endl;
+
 					resNode = node;
-					//std::cout << "found!! 2"<<std::endl;
 					limit = temp_int_res.t;
 					int_res.t = temp_int_res.t;
 					int_res.norm_v = temp_int_res.norm_v;
-					//std::cout << limit<<std::endl;
+
+					int_res.t = glm::distance(glm::vec3(resNode->trans*(transferd_ray.start + int_res.t * transferd_ray.direction)), glm::vec3(transferd_ray.start));
+					int_res.norm_v = glm::normalize(glm::transpose(glm::mat3(resNode->invtrans))*int_res.norm_v);
+					limit = int_res.t;
 					} 
 				}
-			
 			}
-		}
-		
+		}	
 	}
 	return int_res;
 }
@@ -78,15 +88,12 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 		SceneNode *resNode = NULL;
 		double curLim = exp_test;
 		intersection int_near = getNearestIntersection(resNode, rootNode, ray, curLim);
-		if(resNode != NULL){
-		//cout<< " with node " << resNode->m_name << " and id : "<< resNode->m_nodeId<<endl;
-		//cout << " intersection : "<< int_near.t << " "<<endl;
-		}
+
+		// performation invese transformation
+		
 		
 		if(resNode !=NULL && int_near.t != -1){
-			//cout<< " with node " << resNode->m_name << " and id : "<< resNode->m_nodeId<<endl;
-			//cout << " intersection : "<< int_near.t << " "<<endl;
-			// set up base color
+
 			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f); 
 
 			// add ambient
@@ -99,9 +106,17 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 			for(Light * light : lights){
 				Ray curRay;
-				//curRay.start = glm::vec4(newOri, 1.0f);
+
+				// add transformation functions
 				curRay.start = glm::vec4(newOri, 1.0f);
 				curRay.direction = glm::normalize(glm::vec4(light->position - newOri, 0.0f));
+
+				if(resNode->m_nodeType == NodeType::GeometryNode){
+					curRay.start = resNode->invtrans*curRay.start;
+					curRay.direction = glm::normalize(resNode->invtrans*(curRay.start  + curRay.direction) - resNode->invtrans*curRay.start);
+
+				}
+				
 				//Ray curRay = Ray(glm::vec4(newOri, 1.0f), glm::vec4(light->position, 1.0f));
 				SceneNode *tempResNode = NULL;
 				double tempCurLim = exp_test;
@@ -140,7 +155,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 					// step 4 update color
 
-					col += light->colour*(Diffuse + Specular);
+					col += light->colour*(Diffuse + Specular)/devider;
 				}
 
 			}
@@ -150,7 +165,9 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 			}
 			return col; 
 		}else{
-			return glm::vec3(0.0f, 0.0f, 0.0f);
+			double y = ray.direction.y;
+			glm::vec3 color = glm::vec3(y/10*1.0f, y/10*3*1.0f,y/10*7*1.0f);
+			return color;
 	
 		}
 };
@@ -174,7 +191,7 @@ void A4_Render(
 ) {
 
   // Fill in raytracing code here...  
-
+  transWholeTree(root);
   std::cout << "Calling A4_Render(\n" <<
 		  "\t" << *root <<
           "\t" << "Image(width:" << image.width() << ", height:" << image.height() << ")\n"
@@ -245,14 +262,9 @@ void A4_Render(
 			curRay.start = eye_v4;
 			glm::vec4 dir = glm::normalize( t_matrix * glm::vec4(x, y, 0, 1) - eye_v4);
 			curRay.direction = dir;
-			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f);
-			//cout << " will ray trace " << glm::to_string(curRay.start) << " dir" << glm::to_string(curRay.direction) <<endl;
-			
+			glm::vec3 col = glm::vec3(0.0f, 0.0f, 0.0f);			
 			col += rayTrace(curRay, 6, root, ambient, lights);
-			//if(y == 66 && x == 185){
-				//std::cout << " will ray trace " << glm::to_string(curRay.start) << " dir" << glm::to_string(curRay.direction) << std::endl;
-				//exit(0);
-			//}
+			
 			// Red: 
 			image(x, y, 0) = col.r;
 			// Green: 

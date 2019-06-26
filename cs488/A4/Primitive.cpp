@@ -88,7 +88,6 @@ Sphere::~Sphere()
 }
 
 intersection Sphere::checkIntersection(const Ray & ray){
-
     glm::vec3 centerPos =  glm::vec3(0.0f, 0.0f, 0.0f);
     float a = glm::dot(ray.direction, ray.direction);
     float b = 2 * glm::dot(glm::vec3(ray.direction), glm::vec3(ray.start) - centerPos);
