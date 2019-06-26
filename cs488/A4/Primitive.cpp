@@ -4,7 +4,7 @@
 #include <tuple>
 using namespace std;
 using namespace glm;
-double exp_test = 0.001;
+double exp_test_glo_2 = 0.01;
 tuple<int, int, int> cubeIndexPair[12] = {
 	{0, 1, 2},//bot
 	{2, 3, 0},
@@ -69,7 +69,7 @@ bool rootsValidation(size_t res, double roots[2]){
     if(res <= 0){
         return false;
     }
-    if(std::max(roots[0], roots[1]) < 0)
+    if(std::max(roots[0], roots[1]) < exp_test_glo_2)
     {
         return false;
     }
@@ -168,11 +168,10 @@ intersection NonhierSphere::checkIntersection(const Ray & ray){
         }else{
             int_res.t =  (float)std::min(roots[0], roots[1]);
         }
-        int_res.norm_v = glm::vec3(glm::normalize(centerPos - glm::vec3(ray.start + float(int_res.t) * (ray.direction)) ));
+        int_res.norm_v = glm::vec3(glm::normalize( glm::vec3(ray.start + float(int_res.t) * (ray.direction)) - centerPos ));
         //int_res.norm_v = glm::vec3(glm::normalize(ray.start + float(int_res.t) * (ray.direction)));
         //std::cout << " NonhierBox check slove res:  " <<res<< " " << int_res.t << " " << glm::to_string(int_res.norm_v)<<std::endl;
     }
-
     return int_res;
 
 }
@@ -201,38 +200,35 @@ intersection NonhierBox::checkIntersection(const Ray & ray){
         double  temp_res = checkTriInterct(ray, cube_vertex_nonhierBox[std::get<0>(cubeIndexPair[i])],
                                         cube_vertex_nonhierBox[std::get<1>(cubeIndexPair[i])],
                                         cube_vertex_nonhierBox[std::get<2>(cubeIndexPair[i])]);
-        if(temp_res >= 0 && (int_res.t == -1 || (temp_res < int_res.t ))){
+        if(temp_res >= exp_test_glo_2 && (int_res.t == -1 || (temp_res < int_res.t ))){
             int_res.t = temp_res;
             switch (i){
                 case (0):
                 case (1):
-                    int_res.norm_v = glm::vec3(0.0f, 1.0f, 0.0f);
+                    int_res.norm_v = glm::vec3(0.0f, -1.0f, 0.0f);
                     break;
                 case (2):
                 case (3):
-                    int_res.norm_v = glm::vec3(1.0f, 0.0f, 0.0f);
+                    int_res.norm_v = glm::vec3(-1.0f, 0.0f, 0.0f);
                     break;
                 case (4):
                 case (5):
-                    int_res.norm_v = glm::vec3(0.0f, 0.0f, 1.0f);
+                    int_res.norm_v = glm::vec3(0.0f, 0.0f, -1.0f);
                     break;
                 case (6):
                 case (7):
-                    int_res.norm_v = glm::vec3(-1.0f, 0.0f, 0.0f);
+                    int_res.norm_v = glm::vec3(1.0f, 0.0f, 0.0f);
                     break;
                 case (8):
                 case (9):
-                    int_res.norm_v = glm::vec3(0.0f, 0.0f, -1.0f);
+                    int_res.norm_v = glm::vec3(0.0f, 0.0f, 1.0f);
                     break;
                 case (10):
                 case (11):
-                    int_res.norm_v = glm::vec3(0.0f, -1.0f, 0.0f);
+                    int_res.norm_v = glm::vec3(0.0f, 1.0f, 0.0f);
                     break;
             }
         } 
-    }
-    if(int_res.t != -1){
-        //int_res
     }
 
     return int_res;

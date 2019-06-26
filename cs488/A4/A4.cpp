@@ -8,6 +8,8 @@
 
 //debug
 #include <glm/gtx/string_cast.hpp>
+double exp_test_glo = 0.001;
+
 SceneNode * findNodeById(SceneNode& rootNode, unsigned int id){
 	if(rootNode.m_nodeId == id){
 		return &rootNode;
@@ -39,7 +41,7 @@ Ray generateReflection(Ray startRay, glm::vec3 newOri, intersection int_neat){
 intersection getNearestIntersection(SceneNode *&resNode, SceneNode *rootNode, Ray &ray, double limit){
 	//cout << " get interection called "<< limit<<endl;
 	intersection int_res;
-
+	int_res.t = -1;
 	for(int i = 0 ; i < rootNode->totalSceneNodes(); i++){
 		const GeometryNode *geometryNode;
 		SceneNode *node = findNodeById(*rootNode, i);
@@ -50,7 +52,7 @@ intersection getNearestIntersection(SceneNode *&resNode, SceneNode *rootNode, Ra
 			//cout << " after  convert  "<< geometryNode->m_name<<endl; 
 			//cout << " get next interection called "<< limit<<endl;
 			intersection temp_int_res = geometryNode->m_primitive->checkIntersection(ray);
-			if (temp_int_res.t > 0){
+			if (temp_int_res.t > exp_test_glo){
 				if(temp_int_res.t < limit){
 					//std::cout << "found!!"<<std::endl;
 					resNode = node;
@@ -81,7 +83,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 		//cout << " intersection : "<< int_near.t << " "<<endl;
 		}
 		
-		if(resNode !=NULL && int_near.t>= 0.01){
+		if(resNode !=NULL && int_near.t != -1){
 			//cout<< " with node " << resNode->m_name << " and id : "<< resNode->m_nodeId<<endl;
 			//cout << " intersection : "<< int_near.t << " "<<endl;
 			// set up base color
@@ -98,21 +100,21 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 			for(Light * light : lights){
 				Ray curRay;
 				//curRay.start = glm::vec4(newOri, 1.0f);
-				curRay.start = glm::vec4(light->position, 1.0f);
-				curRay.direction = glm::normalize(glm::vec4(-light->position + newOri, 0.0f));
+				curRay.start = glm::vec4(newOri, 1.0f);
+				curRay.direction = glm::normalize(glm::vec4(light->position - newOri, 0.0f));
 				//Ray curRay = Ray(glm::vec4(newOri, 1.0f), glm::vec4(light->position, 1.0f));
 				SceneNode *tempResNode = NULL;
 				double tempCurLim = exp_test;
 				intersection int_w_light = getNearestIntersection(tempResNode, rootNode, curRay, tempCurLim);
 				double diss = glm::abs(glm::distance(newOri, light->position + glm::vec3(int_w_light.t*curRay.direction)));
-				if(tempResNode == resNode){// has interection
+				if(int_w_light.t == -1 || (int_w_light.t >0 && diss < 0.01)){// has interection
 					
 					const GeometryNode * geometryNode_2 = static_cast<const GeometryNode*>(tempResNode);
 					PhongMaterial* pMaterial_2 = static_cast<PhongMaterial*>(geometryNode_2->m_material);		
 					glm::vec3 N = int_near.norm_v;
 					glm::vec3 L = glm::vec3(curRay.direction);
 					glm::vec3 V = glm::vec3(-1*ray.direction);
-					glm::vec3 h = glm::normalize(L + glm::vec3(ray.direction));
+					glm::vec3 h = glm::normalize(L - glm::vec3(ray.direction));
 					float n_dot_l = std::max((float)glm::dot(N, L), 0.0f);
 					float n_dot_h = std::max((float)glm::dot(N, h), 0.0f);
 					glm::vec3 R = glm::normalize(2*glm::dot(L, N)*N - L);
@@ -125,11 +127,11 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 					//Step 2. calculate Specular
 					float pf = std::pow(n_dot_h, pMaterial->get_m_shine() );
 					//float pf = std::pow( n_dot_h, pMaterial->get_m_shine() );
-					float specAmt = std::pow(glm::dot((glm::vec3(ray.direction)), 
+					float specAmt = std::pow(glm::dot((glm::vec3(-1 * ray.direction)), 
 						2*glm::dot(int_near.norm_v, glm::vec3(curRay.direction))* 
 						int_near.norm_v - glm::vec3(curRay.direction)),  pMaterial->get_m_shine());
 
-					glm::vec3 Specular =  pMaterial->get_m_ks() * specAmt;
+					glm::vec3 Specular =  pMaterial->get_m_ks() * pf;
 
 
 					//Step 3. calculate attenuation
@@ -138,7 +140,7 @@ glm::vec3 rayTrace(Ray &ray, int maxHit, SceneNode *rootNode, const glm::vec3 & 
 
 					// step 4 update color
 
-					col += light->colour*(Diffuse + Specular)/devider;
+					col += light->colour*(Diffuse + Specular);
 				}
 
 			}
