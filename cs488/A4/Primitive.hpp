@@ -24,8 +24,11 @@ struct intersection{
 
 class Primitive {
 public:
+  bool isPlane = false; // used to disable bounding volume for plane
+
   virtual ~Primitive();
   virtual intersection checkIntersection(const Ray &ray) = 0;
+  
 };
 
 class Sphere : public Primitive {

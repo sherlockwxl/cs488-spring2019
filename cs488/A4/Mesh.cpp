@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <limits>
 #include <glm/ext.hpp>
 
 // #include "cs488-framework/ObjFileDecoder.hpp"
@@ -30,7 +30,6 @@ double checkTriInterctV2(const Ray ray, glm::vec3 P0, glm::vec3 P1, glm::vec3 P2
 	double t = glm::determinant(D3)/glm::determinant(D);
 
 	if((t>0.01) && (beta >= 0) && (gamma >= 0) && (beta + gamma <= 1) ){
-        //cout<<"found"<<t<<endl;
 		return t;
     }
 	else
@@ -57,6 +56,9 @@ Mesh::Mesh( const std::string& fname )
 			m_faces.push_back( Triangle( s1 - 1, s2 - 1, s3 - 1 ) );
 		}
 	}
+
+	boundingSphere = generateBounding();
+
 }
 
 std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
@@ -80,8 +82,18 @@ std::ostream& operator<<(std::ostream& out, const Mesh& mesh)
   return out;
 }
 intersection Mesh::checkIntersection(const Ray & ray){
+	#ifdef RENDER_BOUNDING_VOLUMES
+		if(!isPlane){
+			return boundingSphere->checkIntersection(ray);
+		}
+		
+	#endif
+	
 	intersection int_res = {};
 	int_res.t = -1;
+	if( boundingSphere->checkIntersection(ray).t == -1){
+		return int_res;
+	}
 	for(Triangle tri : m_faces){
 		glm::vec3 P0 = m_vertices.at(tri.v1);
 		glm::vec3 P1 = m_vertices.at(tri.v2);
@@ -94,4 +106,29 @@ intersection Mesh::checkIntersection(const Ray & ray){
 		}
 	}
 	return int_res;
+}
+
+NonhierSphere * Mesh::generateBounding(){
+	float maxX = -1 * std::numeric_limits<float>::infinity();
+	float maxY = -1 * std::numeric_limits<float>::infinity();
+	float maxZ = -1 * std::numeric_limits<float>::infinity();
+
+	float minX = std::numeric_limits<float>::infinity();
+	float minY = std::numeric_limits<float>::infinity();
+	float minZ = std::numeric_limits<float>::infinity();
+
+
+	for(glm::vec3 vertex : m_vertices){
+		maxX = std::max(maxX, vertex.x);
+		maxY = std::max(maxY, vertex.y);
+		maxZ = std::max(maxZ, vertex.z);
+		minX = std::min(minX, vertex.x);
+		minY = std::min(minY, vertex.y);
+		minZ = std::min(minZ, vertex.z);
+	}
+
+	// now we have the dingial
+	glm::vec3 ori = glm::vec3((minX + maxX)/2, (minY + maxY)/2, (minZ + maxZ)/2);
+	double R = glm::length(glm::vec3((- minX + maxX), (- minY + maxY), (- minZ + maxZ))); 
+	return new NonhierSphere(ori, R/2);
 }

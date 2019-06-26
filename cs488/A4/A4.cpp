@@ -70,6 +70,9 @@ intersection getNearestIntersection(SceneNode *&resNode, SceneNode *rootNode, Ra
 				
 
 				intersection temp_int_res;
+				if(geometryNode->m_name == "plane"){
+					geometryNode->m_primitive->isPlane = true;
+				}
 				if(node->trans != glm::mat4()){
 
 					temp_int_res = geometryNode->m_primitive->checkIntersection(transferd_ray);
@@ -259,7 +262,7 @@ void A4_Render(
 
 	int perc = ceil(((double)imageh/10));
 	glm::vec4 eye_v4 = glm::vec4(eye, 1.0f);
-	int supersamplingAmt = 1;
+	int supersamplingAmt = 3;
 
 	for (int y = 0; y < imageh; ++y) {
 		if(y% perc == 0){
