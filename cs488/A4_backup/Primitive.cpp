@@ -1,12 +1,12 @@
 // Spring 2019
 
 #include "Primitive.hpp"
+#include <tuple>
 using namespace std;
 using namespace glm;
 double exp_test_glo_2 = 0.01;
-
-int cubeIndexPair[12][5] = {
-    {0, 1, 2},//bot
+tuple<int, int, int> cubeIndexPair[12] = {
+	{0, 1, 2},//bot
 	{2, 3, 0},
 	{0, 4, 7},//left
     {7, 3, 0},
@@ -18,7 +18,8 @@ int cubeIndexPair[12][5] = {
     {7, 6, 2},
     {4, 7, 6},//top
     {6, 5, 4}
-};
+}; 
+
 
 static const glm::vec3 cube_vertex[8]=
 {
@@ -49,14 +50,14 @@ double checkTriInterct(const Ray ray, glm::vec3 P0, glm::vec3 P1, glm::vec3 P2) 
     D1 = glm::transpose(D1);
     glm::mat3 D2{base1, R, base3};
     D2 = glm::transpose(D2);
-    glm::mat3 D3{base1, base2, R};
+    glm::mat3 D3{base1, base2, R};	
     D3 = glm::transpose(D3);
 	double beta = glm::determinant(D1)/glm::determinant(D);
 	double gamma = glm::determinant(D2)/glm::determinant(D);
 	double t = glm::determinant(D3)/glm::determinant(D);
 
 	if((t>exp_test_glo_2) && (beta >= 0) && (gamma >= 0) && (beta + gamma <= 1) ){
-
+        //cout<<"found"<<t<<endl;
 		return t;
     }
 	else
@@ -98,14 +99,15 @@ intersection Sphere::checkIntersection(const Ray & ray){
     if(!rootsValidation(res, roots)){
         int_res.t = -1;// for no intesection
     }else{
-
+       
         if(std::min(roots[0], roots[1]) < 0){
             int_res.t = (float)std::max(roots[0], roots[1]);
         }else{
             int_res.t =  (float)std::min(roots[0], roots[1]);
         }
         int_res.norm_v = glm::vec3(glm::normalize( glm::vec3(ray.start + float(int_res.t) * (ray.direction)) - centerPos ));
-
+        //int_res.norm_v = glm::vec3(glm::normalize(ray.start + float(int_res.t) * (ray.direction)));
+        //std::cout << " NonhierBox check slove res:  " <<res<< " " << int_res.t << " " << glm::to_string(int_res.norm_v)<<std::endl;
     }
     return int_res;
 
@@ -131,9 +133,9 @@ intersection Cube::checkIntersection(const Ray & ray){
     intersection int_res = {};
     int_res.t = -1;
     for (int i = 0; i < 11; i++){
-        double  temp_res = checkTriInterct(ray, cube_vertex_nonhierBox[cubeIndexPair[i][0]],
-                                        cube_vertex_nonhierBox[cubeIndexPair[i][1]],
-                                        cube_vertex_nonhierBox[cubeIndexPair[i][2]]);
+        double  temp_res = checkTriInterct(ray, cube_vertex_nonhierBox[std::get<0>(cubeIndexPair[i])],
+                                        cube_vertex_nonhierBox[std::get<1>(cubeIndexPair[i])],
+                                        cube_vertex_nonhierBox[std::get<2>(cubeIndexPair[i])]);
         if(temp_res >= exp_test_glo_2 && (int_res.t == -1 || (temp_res < int_res.t ))){
             int_res.t = temp_res;
             switch (i){
@@ -162,7 +164,7 @@ intersection Cube::checkIntersection(const Ray & ray){
                     int_res.norm_v = glm::vec3(0.0f, 1.0f, 0.0f);
                     break;
             }
-        }
+        } 
     }
     return int_res;
 
@@ -183,13 +185,15 @@ intersection NonhierSphere::checkIntersection(const Ray & ray){
     if(!rootsValidation(res, roots)){
         int_res.t = -1;// for no intesection
     }else{
-
+       
         if(std::min(roots[0], roots[1]) < 0){
             int_res.t = (float)std::max(roots[0], roots[1]);
         }else{
             int_res.t =  (float)std::min(roots[0], roots[1]);
         }
         int_res.norm_v = glm::vec3(glm::normalize( glm::vec3(ray.start + float(int_res.t) * (ray.direction)) - centerPos ));
+        //int_res.norm_v = glm::vec3(glm::normalize(ray.start + float(int_res.t) * (ray.direction)));
+        //std::cout << " NonhierBox check slove res:  " <<res<< " " << int_res.t << " " << glm::to_string(int_res.norm_v)<<std::endl;
     }
     return int_res;
 
@@ -216,9 +220,9 @@ intersection NonhierBox::checkIntersection(const Ray & ray){
     intersection int_res = {};
     int_res.t = -1;
     for (int i = 0; i < 11; i++){
-        double  temp_res = checkTriInterct(ray, cube_vertex_nonhierBox[cubeIndexPair[i][0]],
-                                        cube_vertex_nonhierBox[cubeIndexPair[i][1]],
-                                        cube_vertex_nonhierBox[cubeIndexPair[i][2]]);
+        double  temp_res = checkTriInterct(ray, cube_vertex_nonhierBox[std::get<0>(cubeIndexPair[i])],
+                                        cube_vertex_nonhierBox[std::get<1>(cubeIndexPair[i])],
+                                        cube_vertex_nonhierBox[std::get<2>(cubeIndexPair[i])]);
         if(temp_res >= exp_test_glo_2 && (int_res.t == -1 || (temp_res < int_res.t ))){
             int_res.t = temp_res;
             switch (i){
@@ -247,7 +251,7 @@ intersection NonhierBox::checkIntersection(const Ray & ray){
                     int_res.norm_v = glm::vec3(0.0f, 1.0f, 0.0f);
                     break;
             }
-        }
+        } 
     }
     return int_res;
 

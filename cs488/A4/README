@@ -1,0 +1,43 @@
+===============================================================================
+Compilation: (base directory: A3)
+Steps:
+    1. $ premake4 gmake
+    2. $ make
+    3. $ ./A4 Assets/sample.lua (1000 * 1000 image may take longer to render)
+
+Machine: gl30
+===============================================================================
+Manual:
+
+All required features implemented. All required images including nonhier-bb and macho-cows-bb
+are also submitted.
+Please Note, super sampling is enabled by default and set to 3, so longer than usual render time
+should be normal.
+bounding volume code is disabled by defualt.
+
+
+Background:
+From top to bot, dark blue to black.
+
+Extra Feature:
+super sampling.
+In the A4.cpp file, there is a variable named supersamplingAmt. It control the 
+size of sample grid. Eg: if the variable is set to 3, color will be sampled on a 
+3 * 3 grid averge on the nine color values returned.
+
+Bounding Volume Code:
+implemented in mesh.cpp. I use a sphere for bounding volume.
+Uncomment the option in mesh.hpp will use the bounding volume for image render
+PLease note I disabled the bounding volume on plane object for easy and clear output.
+
+Novel Scene:(sample.lua under A4 folder)
+Thousands of years from now, the group of cows are the only species survived from the nuclear war. 
+And they have developed the spaceship and looking forward to moving to another planet with no war 
+and more grass.  The day they finally find the liveable planet, a floating Mickey shows up and 
+deployed many red fences and try to stop them from boarding the spaceship.  
+Another war is on the horizon and let's see who gonna win the battle.
+
+Please Note, the novel scene is set to be 1000*1000 and it take longer to render comparing with 
+simple lua file.
+The sample.png was rendered with super sampling set as 5 so it seems very smooth, but may be less sharp.
+
