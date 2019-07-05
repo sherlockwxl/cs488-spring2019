@@ -9,6 +9,7 @@
 
 #include "SceneNode.hpp"
 #include "GeometryNode.hpp"
+#include "AnimationModel.hpp"
 
 
 #include <glm/glm.hpp>
@@ -161,5 +162,12 @@ protected:
 	// helper function for undo and redo
 	void undo();
 	void redo();
+
+
+	// change for project
+
+	AnimationModel animationModel;
+	void initAnimationModel();
+	void AddKeyFrame(int type);
 };
 

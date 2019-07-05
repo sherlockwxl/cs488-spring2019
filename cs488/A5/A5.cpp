@@ -34,14 +34,13 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vao_arcCircle(0),
 	  m_vbo_arcCircle(0)
 {
-
+	animationModel = AnimationModel();
 }
 
 //----------------------------------------------------------------------------------------
 // Destructor
 A5::~A5()
 {
-
 }
 
 //----------------------------------------------------------------------------------------
@@ -86,6 +85,7 @@ void A5::init()
 
 	initLightSources();
 
+
 	// Exiting the current scope calls delete automatically on meshConsolidator freeing
 	// all vertex data resources.  This is fine since we already copied this data to
 	// VBOs on the GPU.  We have no use for storing vertex data on the CPU side beyond
@@ -96,6 +96,9 @@ void A5::init()
 
 	// reset all variables abd mouse location
 	resetAll();
+
+	// Extra ini for A5
+	initAnimationModel();
 
 }
 
@@ -343,6 +346,9 @@ void A5::uploadCommonSceneUniforms() {
 void A5::appLogic()
 {
 	// Place per frame, application logic here ...
+
+	// update call animation
+	animationModel.update();
 
 	uploadCommonSceneUniforms();
 }
@@ -953,6 +959,9 @@ bool A5::keyInputEvent (
 			show_gui = !show_gui;
 		}
 
+		if(key == GLFW_KEY_RIGHT){
+			AddKeyFrame(0);
+		}
 		
 		
 	}
@@ -1061,7 +1070,7 @@ void A5::rotateJointHandler(double offsetX, double offsetY, int type){
 }
 
 void A5::rotateJointHelper(GLfloat angle, SceneNode & root, int type){
-	
+	//cout<<"will ortate " << root.m_name << " for : "<<angle<<endl;
 	for (SceneNode * node : root.children) {
 		if(node->isSelected && node->m_name == "head" && type == 2){
 			GLfloat newAngle = head_rotation + angle;
@@ -1148,6 +1157,7 @@ void A5::undo(){
 	
 	if(joint_rotation_undo.size() > 1){
 		joint_rotation_undo.pop();
+
 		while(lastAngleVector == joint_rotation_undo.top() && joint_rotation_undo.size() > 1){
 			joint_rotation_undo.pop();
 		}
@@ -1156,11 +1166,15 @@ void A5::undo(){
 		undo_succeed = false;
 		return;
 	}
+	for(auto const& angle: joint_rotation_undo.top()){
+			cout<<angle<<endl;
+	}
 
 	for(int i = 0; i < jointIndexVector.size(); i++) {
 		SceneNode * node = findNodeById(*m_rootNode, jointIndexVector[i]);
 		JointNode * jointNode = static_cast<JointNode*>(node);
 		std::vector<GLfloat> targetAngleVector = joint_rotation_undo.top();
+
 		GLfloat reverseAngle = -(jointNode->m_joint_x.init - targetAngleVector[i]);
 
 		//reverse
@@ -1192,7 +1206,9 @@ void A5::redo(){
 		joint_rotation_redo.pop();
 		joint_rotation_undo.push(lastAngleVector);
 	}
-
+	for(auto const& angle: lastAngleVector){
+			cout<<angle<<endl;
+	}
 	for(int i = 0; i < jointIndexVector.size(); i++) {
 		SceneNode * node = findNodeById(*m_rootNode, jointIndexVector[i]);
 		JointNode * jointNode = static_cast<JointNode*>(node);
@@ -1288,5 +1304,68 @@ void A5::unselectJoints(){
 			jointNode->isSelected = !jointNode->isSelected;
 			jointNode->children.front()->isSelected = !jointNode->children.front()->isSelected;
 		}
+	}
+}
+
+
+
+// functions for A5
+void A5::initAnimationModel(){
+	// first load all joint node pointer into animation model
+	for(auto const& id: jointIndexVector) {
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		animationModel.JointPointers_v.push_back(node);
+		animationModel.durationCont_v.push_back(0);
+		string s = "dummy";
+		glm::vec2 rotation = glm::vec2(0.0f, 0.0f);
+		KeyFrame kf = KeyFrame(s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
+		vector<KeyFrame> temp;
+		temp.push_back(kf);
+		animationModel.keyFrame_v.push_back(temp);
+	}
+
+}
+
+
+// 0 for left arm attack
+void A5::AddKeyFrame(int type){
+	switch(type){
+		case 0: // left arm attack
+			string s1 = "leftShoulderJoint";
+			string s2 = "leftElbow";
+			glm::vec2 s1_rotation1 = glm::vec2(1.0f, 0.0f);
+			glm::vec2 s1_rotation2 = glm::vec2(0.0f, 0.0f);
+			glm::vec2 s1_rotation3 = glm::vec2(-1.4f, 0.0f);
+			glm::vec2 s1_rotation4 = glm::vec2(0.0f, 0.0f);
+			KeyFrame s1_kf1 = KeyFrame(s1, 10, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s1_kf2 = KeyFrame(s1, 10, 1, -1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s1_kf3 = KeyFrame(s1, 10, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s1_kf4 = KeyFrame(s1, 10, 1, -1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+
+			glm::vec2 s2_rotation1 = glm::vec2(-1.6f, 0.0f);
+			glm::vec2 s2_rotation2 = glm::vec2(-1.6f, 0.0f);
+			glm::vec2 s2_rotation3 = glm::vec2(-0.2f, 0.0f);
+			glm::vec2 s2_rotation4 = glm::vec2(0.0f, 0.0f);
+
+
+			KeyFrame s2_kf1 = KeyFrame(s2, 10, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s2_kf2 = KeyFrame(s2, 10, 1, -1, s2_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s2_kf3 = KeyFrame(s2, 10, 1, 1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+			KeyFrame s2_kf4 = KeyFrame(s2, 10, 1, -1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+			for(int i = 0 ; i < animationModel.JointPointers_v.size(); i ++){
+				SceneNode * node = animationModel.JointPointers_v.at(i);
+				if(node->m_name == s1){
+					animationModel.keyFrame_v.at(i).push_back(s1_kf1);
+					animationModel.keyFrame_v.at(i).push_back(s1_kf2);
+					animationModel.keyFrame_v.at(i).push_back(s1_kf3);
+					animationModel.keyFrame_v.at(i).push_back(s1_kf4);
+				}
+				if(node->m_name == s2){ // push for leftElbow
+					animationModel.keyFrame_v.at(i).push_back(s2_kf1);
+					animationModel.keyFrame_v.at(i).push_back(s2_kf2);
+					animationModel.keyFrame_v.at(i).push_back(s2_kf3);
+					animationModel.keyFrame_v.at(i).push_back(s2_kf4);
+				}
+			}
 	}
 }

@@ -148,7 +148,7 @@ leftShoulder:scale(0.1, 0.1, 0.1)
 leftShoulder:translate(-0.6, 0.8, 0.3)
 leftShoulder:set_material(white)
 
-leftShoulderJoint = gr.joint('leftShoulderJoint', {-3.14, 0, 3.14/2}, {-3.14/2, 0, 3.14/2})
+leftShoulderJoint = gr.joint('leftShoulderJoint', {-3.14, 0, 3.14}, {-3.14, 0, 3.14})
 leftShoulder:add_child(leftShoulderJoint)
 leftShoulderJoint:translate(-0.6, 0.8, 0.3)
 
@@ -162,7 +162,7 @@ leftUpArm:translate(-1.0, 0.3, 0.3)
 leftUpArm:set_material(white)
 
 -- add a cute hand
-leftArmJoint = gr.joint('leftArmJoint', {-3.14/(1.2), 0, 3.14/2}, {0 , 0, 0})
+leftArmJoint = gr.joint('leftArmJoint', {-3.14/(1.2), 0, 3.14/2}, {-3.14/(1.2) , 0, 3.14/2})
 leftUpArm:add_child(leftArmJoint)
 leftArmJoint:translate(-1.4, -0.3, 0.4)
 

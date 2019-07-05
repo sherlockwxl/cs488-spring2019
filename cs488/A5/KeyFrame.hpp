@@ -12,19 +12,22 @@ class KeyFrame{
 
 public:
     string KetFrameName;
-    float lasttime;
+    int totalTime;
     int type; // 0 for translation; 1 for rotation
-    glm::vec3 rotationTarget;
+    glm::vec2 rotationTarget;
     glm::vec3 translationTarget;
+    int order; // 1 for x first, -1 for y first
 
     KeyFrame(string name, 
-    float lasttime,
+    int totalTime,
     int type, // 0 for translation; 1 for rotation
-    glm::vec3 rotationTarget,
+    int order,
+    glm::vec2 rotationTarget,
     glm::vec3 translationTarget)
     : KetFrameName(name),
-	  lasttime(lasttime),
+	  totalTime(totalTime),
       type(type),
+      order(order),
       rotationTarget(rotationTarget),
       translationTarget(translationTarget){
 
