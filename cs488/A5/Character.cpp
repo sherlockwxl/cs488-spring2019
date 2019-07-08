@@ -1,4 +1,5 @@
 #include "Character.hpp"
+#include "GeometryNode.hpp"
 #include <glm/gtx/io.hpp>
 Character::Character(){
     moveLeftOrRight = 0;
@@ -107,4 +108,31 @@ void Character::update(){
     if(moveLeftFrameCounter == 0){
         moveLeftOrRight = 0;
     }
+}
+
+// check if two geometry node has collision
+// meshid 0 cube; meshid 1 sephere
+void Character::isCollision(SceneNode LeftNode, SceneNode RightNode){
+    GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
+    GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
+    //build box for each node
+    glm::vec3 left_trans = glm::vec3(LeftNode.trans[0][3], LeftNode.trans[1][3], LeftNode.trans[2][3]);
+    glm::vec3 right_trans = glm::vec3(RightNode.trans[0][3], RightNode.trans[1][3], RightNode.trans[2][3]);
+    box leftBox = { left_trans.x - LeftNode.trans[0][0],
+                    left_trans.x + LeftNode.trans[0][0],
+                    left_trans.y - LeftNode.trans[1][1],
+                    left_trans.y + LeftNode.trans[1][1],
+                    left_trans.z - LeftNode.trans[2][2],
+                    left_trans.z + LeftNode.trans[2][2]};
+    box rightBox = { right_trans.x - RightNode.trans[0][0],
+                    right_trans.x + RightNode.trans[0][0],
+                    right_trans.y - RightNode.trans[1][1],
+                    right_trans.y + RightNode.trans[1][1],
+                    right_trans.z - RightNode.trans[2][2],
+                    right_trans.z + RightNode.trans[2][2]};
+
+
+    return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
 }
