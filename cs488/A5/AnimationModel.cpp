@@ -1,5 +1,5 @@
 #include "AnimationModel.hpp"
-
+#include "KeyFrame.hpp"
 AnimationModel::AnimationModel(){
     
 }

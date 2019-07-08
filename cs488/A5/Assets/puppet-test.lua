@@ -192,6 +192,287 @@ rightFoot:scale(0.3, 0.2, 0.5)
 rightFoot:translate(0.3, -2.4, 0.2)
 rightFoot:set_material(red)
 
-rootnode:translate(0.0, 0.0, -5.0)
+-- add second puppet
 
+
+
+
+
+brown = gr.material({0.36, 0.27, 0.06}, {0.1, 0.1, 0.1}, 10)
+white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
+lightBlue = gr.material({0.43, 0.78, 0.86}, {0.1, 0.1, 0.1}, 10)
+gray = gr.material({0.41, 0.41, 0.41}, {0.1, 0.1, 0.1}, 10)
+darkgray = gr.material({0.25, 0.29, 0.30}, {0.1, 0.1, 0.1}, 10)
+lightgray = gr.material({0.64, 0.68, 0.68}, {0.1, 0.1, 0.1}, 10)
+
+
+
+torso_baymax = gr.mesh('sphere', 'torso_baymax')
+rootnode:add_child(torso_baymax)
+torso_baymax:scale(0.9, 1.1, 0.9);
+torso_baymax:translate(0.0, 0.0, 0.0)
+torso_baymax:set_material(white)
+
+--neck_baymax and head_baymax
+neck_baymaxJoint_baymax = gr.joint('neck_baymaxJoint_baymax', {0, 0, 3.14/8}, {0, 0, 3.14/8})
+torso_baymax:add_child(neck_baymaxJoint_baymax)
+neck_baymaxJoint_baymax:translate(0.0, 0.8, 0.0)
+
+neck_baymax = gr.mesh('sphere', 'neck_baymax')
+neck_baymaxJoint_baymax:add_child(neck_baymax)
+neck_baymax:scale(0.25, 0.12, 0.25)
+neck_baymax:translate(0.0, 1.0, 0.2)
+neck_baymax:set_material(gray)
+
+head_baymaxJoint_baymax = gr.joint('head_baymaxJoint_baymax', {-3.14/8, 0, 3.14/8}, {-3.14/4, 0, 3.14/4})
+neck_baymax:add_child(head_baymaxJoint_baymax)
+head_baymaxJoint_baymax:translate(0.0, 1.0, 0.2)
+
+head_baymax = gr.mesh('sphere', 'head_baymax')
+head_baymaxJoint_baymax:add_child(head_baymax)
+head_baymax:scale(0.4, 0.32, 0.4);
+head_baymax:translate(0.0, 1.35, 0.25)
+head_baymax:set_material(white)
+
+-- add eyes
+
+leftEye_baymax = gr.mesh('sphere', 'leftEye_baymax')
+head_baymax:add_child(leftEye_baymax)
+leftEye_baymax:scale(0.09, 0.09, 0.1)
+leftEye_baymax:translate(-0.178, 1.38, 0.52)
+leftEye_baymax:set_material(black)
+
+rightEye_baymax = gr.mesh('sphere', 'rightEye_baymax_baymax')
+head_baymax:add_child(rightEye_baymax)
+rightEye_baymax:scale(0.09, 0.09, 0.1)
+rightEye_baymax:translate(0.178, 1.38, 0.52)
+rightEye_baymax:set_material(black)
+
+
+-- add eyes one
+
+-- add the black line_baymax
+line_baymax = gr.mesh('sphere', 'line_baymax')
+head_baymax:add_child(line_baymax)
+line_baymax:scale(0.34, 0.03, 0.401)
+line_baymax:translate(0.0, 1.38, 0.28)
+line_baymax:set_material(black)
+
+-- add black line_baymax done
+
+--neck_baymax and head_baymax done
+
+--abs_baymax
+abs_baymaxJoint_baymax = gr.joint('abs_baymaxJoint_baymax', {-3.14/8, 0, 3.14/8}, {0, 0, 0})
+torso_baymax:add_child(abs_baymaxJoint_baymax)
+abs_baymaxJoint_baymax:translate(0.0, -0.5, 0.0)
+
+abs_baymax = gr.mesh('sphere', 'abs_baymax')
+abs_baymaxJoint_baymax:add_child(abs_baymax)
+abs_baymax:rotate("x",30)
+abs_baymax:scale(1.1, 1.3, 1.1)
+abs_baymax:translate(0.0, -0.6, -0.1)
+abs_baymax:set_material(white)
+
+-- finally add tail_baymax
+tail_baymaxJoint_baymax = gr.joint('tail_baymaxJoint_baymax', {-3.14/5, 0, 3.14/5}, {0, 0, 0})
+abs_baymax:add_child(tail_baymaxJoint_baymax)
+tail_baymaxJoint_baymax:translate(0.0, -0.9, -1.2)
+
+tail_baymax = gr.mesh('sphere', 'tail_baymax')
+tail_baymaxJoint_baymax:add_child(tail_baymax)
+tail_baymax:scale(0.2, 0.2, 0.2)
+tail_baymax:translate(0.0, -0.9, -1.3)
+tail_baymax:set_material(white)
+
+--abs_baymax done
+
+-- left hip
+
+leftHipJoint_baymax = gr.joint('leftHipJoint_baymax', {-3.14/8, 0, 3.14/8}, {0 , 0, 0})
+abs_baymax:add_child(leftHipJoint_baymax)
+leftHipJoint_baymax:translate(-0.6, -1.3, 0.0)
+
+leftThigh_baymax = gr.mesh('sphere', 'leftThigh_baymax')
+leftHipJoint_baymax:add_child(leftThigh_baymax)
+leftThigh_baymax:scale(0.4, 1.0, 0.4)
+leftThigh_baymax:translate(-0.6, -1.5, 0.0)
+leftThigh_baymax:set_material(gray)
+
+leftThigh_baymaxJoint = gr.joint('leftThigh_baymaxJoint', {-3.14/8, 0, 3.14/8}, {0 , 0, 0})
+leftThigh_baymax:add_child(leftThigh_baymaxJoint)
+leftThigh_baymaxJoint:translate(-0.6, -2.2, 0.0)
+
+leftFoot_baymax = gr.mesh('sphere', 'leftFoot_baymax')
+leftThigh_baymaxJoint:add_child(leftFoot_baymax)
+leftFoot_baymax:scale(0.2, 0.15, 0.2)
+leftFoot_baymax:translate(-0.6, -2.5, 0.0)
+leftFoot_baymax:set_material(white)
+
+
+-- left hip done 
+
+-- right hip
+
+rightHipJoint_baymax = gr.joint('rightHipJoint_baymax', {-3.14/8, 0, 3.14/8}, {0 , 0, 0})
+abs_baymax:add_child(rightHipJoint_baymax)
+rightHipJoint_baymax:translate(0.6, -1.3, 0.0)
+
+rightThigh_baymax = gr.mesh('sphere', 'leftThigh_baymax')
+rightHipJoint_baymax:add_child(rightThigh_baymax)
+rightThigh_baymax:scale(0.35, 1.0, 0.35)
+rightThigh_baymax:translate(0.6, -1.5, 0.0)
+rightThigh_baymax:set_material(gray)
+
+rightThigh_baymaxJoint = gr.joint('rightThigh_baymaxJoint', {-3.14/8, 0, 3.14/8}, {0 , 0, 0})
+rightThigh_baymax:add_child(rightThigh_baymaxJoint)
+rightThigh_baymaxJoint:translate(0.6, -2.2, 0.0)
+
+rightFoot_baymax = gr.mesh('sphere', 'rightFoot_baymax')
+rightThigh_baymaxJoint:add_child(rightFoot_baymax)
+rightFoot_baymax:scale(0.2, 0.15, 0.2)
+rightFoot_baymax:translate(0.6, -2.5, 0.0)
+rightFoot_baymax:set_material(white)
+
+-- right hip done
+
+-- left shoulder and arm
+
+leftShoulder_baymax = gr.mesh('sphere', 'leftShoulder_baymax')
+torso_baymax:add_child(leftShoulder_baymax)
+leftShoulder_baymax:scale(0.1, 0.1, 0.1)
+leftShoulder_baymax:translate(-0.6, 0.8, 0.3)
+leftShoulder_baymax:set_material(white)
+
+leftShoulder_baymaxJoint = gr.joint('leftShoulder_baymaxJoint', {-3.14, 0, 3.14}, {-3.14, 0, 3.14})
+leftShoulder_baymax:add_child(leftShoulder_baymaxJoint)
+leftShoulder_baymaxJoint:translate(-0.6, 0.8, 0.3)
+
+
+leftUpArm_baymax = gr.mesh('sphere', 'leftUpArm_baymax')
+leftShoulder_baymaxJoint:add_child(leftUpArm_baymax)
+
+leftUpArm_baymax:scale(0.3, 0.8, 0.3)
+leftUpArm_baymax:rotate('z',-40.0)
+leftUpArm_baymax:translate(-1.0, 0.3, 0.3)
+leftUpArm_baymax:set_material(white)
+
+-- add a cute hand
+leftArmJoint_baymax = gr.joint('leftArmJoint_baymax', {-3.14/(1.2), 0, 3.14/2}, {-3.14/(1.2) , 0, 3.14/2})
+leftUpArm_baymax:add_child(leftArmJoint_baymax)
+leftArmJoint_baymax:translate(-1.4, -0.3, 0.4)
+
+leftHand_baymax = gr.mesh('sphere', 'leftHand_baymax')
+leftArmJoint_baymax:add_child(leftHand_baymax)
+leftHand_baymax:scale(0.2, 0.2, 0.2)
+leftHand_baymax:translate(-1.5, -0.4, 0.4)
+leftHand_baymax:set_material(white)
+
+-- left shoulder and arm done
+
+
+-- right shoulder and arm
+
+rightShoulder_baymax = gr.mesh('sphere', 'rightShoulder_baymax')
+torso_baymax:add_child(rightShoulder_baymax)
+rightShoulder_baymax:scale(0.1, 0.1, 0.1)
+rightShoulder_baymax:translate(0.6, 0.8, 0.3)
+rightShoulder_baymax:set_material(white)
+
+rightShoulder_baymaxJoint = gr.joint('rightShoulder_baymaxJoint', {-3.14, 0, 3.14/2}, {-3.14/2, 0, 3.14/2})
+rightShoulder_baymax:add_child(rightShoulder_baymaxJoint)
+rightShoulder_baymaxJoint:translate(0.6, 0.8, 0.3)
+
+
+rightUpArm_baymax = gr.mesh('sphere', 'rightUpArm_baymax')
+rightShoulder_baymaxJoint:add_child(rightUpArm_baymax)
+
+rightUpArm_baymax:scale(0.3, 0.8, 0.3)
+rightUpArm_baymax:rotate('z',40.0)
+rightUpArm_baymax:translate(1.0, 0.3, 0.3)
+rightUpArm_baymax:set_material(white)
+
+
+-- add a cute hand
+rightArmJoint_baymax = gr.joint('rightArmJoint_baymax', {-3.14/(1.2), 0, 3.14/2}, {0 , 0, 0})
+rightUpArm_baymax:add_child(rightArmJoint_baymax)
+rightArmJoint_baymax:translate(1.4, -0.3, 0.4)
+
+rightHand_baymax = gr.mesh('sphere', 'rightHand_baymax')
+rightArmJoint_baymax:add_child(rightHand_baymax)
+rightHand_baymax:scale(0.2, 0.2, 0.2)
+rightHand_baymax:translate(1.5, -0.4, 0.4)
+rightHand_baymax:set_material(white)
+-- right shoulder and arm done
+
+
+-- left wing base and wing
+leftWing_baymaxBase_baymaxJoint_baymax = gr.joint('leftWing_baymaxBase_baymaxJoint_baymax', {-3.14/8, 0, 3.14/8}, {0, 0, 0})
+torso_baymax:add_child(leftWing_baymaxBase_baymaxJoint_baymax)
+leftWing_baymaxBase_baymaxJoint_baymax:translate(-0.5, 0.8, -0.4)
+
+
+leftWing_baymaxBase_baymax = gr.mesh('sphere', 'leftWing_baymaxBase_baymax')
+leftWing_baymaxBase_baymaxJoint_baymax:add_child(leftWing_baymaxBase_baymax)
+leftWing_baymaxBase_baymax:scale(0.6, 0.3, 0.05)
+leftWing_baymaxBase_baymax:rotate('z',-40.0)
+leftWing_baymaxBase_baymax:translate(-0.6, 1.0, -0.6)
+leftWing_baymaxBase_baymax:set_material(black)
+
+leftWing_baymaxJoint_baymax = gr.joint('leftWing_baymaxJoint_baymax', {-3.14/4, 0, 3.14/4}, {-3.14/2, 0, 3.14/2})
+leftWing_baymaxBase_baymax:add_child(leftWing_baymaxJoint_baymax)
+leftWing_baymaxJoint_baymax:rotate('x',80.0)
+leftWing_baymaxJoint_baymax:rotate('y',80.0)
+leftWing_baymaxJoint_baymax:rotate('z',20.0)
+leftWing_baymaxJoint_baymax:translate(-1.0, 1.4, -0.6)
+
+
+leftWing_baymax = gr.mesh('sphere', 'leftWing_baymax')
+leftWing_baymaxJoint_baymax:add_child(leftWing_baymax)
+leftWing_baymax:scale(1.2, 0.3, 0.1)
+leftWing_baymax:rotate('z',20.0)
+leftWing_baymax:translate(-1.8, 1.1, -0.6)
+leftWing_baymax:set_material(red)
+
+-- left wing base and wing done
+
+-- right wing base and wing
+rightWing_baymaxBase_baymaxJoint_baymax = gr.joint('rightWing_baymaxBase_baymaxJoint_baymax', {-3.14/8, 0, 3.14/8}, {0, 0, 0})
+torso_baymax:add_child(rightWing_baymaxBase_baymaxJoint_baymax)
+rightWing_baymaxBase_baymaxJoint_baymax:translate(0.5, 0.8, -0.4)
+
+
+rightWing_baymaxBase_baymax = gr.mesh('sphere', 'rightWing_baymaxBase_baymax')
+rightWing_baymaxBase_baymaxJoint_baymax:add_child(rightWing_baymaxBase_baymax)
+rightWing_baymaxBase_baymax:scale(0.6, 0.3, 0.05)
+rightWing_baymaxBase_baymax:rotate('z',40.0)
+rightWing_baymaxBase_baymax:translate(0.6, 1.0, -0.6)
+rightWing_baymaxBase_baymax:set_material(black)
+
+rightWing_baymaxJoint_baymax = gr.joint('rightWing_baymaxJoint_baymax', {-3.14/4, 0, 3.14/4}, {-3.14/2, 0, 3.14/2})
+rightWing_baymaxBase_baymax:add_child(rightWing_baymaxJoint_baymax)
+rightWing_baymaxJoint_baymax:rotate('x',-80.0)
+rightWing_baymaxJoint_baymax:rotate('y',-80.0)
+rightWing_baymaxJoint_baymax:rotate('z',-20.0)
+rightWing_baymaxJoint_baymax:translate(1.0, 1.4, -0.6)
+
+
+rightWing_baymax = gr.mesh('sphere', 'rightWing_baymax')
+rightWing_baymaxJoint_baymax:add_child(rightWing_baymax)
+rightWing_baymax:scale(1.2, 0.3, 0.1)
+rightWing_baymax:rotate('z',-20.0)
+rightWing_baymax:translate(1.8, 1.1, -0.6)
+rightWing_baymax:set_material(red)
+
+-- right wing base and wing done
+
+
+
+
+
+
+
+rootnode:translate(0.0, 0.0, -10.0)
+torso:translate(-5.0,0.0,0.0)
+torso_baymax:translate(5.0,0.0,0.0)
 return rootnode

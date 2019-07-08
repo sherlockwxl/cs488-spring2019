@@ -1,4 +1,7 @@
 
+#ifndef ANIMATION_MODEL
+#define ANIMATION_MODEL
+
 #include "KeyFrame.hpp"
 #include "SceneNode.hpp"
 #include "JointNode.hpp"
@@ -14,6 +17,7 @@
 
 using namespace std;
 using namespace glm;
+
 class AnimationModel{
 public:
     vector<SceneNode *> JointPointers_v;
@@ -27,3 +31,5 @@ public:
     void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix); 
     void update();
 };
+
+#endif

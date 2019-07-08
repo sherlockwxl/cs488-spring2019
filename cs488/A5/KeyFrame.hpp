@@ -1,4 +1,5 @@
-
+#ifndef KEYFRAME
+#define KEYFRAME
 
 
 #include <glm/glm.hpp>
@@ -18,9 +19,7 @@ public:
     glm::vec3 translationTarget;
     int order; // 1 for x first, -1 for y first
 
-    KeyFrame(string name, 
-    int totalTime,
-    int type, // 0 for translation; 1 for rotation
+    KeyFrame(string name, int totalTime, int type, // 0 for translation; 1 for rotation
     int order,
     glm::vec2 rotationTarget,
     glm::vec3 translationTarget)
@@ -31,6 +30,9 @@ public:
       rotationTarget(rotationTarget),
       translationTarget(translationTarget){
 
-    }
+    };
+
 
 };
+
+#endif

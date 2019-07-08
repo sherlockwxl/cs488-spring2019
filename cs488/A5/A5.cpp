@@ -35,6 +35,7 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vbo_arcCircle(0)
 {
 	animationModel = AnimationModel();
+	keyFrameHandler = KeyFrameHandler();
 }
 
 //----------------------------------------------------------------------------------------
@@ -123,6 +124,12 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		SceneNode * node = findNodeById(*m_rootNode, id);
 		if(node->m_name == "head"){
 			head_id = id;
+		}
+		if(node->m_name == "torso"){
+			Left_rootNode = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == " torso_baymax"){
+			Right_rootNode = std::shared_ptr<SceneNode>(node);
 		}
 		if(node->m_nodeType == NodeType::JointNode){
 			jointIndex.push(id);
@@ -959,8 +966,24 @@ bool A5::keyInputEvent (
 			show_gui = !show_gui;
 		}
 
-		if(key == GLFW_KEY_RIGHT){
+		if(key == GLFW_KEY_1){
 			AddKeyFrame(0);
+		}
+
+		if(key == GLFW_KEY_RIGHT){
+			moveHandler(0, 1);
+		}
+
+		if(key == GLFW_KEY_LEFT){
+			moveHandler(0, 0);
+		}
+
+		if(key == GLFW_KEY_UP){
+			moveHandler(0, 2);
+		}
+
+		if(key == GLFW_KEY_DOWN){
+			moveHandler(0, 3);
 		}
 		
 		
@@ -1251,6 +1274,8 @@ void A5::trackballHandler(double xPos, double yPos){
 	
 	glm::mat4 rotationMatrix = vAxisRotMatrix(fRotVecX, -fRotVecY, fRotVecZ, rotationMatrix);
 	rotationMatrix = glm::scale(glm::transpose(rotationMatrix),glm::vec3(1.0f,1.0f,1.0f));
+	//cout<<"rotation is "<<rotationMatrix<<endl;
+	trackBallRotationMatrix = m_rootNode->trans;
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
 }
 
@@ -1331,41 +1356,66 @@ void A5::initAnimationModel(){
 void A5::AddKeyFrame(int type){
 	switch(type){
 		case 0: // left arm attack
-			string s1 = "leftShoulderJoint";
-			string s2 = "leftElbow";
-			glm::vec2 s1_rotation1 = glm::vec2(1.0f, 0.0f);
-			glm::vec2 s1_rotation2 = glm::vec2(0.0f, 0.0f);
-			glm::vec2 s1_rotation3 = glm::vec2(-1.4f, 0.0f);
-			glm::vec2 s1_rotation4 = glm::vec2(0.0f, 0.0f);
-			KeyFrame s1_kf1 = KeyFrame(s1, 10, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s1_kf2 = KeyFrame(s1, 10, 1, -1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s1_kf3 = KeyFrame(s1, 10, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s1_kf4 = KeyFrame(s1, 10, 1, -1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+			keyFrameHandler.addKeyFrameforLeftHit(animationModel);
+	}
+}
 
-			glm::vec2 s2_rotation1 = glm::vec2(-1.6f, 0.0f);
-			glm::vec2 s2_rotation2 = glm::vec2(-1.6f, 0.0f);
-			glm::vec2 s2_rotation3 = glm::vec2(-0.2f, 0.0f);
-			glm::vec2 s2_rotation4 = glm::vec2(0.0f, 0.0f);
+void A5::moveHandler(int target, int type){// target 0 for left 1 for right
+	switch(type){
+		case 0: // move left 
+			moveLeft(target);
+		break;
+		case 1: // move right 
+			moveRight(target);
+		break;
+		case 2: // move up 
+			moveForward(target);
+		break;
+		case 3: // move down 
+			moveBack(target);
+		break;
+			
+	}
+}
 
-
-			KeyFrame s2_kf1 = KeyFrame(s2, 10, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s2_kf2 = KeyFrame(s2, 10, 1, -1, s2_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s2_kf3 = KeyFrame(s2, 10, 1, 1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
-			KeyFrame s2_kf4 = KeyFrame(s2, 10, 1, -1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
-			for(int i = 0 ; i < animationModel.JointPointers_v.size(); i ++){
-				SceneNode * node = animationModel.JointPointers_v.at(i);
-				if(node->m_name == s1){
-					animationModel.keyFrame_v.at(i).push_back(s1_kf1);
-					animationModel.keyFrame_v.at(i).push_back(s1_kf2);
-					animationModel.keyFrame_v.at(i).push_back(s1_kf3);
-					animationModel.keyFrame_v.at(i).push_back(s1_kf4);
-				}
-				if(node->m_name == s2){ // push for leftElbow
-					animationModel.keyFrame_v.at(i).push_back(s2_kf1);
-					animationModel.keyFrame_v.at(i).push_back(s2_kf2);
-					animationModel.keyFrame_v.at(i).push_back(s2_kf3);
-					animationModel.keyFrame_v.at(i).push_back(s2_kf4);
-				}
-			}
+void A5::moveLeft(int target){
+	// need to check collision
+	if(target == 0){
+		glm::vec4 temp = glm::vec4(-1.0f, 0.0f, 0.0f,0.0f);
+		temp = trackBallRotationMatrix * temp;
+		//cout<<"move left"<<temp<<endl;
+		Left_rootNode->translate(vec3(temp));
+	}else{
+		Right_rootNode->translate(vec3(-1.0f, 0.0f, 0.0f));
+	}
+}
+void A5::moveRight(int target){
+	if(target == 0){
+		glm::vec4 temp = glm::vec4(1.0f, 0.0f, 0.0f,0.0f);
+		temp = trackBallRotationMatrix * temp;
+		//cout<<"move right"<<temp<<endl;
+		Left_rootNode->translate(vec3(temp));
+	}else{
+		Right_rootNode->translate(vec3(1.0f, 0.0f, 0.0f));
+	}
+}
+void A5::moveForward(int target){
+	if(target == 0){
+		glm::vec4 temp = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+		temp = trackBallRotationMatrix * temp;
+		//cout<<"move forward"<<temp<<endl;
+		Left_rootNode->translate(vec3(temp));
+	}else{
+		Right_rootNode->translate(vec3(0.0f, 0.0f, 1.0f));
+	}
+}
+void A5::moveBack(int target){
+	if(target == 0){
+		glm::vec4 temp = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+		temp = trackBallRotationMatrix * temp;
+		//cout<<"move back"<<temp<<endl;
+		Left_rootNode->translate(vec3(temp));
+	}else{
+		Right_rootNode->translate(vec3(0.0f, 0.0f, -1.0f));
 	}
 }
