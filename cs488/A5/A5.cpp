@@ -36,6 +36,8 @@ A5::A5(const std::string & luaSceneFile)
 {
 	animationModel = AnimationModel();
 	keyFrameHandler = KeyFrameHandler();
+	character_1 = Character();
+	character_2 = Character();
 }
 
 //----------------------------------------------------------------------------------------
@@ -115,6 +117,7 @@ void A5::processLuaSceneFile(const std::string & filename) {
 	// as a straightforward pathname.
 	m_rootNode = std::shared_ptr<SceneNode>(import_lua(filename));
 
+
 	// get the total node
 	totalNode = m_rootNode->totalSceneNodes();
 	root_ori = m_rootNode->trans*vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -127,9 +130,11 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		}
 		if(node->m_name == "torso"){
 			Left_rootNode = std::shared_ptr<SceneNode>(node);
+			character_1.m_rootNode = Left_rootNode;
 		}
 		if(node->m_name == " torso_baymax"){
 			Right_rootNode = std::shared_ptr<SceneNode>(node);
+			character_2.m_rootNode = Right_rootNode;
 		}
 		if(node->m_nodeType == NodeType::JointNode){
 			jointIndex.push(id);
@@ -356,6 +361,8 @@ void A5::appLogic()
 
 	// update call animation
 	animationModel.update();
+
+	character_1.update();
 
 	uploadCommonSceneUniforms();
 }
@@ -868,7 +875,6 @@ bool A5::keyInputEvent (
 		int mods
 ) {
 	bool eventHandled(false);
-
 	if( action == GLFW_PRESS ) {
 		// Respond to some key events.
 
@@ -971,25 +977,45 @@ bool A5::keyInputEvent (
 		}
 
 		if(key == GLFW_KEY_RIGHT){
-			moveHandler(0, 1);
+			eventHandled = true;
+			character_1.move(1, 0);
 		}
 
 		if(key == GLFW_KEY_LEFT){
-			moveHandler(0, 0);
+			eventHandled = true;
+			character_1.move(0, 0);
 		}
 
 		if(key == GLFW_KEY_UP){
-			moveHandler(0, 2);
+			eventHandled = true;
+			character_1.move(2, 0);
 		}
 
 		if(key == GLFW_KEY_DOWN){
-			moveHandler(0, 3);
+			eventHandled = true;
+			character_1.move(3, 0);
 		}
 		
 		
+	}else if(action == GLFW_RELEASE){
+		if(key == GLFW_KEY_RIGHT){
+			character_1.move(1, 1);
+		}
+
+		if(key == GLFW_KEY_LEFT){
+			character_1.move(0, 1);
+		}
+
+		if(key == GLFW_KEY_UP){
+			character_1.move(2, 1);
+		}
+
+		if(key == GLFW_KEY_DOWN){
+			character_1.move(3 ,1);
+		}
 	}
 	// Fill in with event handling code...
-
+	eventHandled = true;
 	return eventHandled;
 }
 
@@ -1276,6 +1302,9 @@ void A5::trackballHandler(double xPos, double yPos){
 	rotationMatrix = glm::scale(glm::transpose(rotationMatrix),glm::vec3(1.0f,1.0f,1.0f));
 	//cout<<"rotation is "<<rotationMatrix<<endl;
 	trackBallRotationMatrix = m_rootNode->trans;
+	character_1.trackBallRotationMatrix = trackBallRotationMatrix;
+	cout<<character_1.trackBallRotationMatrix<<endl;
+	character_2.trackBallRotationMatrix = trackBallRotationMatrix;
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
 }
 
@@ -1360,6 +1389,7 @@ void A5::AddKeyFrame(int type){
 	}
 }
 
+// dropped -- replaced with directly call character move function
 void A5::moveHandler(int target, int type){// target 0 for left 1 for right
 	switch(type){
 		case 0: // move left 
@@ -1419,3 +1449,5 @@ void A5::moveBack(int target){
 		Right_rootNode->translate(vec3(0.0f, 0.0f, -1.0f));
 	}
 }
+
+// dropped till here

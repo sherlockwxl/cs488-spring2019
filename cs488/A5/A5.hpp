@@ -12,6 +12,7 @@
 #include "AnimationModel.hpp"
 #include "KeyFrame.hpp"
 #include "KeyFrameHandler.hpp"
+#include "Character.hpp"
 
 
 #include <glm/glm.hpp>
@@ -173,6 +174,8 @@ protected:
 	std::shared_ptr<SceneNode> Left_rootNode;
 	std::shared_ptr<SceneNode> Right_rootNode;
 	glm::mat4 trackBallRotationMatrix;
+	Character character_1;
+	Character character_2;
 	void initAnimationModel();
 	void AddKeyFrame(int type);
 	void moveHandler(int target, int type);
