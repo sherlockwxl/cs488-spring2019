@@ -5,8 +5,10 @@
 #include <memory>
 #include <vector>
 #include <glm/glm.hpp>
-#include <GL/gl.h>
 #include "SceneNode.hpp"
+
+#include "cs488-framework/OpenGLImport.hpp"
+
 struct box{
     GLfloat min_x;
     GLfloat max_x;

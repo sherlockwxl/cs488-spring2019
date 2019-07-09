@@ -1,6 +1,5 @@
 #include <vector>
 #include <glm/glm.hpp>
-#include <string>
 #include "KeyFrame.hpp"
 #include "AnimationModel.hpp"
 

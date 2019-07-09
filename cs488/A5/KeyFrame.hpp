@@ -7,23 +7,24 @@
 #include <vector>
 #include <stack>
 #include <queue>
+#include <string>
 
 using namespace std;
 class KeyFrame{
 
 public:
-    string KetFrameName;
+    string KeyFrameName;
     int totalTime;
     int type; // 0 for translation; 1 for rotation
     glm::vec2 rotationTarget;
     glm::vec3 translationTarget;
     int order; // 1 for x first, -1 for y first
 
-    KeyFrame(string name, int totalTime, int type, // 0 for translation; 1 for rotation
+    KeyFrame(string KeyFrameName, int totalTime, int type, // 0 for translation; 1 for rotation
     int order,
     glm::vec2 rotationTarget,
     glm::vec3 translationTarget)
-    : KetFrameName(name),
+    : KeyFrameName(KeyFrameName),
 	  totalTime(totalTime),
       type(type),
       order(order),

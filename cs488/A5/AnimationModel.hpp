@@ -10,7 +10,7 @@
 #include <vector>
 #include <stack>
 #include <queue>
-#include <GL/gl.h>
+#include "cs488-framework/OpenGLImport.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/io.hpp>
 #include <glm/gtc/matrix_transform.hpp>

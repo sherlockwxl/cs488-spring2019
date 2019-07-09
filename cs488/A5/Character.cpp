@@ -126,6 +126,7 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
     GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
     //build box for each node
     //cout<<LeftNode->trans<<endl;
+    // test
     glm::vec3 left_trans = glm::vec3(LeftNode->trans[3][0], LeftNode->trans[3][1], LeftNode->trans[3][2]);
     left_trans = glm::vec3( glm::vec4(left_trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
     glm::vec3 right_trans = glm::vec3(RightNode->trans[3][0], RightNode->trans[3][1], RightNode->trans[3][2]);
@@ -143,31 +144,87 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
     }else{
         rightMult = 1.0f;
     }
-    
-    box leftBox = { std::min(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
-                    std::max(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
-                    std::min(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
-                    std::max(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
-                    std::min(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult),
-                    std::max(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult)};
-    box rightBox = { std::min(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
-                    std::max(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
-                    std::min(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
-                    std::max(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
-                    std::min(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult),
-                    std::max(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult)};
+    glm::vec3 leftBox_base[] = {glm::vec3(-1.0f*leftMult, -1.0f*leftMult, -1.0f*leftMult),
+                           glm::vec3(-1.0f*leftMult, -1.0f*leftMult, 1.0f*leftMult),
+                           glm::vec3(-1.0f*leftMult, 1.0f*leftMult, -1.0f*leftMult),
+                           glm::vec3(1.0f*leftMult, -1.0f*leftMult, -1.0f*leftMult),
+                           glm::vec3(-1.0f*leftMult, 1.0f*leftMult, 1.0f*leftMult),
+                           glm::vec3(1.0f*leftMult, -1.0f*leftMult, 1.0f*leftMult),
+                           glm::vec3(1.0f*leftMult, 1.0f*leftMult, -1.0f*leftMult),
+                           glm::vec3(1.0f*leftMult, 1.0f*leftMult, 1.0f*leftMult), };
+
+    glm::vec3 rightBox_base[] = {glm::vec3(-1.0f*rightMult, -1.0f*rightMult, -1.0f*rightMult),
+                           glm::vec3(-1.0f*rightMult, -1.0f*rightMult, 1.0f*rightMult),
+                           glm::vec3(-1.0f*rightMult, 1.0f*rightMult, -1.0f*rightMult),
+                           glm::vec3(1.0f*rightMult, -1.0f*rightMult, -1.0f*rightMult),
+                           glm::vec3(-1.0f*rightMult, 1.0f*rightMult, 1.0f*rightMult),
+                           glm::vec3(1.0f*rightMult, -1.0f*rightMult, 1.0f*rightMult),
+                           glm::vec3(1.0f*rightMult, 1.0f*rightMult, -1.0f*rightMult),
+                           glm::vec3(1.0f*rightMult, 1.0f*rightMult, 1.0f*rightMult), };
+
+    glm::vec3 left_max = glm::vec3(-1000.0f, -1000.0f, -1000.0f);
+    glm::vec3 left_min = glm::vec3(1000.0f, 1000.0f, 1000.0f);
+    glm::vec3 right_max = glm::vec3(-1000.0f, -1000.0f, -1000.0f);
+    glm::vec3 right_min = glm::vec3(1000.0f, 1000.0f, 1000.0f);
+    for(int i = 0; i < 8; i++){
+        glm::vec3 left_transformed = glm::vec3(LeftNode->trans * glm::vec4(leftBox_base[i], 1.0f));
+        //cout<<"ori : " << LeftNode->trans <<endl;
+        //cout<<"after : " << left_transformed<<endl;
+        left_min.x = std::min(left_min.x, left_transformed.x);
+        left_min.y = std::min(left_min.y, left_transformed.y);
+        left_min.z = std::min(left_min.z, left_transformed.z);
+        left_max.x = std::max(left_max.x, left_transformed.x);
+        left_max.y = std::max(left_max.y, left_transformed.y);
+        left_max.z = std::max(left_max.z, left_transformed.z);
+
+        glm::vec3 right_transformed = glm::vec3(RightNode->trans * glm::vec4(rightBox_base[i], 1.0f));
+        right_min.x = std::min(right_min.x, right_transformed.x);
+        right_min.y = std::min(right_min.y, right_transformed.y);
+        right_min.z = std::min(right_min.z, right_transformed.z);
+        right_max.x = std::max(right_max.x, right_transformed.x);
+        right_max.y = std::max(right_max.y, right_transformed.y);
+        right_max.z = std::max(right_max.z, right_transformed.z);
+    }
+    box leftBox = {
+        left_min.x,
+        left_max.x,
+        left_min.y,
+        left_max.y,
+        left_min.z,
+        left_max.z
+    };
+    box rightBox = {
+        right_min.x,
+        right_max.x,
+        right_min.y,
+        right_max.y,
+        right_min.z,
+        right_max.z,
+    };
+    // box leftBox = { std::min(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
+    //                 std::max(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
+    //                 std::min(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
+    //                 std::max(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
+    //                 std::min(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult),
+    //                 std::max(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult)};
+    // box rightBox = { std::min(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
+    //                 std::max(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
+    //                 std::min(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
+    //                 std::max(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
+    //                 std::min(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult),
+    //                 std::max(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult)};
 
     if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
          (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
          {
-              cout<<LeftNode->trans<<endl;
-              cout<<RightNode->trans<<endl;
-              cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
-              cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
-              cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
-              cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
-              exit(0);
+            //   cout<<LeftNode->trans<<endl;
+            //   cout<<RightNode->trans<<endl;
+            //   cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
+            //   cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
+            //   cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
+            //   cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
+            //   exit(0);
          }
     return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
