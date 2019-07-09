@@ -33,7 +33,7 @@ class Character{
         Character();
         void move(int direction, int type); // 0 for left; 1 for right; 2 for up; 3 for down; type: 0 for start 1 for end
         void update();
-        void checkCollisions();
+        bool checkCollisions();
         bool isCollision(SceneNode * LeftNode, SceneNode * RightNode);
         SceneNode * findNodeById(SceneNode& rootNode, unsigned int id);
 };

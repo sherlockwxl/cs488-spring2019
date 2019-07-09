@@ -45,8 +45,7 @@ void Character::move(int direction, int type){
             }
 
             break;
-        case 2: // move up
-
+        case 3: // move up
             if(moveUpOrDown == 1 && type == 1){// to end
                 moveUpFrameCounter = persistence;
             }else{
@@ -58,7 +57,7 @@ void Character::move(int direction, int type){
             }
 
             break;
-        case 3: // move down
+        case 2: // move down
 
             if(moveUpOrDown == -1 && type == 1){// to end
                 moveUpFrameCounter = persistence;
@@ -78,6 +77,7 @@ void Character::move(int direction, int type){
 
 
 void Character::update(){
+
     GLfloat v_up; 
     if(moveUpFrameCounter == -1){// keep moving
         v_up = v_start * 0.6;
@@ -108,7 +108,14 @@ void Character::update(){
     if(moveLeftFrameCounter == 0){
         moveLeftOrRight = 0;
     }
-    checkCollisions();
+    if(checkCollisions()){
+        m_rootNode->translate(glm::vec3(temp * -1.0f));
+        moveUpFrameCounter = 0;
+        moveLeftFrameCounter = 0;
+        moveLeftOrRight = 0;
+        moveUpOrDown = 0;
+    }
+    
 }
 
 // check if two geometry node has collision
@@ -118,7 +125,7 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
     GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
     GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
     //build box for each node
-    //cout<<LeftNode.trans<<endl;
+    //cout<<LeftNode->trans<<endl;
     glm::vec3 left_trans = glm::vec3(LeftNode->trans[3][0], LeftNode->trans[3][1], LeftNode->trans[3][2]);
     left_trans = glm::vec3( glm::vec4(left_trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
     glm::vec3 right_trans = glm::vec3(RightNode->trans[3][0], RightNode->trans[3][1], RightNode->trans[3][2]);
@@ -154,17 +161,20 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
          (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
          {
-            //  cout<<LeftNode->trans<<endl;
-            //  cout<<RightNode->trans<<endl;
-            //  cout<<"left: " << leftBox.min_y << " max : " << leftBox.max_y<<endl;
-            //  cout<<"right: " << rightBox.min_y << " max : " << rightBox.max_y<<endl;
+              cout<<LeftNode->trans<<endl;
+              cout<<RightNode->trans<<endl;
+              cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
+              cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
+              cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
+              cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
+              exit(0);
          }
     return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
          (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
 }
 
-void Character::checkCollisions(){
+bool Character::checkCollisions(){
 
     for(auto const& id: geoIndexVector) {
         SceneNode * node = findNodeById(*m_rootNode, id);
@@ -172,9 +182,13 @@ void Character::checkCollisions(){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
                 cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                //should trigger movement stop
+                return true;
+
             }
         }
     }
+    return false;
 }
 
 SceneNode * Character::findNodeById(SceneNode& rootNode, unsigned int id){

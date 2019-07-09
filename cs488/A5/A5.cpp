@@ -117,6 +117,7 @@ void A5::processLuaSceneFile(const std::string & filename) {
 	// as a straightforward pathname.
 	m_rootNode = std::shared_ptr<SceneNode>(import_lua(filename));
 
+	
 
 	// get the total node
 	totalNode = m_rootNode->totalSceneNodes();
@@ -129,11 +130,15 @@ void A5::processLuaSceneFile(const std::string & filename) {
 			head_id = id;
 		}
 		if(node->m_name == "torso"){
+			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), 1.5f, vec3(0.0f, 1.0f, 0.0f));
+			recursiveRotate(node->trans, *node, y_rotateMatrix);
 			Left_rootNode = std::shared_ptr<SceneNode>(node);
 			character_1.m_rootNode = Left_rootNode;
 			character_2.other_rootNode = Left_rootNode;
 		}
 		if(node->m_name == "torso_baymax"){
+			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), -1.5f, vec3(0.0f, 1.0f, 0.0f));
+			recursiveRotate(node->trans, *node, y_rotateMatrix);
 			Right_rootNode = std::shared_ptr<SceneNode>(node);
 			character_2.m_rootNode = Right_rootNode;
 			character_1.other_rootNode = Right_rootNode;
@@ -1321,6 +1326,7 @@ void A5::trackballHandler(double xPos, double yPos){
 	rotationMatrix = glm::scale(glm::transpose(rotationMatrix),glm::vec3(1.0f,1.0f,1.0f));
 	//cout<<"rotation is "<<rotationMatrix<<endl;
 	trackBallRotationMatrix = m_rootNode->trans;
+	glm::mat4 y_rotateMatrix = glm::rotate(mat4(), 1.5f, vec3(0.0f, 1.0f, 0.0f));
 	character_1.trackBallRotationMatrix = trackBallRotationMatrix;
 	character_2.trackBallRotationMatrix = trackBallRotationMatrix;
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);

@@ -45,7 +45,7 @@ void AnimationModel::rotateJointHelper(GLfloat anglex, GLfloat angley, SceneNode
     if(node.m_nodeType == NodeType::JointNode){
         //cout<<"should not "<<endl;
         JointNode * jointNode = static_cast<JointNode*>(&node);
-        cout<<"will ortate " << node.m_name << " ini : "<<jointNode->m_joint_x.init << " and "<< jointNode->m_joint_y.init<<endl;
+        //cout<<"will ortate " << node.m_name << " ini : "<<jointNode->m_joint_x.init << " and "<< jointNode->m_joint_y.init<<endl;
         GLfloat newAngle_x = jointNode->m_joint_x.init + anglex;
         GLfloat newAngle_y = jointNode->m_joint_y.init + angley;
         //cout<< " newAngle_x :   " << newAngle_x <<" newAngle_y: " << newAngle_y<<endl;
@@ -69,7 +69,7 @@ void AnimationModel::rotateJointHelper(GLfloat anglex, GLfloat angley, SceneNode
                 rotateMatrix = glm::rotate(mat4(), angley, vec3(0.0f, 1.0f, 0.0f));
                 rotateMatrix = glm::rotate(rotateMatrix, anglex, vec3(1.0f, 0.0f, 0.0f));
             }
-            cout<<"after ortate " << node.m_name << " ini : "<<jointNode->m_joint_x.init << " and "<< jointNode->m_joint_y.init<<endl;
+            //cout<<"after ortate " << node.m_name << " ini : "<<jointNode->m_joint_x.init << " and "<< jointNode->m_joint_y.init<<endl;
             recursiveRotate(node.trans, node, rotateMatrix);
         }else{
 
