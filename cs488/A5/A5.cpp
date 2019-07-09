@@ -131,13 +131,33 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		if(node->m_name == "torso"){
 			Left_rootNode = std::shared_ptr<SceneNode>(node);
 			character_1.m_rootNode = Left_rootNode;
+			character_2.other_rootNode = Left_rootNode;
 		}
-		if(node->m_name == " torso_baymax"){
+		if(node->m_name == "torso_baymax"){
 			Right_rootNode = std::shared_ptr<SceneNode>(node);
 			character_2.m_rootNode = Right_rootNode;
+			character_1.other_rootNode = Right_rootNode;
 		}
 		if(node->m_nodeType == NodeType::JointNode){
 			jointIndex.push(id);
+		}
+	}
+	for(int id = 0; id < totalNode; id++){
+		SceneNode * node = findNodeById(*character_1.m_rootNode, id);
+		if(node != NULL){
+			if(node->m_nodeType == NodeType::GeometryNode){
+				character_1.geoIndexVector.push_back(id);
+				character_2.other_geoIndexVector.push_back(id);
+			}
+		}
+	}
+	for(int id = 0; id < totalNode; id++){
+		SceneNode * node = findNodeById(*character_2.m_rootNode, id);
+		if(node != NULL){
+			if(node->m_nodeType == NodeType::GeometryNode){
+				character_2.geoIndexVector.push_back(id);
+				character_1.other_geoIndexVector.push_back(id);
+			}
 		}
 	}
 	// push all joint node index into vector for easy access
@@ -607,7 +627,6 @@ void A5::renderSceneGraph(const SceneNode & root) {
 			continue;
 
 		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
-
 		updateShaderUniforms(m_shader, *geometryNode, m_view);
 
 		
@@ -1216,7 +1235,7 @@ void A5::undo(){
 		return;
 	}
 	for(auto const& angle: joint_rotation_undo.top()){
-			cout<<angle<<endl;
+			//cout<<angle<<endl;
 	}
 
 	for(int i = 0; i < jointIndexVector.size(); i++) {
@@ -1303,7 +1322,6 @@ void A5::trackballHandler(double xPos, double yPos){
 	//cout<<"rotation is "<<rotationMatrix<<endl;
 	trackBallRotationMatrix = m_rootNode->trans;
 	character_1.trackBallRotationMatrix = trackBallRotationMatrix;
-	cout<<character_1.trackBallRotationMatrix<<endl;
 	character_2.trackBallRotationMatrix = trackBallRotationMatrix;
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
 }

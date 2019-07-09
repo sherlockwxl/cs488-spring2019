@@ -108,31 +108,84 @@ void Character::update(){
     if(moveLeftFrameCounter == 0){
         moveLeftOrRight = 0;
     }
+    checkCollisions();
 }
 
 // check if two geometry node has collision
 // meshid 0 cube; meshid 1 sephere
-void Character::isCollision(SceneNode LeftNode, SceneNode RightNode){
+bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
+
     GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
     GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
     //build box for each node
-    glm::vec3 left_trans = glm::vec3(LeftNode.trans[0][3], LeftNode.trans[1][3], LeftNode.trans[2][3]);
-    glm::vec3 right_trans = glm::vec3(RightNode.trans[0][3], RightNode.trans[1][3], RightNode.trans[2][3]);
-    box leftBox = { left_trans.x - LeftNode.trans[0][0],
-                    left_trans.x + LeftNode.trans[0][0],
-                    left_trans.y - LeftNode.trans[1][1],
-                    left_trans.y + LeftNode.trans[1][1],
-                    left_trans.z - LeftNode.trans[2][2],
-                    left_trans.z + LeftNode.trans[2][2]};
-    box rightBox = { right_trans.x - RightNode.trans[0][0],
-                    right_trans.x + RightNode.trans[0][0],
-                    right_trans.y - RightNode.trans[1][1],
-                    right_trans.y + RightNode.trans[1][1],
-                    right_trans.z - RightNode.trans[2][2],
-                    right_trans.z + RightNode.trans[2][2]};
+    //cout<<LeftNode.trans<<endl;
+    glm::vec3 left_trans = glm::vec3(LeftNode->trans[3][0], LeftNode->trans[3][1], LeftNode->trans[3][2]);
+    left_trans = glm::vec3( glm::vec4(left_trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
+    glm::vec3 right_trans = glm::vec3(RightNode->trans[3][0], RightNode->trans[3][1], RightNode->trans[3][2]);
+    right_trans = glm::vec3(glm::vec4(right_trans, 0.0f) * glm::inverse(trackBallRotationMatrix) );
+    GLfloat leftMult;
+    GLfloat rightMult;
+    if(LeftGeoNode->meshId == "cube"){
+        leftMult = 0.5f;
+    }else{
+        leftMult = 1.0f;
+    }
 
+    if(RightGeoNode->meshId == "cube"){
+        rightMult = 0.5f;
+    }else{
+        rightMult = 1.0f;
+    }
+    
+    box leftBox = { std::min(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
+                    std::max(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
+                    std::min(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
+                    std::max(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
+                    std::min(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult),
+                    std::max(left_trans.z - LeftNode->trans[2][2]*leftMult,  left_trans.z + LeftNode->trans[2][2]*leftMult)};
+    box rightBox = { std::min(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
+                    std::max(right_trans.x - RightNode->trans[0][0]*leftMult,  right_trans.x + RightNode->trans[0][0]*leftMult),
+                    std::min(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
+                    std::max(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
+                    std::min(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult),
+                    std::max(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult)};
 
+    if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
+         {
+            //  cout<<LeftNode->trans<<endl;
+            //  cout<<RightNode->trans<<endl;
+            //  cout<<"left: " << leftBox.min_y << " max : " << leftBox.max_y<<endl;
+            //  cout<<"right: " << rightBox.min_y << " max : " << rightBox.max_y<<endl;
+         }
     return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
          (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
+}
+
+void Character::checkCollisions(){
+
+    for(auto const& id: geoIndexVector) {
+        SceneNode * node = findNodeById(*m_rootNode, id);
+        for(auto const& other_id: other_geoIndexVector){
+            SceneNode * other_node = findNodeById(*other_rootNode, other_id);
+            if(isCollision(node, other_node)){
+                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+            }
+        }
+    }
+}
+
+SceneNode * Character::findNodeById(SceneNode& rootNode, unsigned int id){
+	if(rootNode.m_nodeId == id){
+		return &rootNode;
+	}
+	for(SceneNode * nextNode : rootNode.children){
+		SceneNode * res = findNodeById(*nextNode, id);
+		if(res!= NULL){
+			return res;
+		}
+	}
+	return NULL;
 }
