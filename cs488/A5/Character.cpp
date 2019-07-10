@@ -87,7 +87,7 @@ void Character::update(){
     GLfloat v_up; 
     if(jump == 1){ // jump triggered
         if(isOntheGround){
-            v_upOrDown = 0.5f;
+            v_upOrDown = 0.6f;
             jump = 2;
         }
     }else if (jump == 2){
@@ -97,12 +97,15 @@ void Character::update(){
         box rightFootBox = getBoundingBox(rightFoot_Node.get());
         box baseBox = getBoundingBox(ground_Node.get());
         if(v_upOrDown < 0.0f){// going down
-            v_upOrDown < (baseBox.max_z - std::min(leftFootBox.min_z, rightFootBox.min_z));
-            v_upOrDown = (baseBox.max_z - std::min(leftFootBox.min_z, rightFootBox.min_z) + 0.001f);
-            //cout<<ground_Node->trans[3][2]<<endl;
-            //cout<<  std::min(leftFootBox.min_z, rightFootBox.min_z)<<endl;
-            //cout<<"gap : " << (ground_Node->trans[3][2] - std::min(leftFootBox.min_z, rightFootBox.min_z));
+            if(v_upOrDown < (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y))){
+                v_upOrDown = (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
+                cout<<baseBox.max_y<< " min : "<<baseBox.min_y<<endl;
+                cout<<  std::min(leftFootBox.min_y, rightFootBox.min_y)<<endl;
+                cout<<"gap : " << (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
+            }
         }
+            
+            
         if(isOntheGround){
             v_upOrDown = 0.0f;
             jump = 0;

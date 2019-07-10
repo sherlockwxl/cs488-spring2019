@@ -26,7 +26,7 @@ class Character{
         GLfloat mass;
         GLfloat u = 0.1f;
         int persistence = 20;
-        GLfloat g = 0.98f;
+        GLfloat g = 0.098f;
         std::shared_ptr<SceneNode> m_rootNode;
         std::shared_ptr<SceneNode> other_rootNode;
         std::shared_ptr<SceneNode> leftFoot_Node;
