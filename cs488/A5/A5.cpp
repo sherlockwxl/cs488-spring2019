@@ -129,19 +129,36 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		if(node->m_name == "head"){
 			head_id = id;
 		}
+		if(node->m_name == "platform"){
+			character_1.ground_Node = std::shared_ptr<SceneNode>(node);
+		}
 		if(node->m_name == "torso"){
-			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), 1.5f, vec3(0.0f, 1.0f, 0.0f));
+			GLfloat angel = 3.141592f * 0.5f;
+			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), angel, vec3(0.0f, 1.0f, 0.0f));
 			recursiveRotate(node->trans, *node, y_rotateMatrix);
 			Left_rootNode = std::shared_ptr<SceneNode>(node);
 			character_1.m_rootNode = Left_rootNode;
 			character_2.other_rootNode = Left_rootNode;
 		}
+		if(node->m_name == "leftFoot"){
+			character_1.leftFoot_Node = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == "rightFoot"){
+			character_1.rightFoot_Node = std::shared_ptr<SceneNode>(node);
+		}
 		if(node->m_name == "torso_baymax"){
-			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), -1.5f, vec3(0.0f, 1.0f, 0.0f));
+			GLfloat angel = 3.141592f * 1.5f;
+			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), angel, vec3(0.0f, 1.0f, 0.0f));
 			recursiveRotate(node->trans, *node, y_rotateMatrix);
 			Right_rootNode = std::shared_ptr<SceneNode>(node);
 			character_2.m_rootNode = Right_rootNode;
 			character_1.other_rootNode = Right_rootNode;
+		}
+		if(node->m_name == "leftFoot_baymax"){
+			character_2.leftFoot_Node = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == "rightFoot_baymax"){
+			character_2.rightFoot_Node = std::shared_ptr<SceneNode>(node);
 		}
 		if(node->m_nodeType == NodeType::JointNode){
 			jointIndex.push(id);
@@ -329,7 +346,7 @@ void A5::initPerspectiveMatrix()
 
 //----------------------------------------------------------------------------------------
 void A5::initViewMatrix() {
-	m_view = glm::lookAt(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f),
+	m_view = glm::lookAt(vec3(0.0f, 3.0f, 6.0f), vec3(0.0f, 0.0f, -2.0f),
 			vec3(0.0f, 1.0f, 0.0f));
 }
 
@@ -1018,6 +1035,11 @@ bool A5::keyInputEvent (
 		if(key == GLFW_KEY_DOWN){
 			eventHandled = true;
 			character_1.move(3, 0);
+		}
+
+		if(key == GLFW_KEY_SPACE){
+			eventHandled = true;
+			character_1.move(4, 0);
 		}
 		
 		

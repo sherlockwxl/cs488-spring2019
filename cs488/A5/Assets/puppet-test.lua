@@ -9,10 +9,20 @@ blue = gr.material({0.0, 0.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 green = gr.material({0.0, 1.0, 0.0}, {0.1, 0.1, 0.1}, 10)
 white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
 black = gr.material({0.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 10)
+darkgray = gr.material({0.25, 0.29, 0.30}, {0.1, 0.1, 0.1}, 10)
+
+-- add a platform
+
+platform = gr.mesh('cube', 'platform')
+rootnode:add_child(platform)
+platform:scale(25.0, 25.0, 0.1)
+platform:translate(0.0, 0.0, 5.0)
+platform:rotate('x',90)
+platform:set_material(darkgray)
 
 torso = gr.mesh('sphere', 'torso')
 rootnode:add_child(torso)
-torso:scale(0.5, 0.8, 0.5);
+torso:scale(0.5, 0.8, 0.5)
 torso:translate(0.0, 0.0, 0.0)
 torso:set_material(blue)
 
@@ -269,8 +279,8 @@ abs_baymaxJoint_baymax:translate(0.0, -0.5, 0.0)
 
 abs_baymax = gr.mesh('sphere', 'abs_baymax')
 abs_baymaxJoint_baymax:add_child(abs_baymax)
-abs_baymax:rotate("x",30)
 abs_baymax:scale(1.1, 1.3, 1.1)
+abs_baymax:rotate("x",30)
 abs_baymax:translate(0.0, -0.6, -0.1)
 abs_baymax:set_material(white)
 

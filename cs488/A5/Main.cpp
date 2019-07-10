@@ -13,7 +13,7 @@ int main( int argc, char **argv )
 		title += luaSceneFile;
 		title += "]";
 
-		CS488Window::launch(argc, argv, new A5(luaSceneFile), 1024, 768, title);
+		CS488Window::launch(argc, argv, new A5(luaSceneFile), 2048, 1024, title);
 
 	} else {
 		cout << "Must supply Lua file as First argument to program.\n";

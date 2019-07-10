@@ -12,7 +12,7 @@ black = gr.material({0.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 10)
 
 torso = gr.mesh('cube', 'torso')
 rootnode:add_child(torso)
-torso:scale(0.5, 0.8, 0.5);
+--torso:scale(0.5, 0.8, 0.5);
 torso:translate(0.0, 0.0, 0.0)
 torso:set_material(blue)
 
@@ -35,7 +35,7 @@ lightgray = gr.material({0.64, 0.68, 0.68}, {0.1, 0.1, 0.1}, 10)
 
 torso_baymax = gr.mesh('cube', 'torso_baymax')
 rootnode:add_child(torso_baymax)
-torso_baymax:scale(0.9, 1.1, 0.9);
+--torso_baymax:scale(0.9, 1.1, 0.9);
 torso_baymax:translate(0.0, 0.0, 0.0)
 torso_baymax:set_material(white)
 
@@ -47,9 +47,7 @@ torso_baymax:set_material(white)
 
 
 
-
-
 rootnode:translate(0.0, 0.0, -10.0)
-torso:translate(-5.0,0.0,0.0)
-torso_baymax:translate(5.0,0.0,0.0)
+torso:translate(-1.1,0.0,0.0)
+torso_baymax:translate(0.0,0.0,0.0)
 return rootnode

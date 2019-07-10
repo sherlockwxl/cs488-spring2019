@@ -1,3 +1,4 @@
+//TODO: fix AABB issue may need to implement new check approach
 #include "Character.hpp"
 #include "GeometryNode.hpp"
 #include <glm/gtx/io.hpp>
@@ -23,7 +24,7 @@ void Character::move(int direction, int type){
             if(moveLeftOrRight == -1 && type == 1){// to end
                 moveLeftFrameCounter = persistence;
             }else{
-                if(moveLeftOrRight == 1 && type == 1){
+                if((moveLeftOrRight == 1 || moveLeftOrRight == 0) && type == 1){
                     return;
                 }
                 moveLeftOrRight = -1;
@@ -37,7 +38,7 @@ void Character::move(int direction, int type){
             if(moveLeftOrRight == 1 && type == 1){// to end
                 moveLeftFrameCounter = persistence;
             }else{
-                if(moveLeftOrRight == -1 && type == 1){
+                if((moveLeftOrRight == -1 || moveLeftOrRight == 0)&& type == 1){
                     return;
                 }
                 moveLeftOrRight = 1;
@@ -70,6 +71,11 @@ void Character::move(int direction, int type){
             }
 
             break;
+        case 4: // jump
+            if(jump == 0){
+                jump = 1;
+            }
+            break;
              
     }
 }
@@ -77,22 +83,52 @@ void Character::move(int direction, int type){
 
 
 void Character::update(){
-
+    checkOntheGround();
     GLfloat v_up; 
-    if(moveUpFrameCounter == -1){// keep moving
-        v_up = v_start * 0.6;
-    }else{
-        v_up = v_start * (moveUpFrameCounter) /100;
+    if(jump == 1){ // jump triggered
+        if(isOntheGround){
+            v_upOrDown = 0.5f;
+            jump = 2;
+        }
+    }else if (jump == 2){
+        v_upOrDown -= g;
+        cout << " v " << v_upOrDown<<endl;
+        box leftFootBox = getBoundingBox(leftFoot_Node.get());
+        box rightFootBox = getBoundingBox(rightFoot_Node.get());
+        box baseBox = getBoundingBox(ground_Node.get());
+        if(v_upOrDown < 0.0f){// going down
+            v_upOrDown < (baseBox.max_z - std::min(leftFootBox.min_z, rightFootBox.min_z));
+            v_upOrDown = (baseBox.max_z - std::min(leftFootBox.min_z, rightFootBox.min_z) + 0.001f);
+            //cout<<ground_Node->trans[3][2]<<endl;
+            //cout<<  std::min(leftFootBox.min_z, rightFootBox.min_z)<<endl;
+            //cout<<"gap : " << (ground_Node->trans[3][2] - std::min(leftFootBox.min_z, rightFootBox.min_z));
+        }
+        if(isOntheGround){
+            v_upOrDown = 0.0f;
+            jump = 0;
+        }
     }
     
+    
+    v_up = v_upOrDown;
+    GLfloat v_for; 
+    if(moveUpFrameCounter == -1){// keep moving
+        v_forOrBack = 0.1f;
+    }else{
+        v_forOrBack = std::max(v_forOrBack - g*u, 0.0f);
+    }
+    v_for = v_forOrBack;
+
     GLfloat v_left;
     if(moveLeftFrameCounter == -1){// keep moving
-        v_left = v_start * 0.6;
+        v_leftOrRight = 0.1f;
     }else{
-        v_left = v_start * (moveLeftFrameCounter) /100;
+        v_leftOrRight = std::max(v_leftOrRight - g*u, 0.0f);
     }
-     
-    glm::vec4 temp = glm::vec4(v_left * moveLeftOrRight, 0.0f , v_up * moveUpOrDown, 0.0f);
+    v_left = v_leftOrRight;
+
+
+    glm::vec4 temp = glm::vec4(v_left * moveLeftOrRight, v_up , v_for * moveUpOrDown, 0.0f);
 	temp = trackBallRotationMatrix * temp;
    // std::cout<<"translate " <<temp<<std::endl;
     m_rootNode->translate(glm::vec3(temp));
@@ -122,7 +158,122 @@ void Character::update(){
 // meshid 0 cube; meshid 1 sephere
 bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
 
-    GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
+    
+    box leftBox = getBoundingBox(LeftNode);
+    box rightBox = getBoundingBox(RightNode);
+    if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
+         {
+/*                cout<<LeftNode->trans<<endl;
+               cout<<RightNode->trans<<endl;
+               cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
+               cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
+               cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
+               cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
+               cout<<"left z : " << leftBox.min_z << " max z: " << leftBox.max_z<<endl;
+               cout<<"right z : " << rightBox.min_z << " max z : " << rightBox.max_z<<endl; */
+               //exit(0);
+         }
+    return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
+}
+
+bool Character::checkCollisions(){
+
+    for(auto const& id: geoIndexVector) {
+        SceneNode * node = findNodeById(*m_rootNode, id);
+        for(auto const& other_id: other_geoIndexVector){
+            SceneNode * other_node = findNodeById(*other_rootNode, other_id);
+            if(isCollision(node, other_node)){
+                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                //should trigger movement stop
+                return true;
+
+            }
+        }
+    }
+    return false;
+}
+
+SceneNode * Character::findNodeById(SceneNode& rootNode, unsigned int id){
+	if(rootNode.m_nodeId == id){
+		return &rootNode;
+	}
+	for(SceneNode * nextNode : rootNode.children){
+		SceneNode * res = findNodeById(*nextNode, id);
+		if(res!= NULL){
+			return res;
+		}
+	}
+	return NULL;
+}
+
+
+void Character::checkOntheGround(){
+    if(isCollision(leftFoot_Node.get(), ground_Node.get()) || isCollision(rightFoot_Node.get(), ground_Node.get())){
+        isOntheGround = true;
+        //cout<<"on the ground"<<endl;
+       // exit(0);
+    }else{
+        isOntheGround = false;
+    }
+}
+
+box Character::getBoundingBox(SceneNode* node){
+    GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
+
+    //build box for each node
+    //cout<<LeftNode->trans<<endl;
+    // test
+    glm::vec3 trans = glm::vec3(GeoNode->trans[3][0], GeoNode->trans[3][1], GeoNode->trans[3][2]);
+    trans = glm::vec3( glm::vec4(trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
+    GLfloat Mult;
+    if(GeoNode->meshId == "cube"){
+        Mult = 0.5f;
+    }else{
+        Mult = 1.0f;
+    }
+    glm::vec3 Box_base[] = {glm::vec3(-1.0f*Mult, -1.0f*Mult, -1.0f*Mult),
+                           glm::vec3(-1.0f*Mult, -1.0f*Mult, 1.0f*Mult),
+                           glm::vec3(-1.0f*Mult, 1.0f*Mult, -1.0f*Mult),
+                           glm::vec3(1.0f*Mult, -1.0f*Mult, -1.0f*Mult),
+                           glm::vec3(-1.0f*Mult, 1.0f*Mult, 1.0f*Mult),
+                           glm::vec3(1.0f*Mult, -1.0f*Mult, 1.0f*Mult),
+                           glm::vec3(1.0f*Mult, 1.0f*Mult, -1.0f*Mult),
+                           glm::vec3(1.0f*Mult, 1.0f*Mult, 1.0f*Mult), };
+
+    glm::vec3 max = glm::vec3(-1000.0f, -1000.0f, -1000.0f);
+    glm::vec3 min = glm::vec3(1000.0f, 1000.0f, 1000.0f);
+    for(int i = 0; i < 8; i++){
+        glm::vec3 transformed = glm::vec3(GeoNode->trans * glm::vec4(Box_base[i], 1.0f));
+        //cout<<"ori : " << LeftNode->trans <<endl;
+        //cout<<"after : " << left_transformed<<endl;
+        min.x = std::min(min.x, transformed.x);
+        min.y = std::min(min.y, transformed.y);
+        min.z = std::min(min.z, transformed.z);
+        max.x = std::max(max.x, transformed.x);
+        max.y = std::max(max.y, transformed.y);
+        max.z = std::max(max.z, transformed.z);
+
+    }
+    box Box = {
+        min.x,
+        max.x,
+        min.y,
+        max.y,
+        min.z,
+        max.z
+    };
+    return Box;
+}
+
+
+
+
+// backup box generation code
+/* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
     GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
     //build box for each node
     //cout<<LeftNode->trans<<endl;
@@ -200,7 +351,7 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
         right_max.y,
         right_min.z,
         right_max.z,
-    };
+    }; */
     // box leftBox = { std::min(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
     //                 std::max(left_trans.x - LeftNode->trans[0][0]*leftMult,  left_trans.x + LeftNode->trans[0][0]*leftMult),
     //                 std::min(left_trans.y - LeftNode->trans[1][1]*leftMult,  left_trans.y + LeftNode->trans[1][1]*leftMult),
@@ -213,50 +364,3 @@ bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
     //                 std::max(right_trans.y - RightNode->trans[1][1]*leftMult,  right_trans.y + RightNode->trans[1][1]*leftMult),
     //                 std::min(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult),
     //                 std::max(right_trans.z - RightNode->trans[2][2]*leftMult,  right_trans.z + RightNode->trans[2][2]*leftMult)};
-
-    if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
-         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
-         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
-         {
-            //   cout<<LeftNode->trans<<endl;
-            //   cout<<RightNode->trans<<endl;
-            //   cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
-            //   cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
-            //   cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
-            //   cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
-            //   exit(0);
-         }
-    return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
-         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
-         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
-}
-
-bool Character::checkCollisions(){
-
-    for(auto const& id: geoIndexVector) {
-        SceneNode * node = findNodeById(*m_rootNode, id);
-        for(auto const& other_id: other_geoIndexVector){
-            SceneNode * other_node = findNodeById(*other_rootNode, other_id);
-            if(isCollision(node, other_node)){
-                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
-                //should trigger movement stop
-                return true;
-
-            }
-        }
-    }
-    return false;
-}
-
-SceneNode * Character::findNodeById(SceneNode& rootNode, unsigned int id){
-	if(rootNode.m_nodeId == id){
-		return &rootNode;
-	}
-	for(SceneNode * nextNode : rootNode.children){
-		SceneNode * res = findNodeById(*nextNode, id);
-		if(res!= NULL){
-			return res;
-		}
-	}
-	return NULL;
-}
