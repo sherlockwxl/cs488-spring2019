@@ -13,6 +13,7 @@
 #include "KeyFrame.hpp"
 #include "KeyFrameHandler.hpp"
 #include "Character.hpp"
+#include "ParticleModel.hpp"
 
 
 #include <glm/glm.hpp>
@@ -176,6 +177,16 @@ protected:
 	glm::mat4 trackBallRotationMatrix;
 	Character character_1;
 	Character character_2;
+
+	// shader parameters for particle
+	GLuint m_vao_particle;
+	GLuint m_vbo_particle;
+	GLint m_particle_positionAttribLocation;
+	GLint m_particle_color;
+	ShaderProgram m_shader_particle;
+	ParticleModel particleModel;
+
+
 	void initAnimationModel();
 	void AddKeyFrame(int type);
 	void moveHandler(int target, int type);
@@ -183,5 +194,7 @@ protected:
 	void moveRight(int target);
 	void moveForward(int target);
 	void moveBack(int target);
+	void renderParticles();
+
 };
 

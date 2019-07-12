@@ -92,16 +92,16 @@ void Character::update(){
         }
     }else if (jump == 2){
         v_upOrDown -= g;
-        cout << " v " << v_upOrDown<<endl;
+       // cout << " v " << v_upOrDown<<endl;
         box leftFootBox = getBoundingBox(leftFoot_Node.get());
         box rightFootBox = getBoundingBox(rightFoot_Node.get());
         box baseBox = getBoundingBox(ground_Node.get());
         if(v_upOrDown < 0.0f){// going down
             if(v_upOrDown < (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y))){
                 v_upOrDown = (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
-                cout<<baseBox.max_y<< " min : "<<baseBox.min_y<<endl;
-                cout<<  std::min(leftFootBox.min_y, rightFootBox.min_y)<<endl;
-                cout<<"gap : " << (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
+                //cout<<baseBox.max_y<< " min : "<<baseBox.min_y<<endl;
+                //cout<<  std::min(leftFootBox.min_y, rightFootBox.min_y)<<endl;
+                //cout<<"gap : " << (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
             }
         }
             
@@ -190,7 +190,8 @@ bool Character::checkCollisions(){
         for(auto const& other_id: other_geoIndexVector){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
-                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                enemy->gotHit(other_id);
                 //should trigger movement stop
                 return true;
 
@@ -272,7 +273,13 @@ box Character::getBoundingBox(SceneNode* node){
     return Box;
 }
 
-
+void Character::gotHit(int NodeId){
+    SceneNode * node = findNodeById(*m_rootNode, NodeId);
+    GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
+    //cout<<" got hit on : " << node->m_name<<endl;
+    GeoNode->isHit = true;
+    //TODO: reduce life value after
+}
 
 
 // backup box generation code

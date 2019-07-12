@@ -1,5 +1,7 @@
 #include "AnimationModel.hpp"
 #include "KeyFrame.hpp"
+
+// TODO: add a movement function buffer
 AnimationModel::AnimationModel(){
     
 }

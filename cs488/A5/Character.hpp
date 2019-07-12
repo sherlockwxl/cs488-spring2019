@@ -41,6 +41,7 @@ class Character{
         int jump = 2; // 0 for rest state, 1 for jump called; 2 for during jump
         int moveUpFrameCounter;
         int moveLeftFrameCounter;
+        Character *enemy;
 
 
         Character(SceneNode m_rootNode);
@@ -52,6 +53,7 @@ class Character{
         bool isCollision(SceneNode * LeftNode, SceneNode * RightNode);
         SceneNode * findNodeById(SceneNode& rootNode, unsigned int id);
         box getBoundingBox(SceneNode * node);
+        void gotHit(int NodeId);
 };
 
 

@@ -10,6 +10,7 @@ using namespace std;
 #include "GeometryNode.hpp"
 #include "JointNode.hpp"
 
+
 #include <imgui/imgui.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -32,12 +33,19 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vbo_vertexPositions(0),
 	  m_vbo_vertexNormals(0),
 	  m_vao_arcCircle(0),
-	  m_vbo_arcCircle(0)
+	  m_vbo_arcCircle(0),
+	  m_particle_positionAttribLocation(0),
+	  m_vao_particle(0),
+	  m_vbo_particle(0)
 {
 	animationModel = AnimationModel();
 	keyFrameHandler = KeyFrameHandler();
 	character_1 = Character();
 	character_2 = Character();
+	character_1.enemy = &character_2;
+	character_2.enemy = &character_1;
+	glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	particleModel = ParticleModel(1.0f, color);
 }
 
 //----------------------------------------------------------------------------------------
@@ -59,6 +67,7 @@ void A5::init()
 
 	glGenVertexArrays(1, &m_vao_arcCircle);
 	glGenVertexArrays(1, &m_vao_meshData);
+	glGenVertexArrays(1, &m_vao_particle);
 	enableVertexShaderInputSlots();
 
 	processLuaSceneFile(m_luaSceneFile);
@@ -214,6 +223,13 @@ void A5::createShaderProgram()
 	m_shader_arcCircle.attachVertexShader( getAssetFilePath("arc_VertexShader.vs").c_str() );
 	m_shader_arcCircle.attachFragmentShader( getAssetFilePath("arc_FragmentShader.fs").c_str() );
 	m_shader_arcCircle.link();
+
+	// add particle shader program
+	m_shader_particle.generateProgramObject();
+	m_shader_particle.attachVertexShader( getAssetFilePath("VertexShader.vs").c_str() );
+	m_shader_particle.attachFragmentShader( getAssetFilePath("particle_FragmentShader.fs").c_str() );
+	m_shader_particle.link();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -242,6 +258,17 @@ void A5::enableVertexShaderInputSlots()
 		// Enable the vertex shader attribute location for "position" when rendering.
 		m_arc_positionAttribLocation = m_shader_arcCircle.getAttribLocation("position");
 		glEnableVertexAttribArray(m_arc_positionAttribLocation);
+
+		CHECK_GL_ERRORS;
+	}
+
+	//-- Enable input slots for m_vao_particle:
+	{
+		glBindVertexArray(m_vao_particle);
+
+		// Enable the vertex shader attribute location for "position" when rendering.
+		m_particle_positionAttribLocation = m_shader_particle.getAttribLocation("position");
+		glEnableVertexAttribArray(m_particle_positionAttribLocation);
 
 		CHECK_GL_ERRORS;
 	}
@@ -297,6 +324,25 @@ void A5::uploadVertexDataToVbos (
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERRORS;
 	}
+
+	// Generate VBO to store the particle.
+	{
+
+		static const GLfloat particle_data[] = {
+		-0.66f, -0.66f, 0.66f,
+		0.66f, -0.66f, 0.66f,
+		-0.66f, 0.66f, 0.66f,
+		0.66f, 0.66f, 0.66f,
+		};
+
+		glGenBuffers( 1, &m_vbo_particle );
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo_particle );
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(particle_data), particle_data, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERRORS;
+	}
 }
 
 //----------------------------------------------------------------------------------------
@@ -328,6 +374,20 @@ void A5::mapVboDataToVertexShaderInputLocations()
 	// "position" vertex attribute location for any bound vertex shader program.
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_arcCircle);
 	glVertexAttribPointer(m_arc_positionAttribLocation, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	//-- Unbind target, and restore default values:
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	CHECK_GL_ERRORS;
+
+	// Add paticle System
+	glBindVertexArray(m_vao_particle);
+
+	// Tell GL how to map data from the vertex buffer "m_vbo_arcCircle" into the
+	// "position" vertex attribute location for any bound vertex shader program.
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_particle);
+	glVertexAttribPointer(m_particle_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	//-- Unbind target, and restore default values:
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -405,6 +465,8 @@ void A5::appLogic()
 	animationModel.update();
 
 	character_1.update();
+
+	particleModel.update();
 
 	uploadCommonSceneUniforms();
 }
@@ -621,6 +683,8 @@ void A5::draw() {
 		renderArcCircle();
 	}
 
+	renderParticles();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -660,6 +724,12 @@ void A5::renderSceneGraph(const SceneNode & root) {
 		m_shader.enable();
 		glDrawArrays(GL_TRIANGLES, batchInfo.startIndex, batchInfo.numIndices);
 		m_shader.disable();
+
+		if(geometryNode->isHit){
+			//cout<<"find hit"<<endl;
+			geometryNode->isHit = false;
+			particleModel.addParticle(  geometryNode->trans);
+		}
 	}
 
 	glBindVertexArray(0);
@@ -1434,6 +1504,132 @@ void A5::AddKeyFrame(int type){
 			keyFrameHandler.addKeyFrameforLeftHit(animationModel);
 	}
 }
+
+
+void A5::renderParticles(){
+	glBindVertexArray(m_vao_particle);
+	m_shader_particle.enable();
+	{
+	 for(int i = 0 ; i < particleModel.particle_v.size(); i++){
+		 	
+        	particle& particle = particleModel.particle_v[i];
+			
+			//-- Set ModelView matrix:
+			GLint location = m_shader_particle.getUniformLocation("ModelView");
+			mat4 modelView = m_view * particle.trans;
+
+			glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(modelView));
+			CHECK_GL_ERRORS;
+
+
+
+			//cout << " will draw particle "<<i<<endl;
+			//cout<< " location : "<<particle.location<<endl;
+			//cout<<" model view " << modelView<<endl;
+
+
+			/* location = m_shader_particle.getUniformLocation("NormalMatrix");
+			mat3 normalMatrix = glm::transpose(glm::inverse(mat3(modelView)));
+			glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
+			CHECK_GL_ERRORS; */
+
+
+			location = m_shader_particle.getUniformLocation("Perspective");
+			glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(m_perpsective));
+			CHECK_GL_ERRORS;
+			
+			location = m_shader_particle.getUniformLocation("color");
+			//cout<<particleModel.particle_color<<endl;
+			glUniform4fv(location, 1, value_ptr(particleModel.particle_color));
+			CHECK_GL_ERRORS;
+			//cout<<"will call draw"<<endl;
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			//cout<<"will call draw done"<<endl;
+			/* if( need_reRender ) {
+				int id = node.m_nodeId;
+				float r = float(id&0xff) / 255.0f;
+				float g = float((id>>8)&0xff) / 255.0f;
+				float b = float((id>>16)&0xff) / 255.0f;
+
+				location = m_shader.getUniformLocation("material.kd");
+				glUniform3f( location, r, g, b );
+				CHECK_GL_ERRORS;
+			}
+			else{
+				//-- Set Material values:
+				location = shader.getUniformLocation("material.kd");
+				
+				vec3 kd = node.material.kd;
+				if(node.isSelected){
+					kd = vec3(0.19f, 0.82f, 0.55f);
+				}
+				glUniform3fv(location, 1, value_ptr(kd));
+				CHECK_GL_ERRORS;
+				location = shader.getUniformLocation("material.ks");
+				vec3 ks = node.material.ks;
+				if(node.isSelected){
+					ks = vec3(0.5f);
+				}
+				glUniform3fv(location, 1, value_ptr(ks));
+				CHECK_GL_ERRORS;
+				location = shader.getUniformLocation("material.shininess");
+				glUniform1f(location, node.material.shininess);
+				CHECK_GL_ERRORS;
+			} */
+
+		}
+	}
+	//cout<<"bind done"<<endl;
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+	//cout<<"exit 1 "<<endl;
+	m_shader_particle.disable();
+	CHECK_GL_ERRORS;
+	//cout<<"exit 2"<<endl;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // dropped -- replaced with directly call character move function
 void A5::moveHandler(int target, int type){// target 0 for left 1 for right
