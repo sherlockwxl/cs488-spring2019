@@ -1,6 +1,8 @@
 #version 330
 
+uniform bool texture_enabled;
 uniform bool picking;
+uniform sampler2D Texture;
 
 struct LightSource {
     vec3 position;
@@ -55,8 +57,8 @@ vec3 phongModel(vec3 fragPosition, vec3 fragNormal) {
 }
 
 void main() {
-	if( picking ) {
-		fragColour = vec4(material.kd, 1.0);
+	if( texture_enabled ) {
+		fragColour = texture(Texture, vec2(fs_in.position_ES.x, fs_in.position_ES.y));
 	} else {
 		fragColour = vec4(phongModel(fs_in.position_ES, fs_in.normal_ES), 1.0);
 	}

@@ -149,7 +149,15 @@ int gr_mesh_cmd(lua_State* L)
 
 	const char* meshId = luaL_checkstring(L, 1);
 	const char* name = luaL_checkstring(L, 2);
-	data->node = new GeometryNode(meshId, name);
+
+  if(lua_gettop (L) == 4 && (luaL_checkinteger(L, 3) >= 1)){
+    const int textureId = luaL_checkinteger(L, 3);
+    data->node = new GeometryNode(meshId, name, textureId);
+  }else{
+    data->node = new GeometryNode(meshId, name, 0);
+  }
+  
+	
 
 	luaL_getmetatable(L, "gr.node");
 	lua_setmetatable(L, -2);

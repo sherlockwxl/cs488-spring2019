@@ -7,6 +7,8 @@
 #include "cs488-framework/ShaderProgram.hpp"
 #include "cs488-framework/MeshConsolidator.hpp"
 
+
+
 #include "SceneNode.hpp"
 #include "GeometryNode.hpp"
 #include "AnimationModel.hpp"
@@ -186,6 +188,9 @@ protected:
 	ShaderProgram m_shader_particle;
 	ParticleModel particleModel;
 
+	// texture mapping parameters
+	int texture_count;
+
 
 	void initAnimationModel();
 	void AddKeyFrame(int type);
@@ -195,6 +200,9 @@ protected:
 	void moveForward(int target);
 	void moveBack(int target);
 	void renderParticles();
+
+	// texture mapping
+	void loadTexture(const char* path);
 
 };
 

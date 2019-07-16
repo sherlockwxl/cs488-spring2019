@@ -17,6 +17,10 @@ using namespace std;
 #include <glm/gtx/io.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// image loader for texture mapping
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 using namespace glm;
 
 static bool show_gui = true;
@@ -36,7 +40,8 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vbo_arcCircle(0),
 	  m_particle_positionAttribLocation(0),
 	  m_vao_particle(0),
-	  m_vbo_particle(0)
+	  m_vbo_particle(0),
+	  texture_count(0)
 {
 	animationModel = AnimationModel();
 	keyFrameHandler = KeyFrameHandler();
@@ -71,6 +76,9 @@ void A5::init()
 	enableVertexShaderInputSlots();
 
 	processLuaSceneFile(m_luaSceneFile);
+
+	// process texture file
+	loadTexture("Assets/asphalt.jpg");
 
 	// Load and decode all .obj files at once here.  You may add additional .obj files to
 	// this list in order to support rendering additional mesh types.  All vertex
@@ -426,8 +434,8 @@ void A5::uploadCommonSceneUniforms() {
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(m_perpsective));
 		CHECK_GL_ERRORS;
 
-		location = m_shader.getUniformLocation("picking");
-		glUniform1i( location, need_reRender ? 1 : 0 );
+		//location = m_shader.getUniformLocation("picking");
+		//glUniform1i( location, need_reRender ? 1 : 0 );
 
 		if(!need_reRender){
 			//-- Set LightSource uniform for the scene:
@@ -613,6 +621,8 @@ void A5::updateShaderUniforms(
 		glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
 		CHECK_GL_ERRORS;
 
+		location = shader.getUniformLocation("texture_enabled");
+
 		if( need_reRender ) {
 			int id = node.m_nodeId;
 			float r = float(id&0xff) / 255.0f;
@@ -625,24 +635,32 @@ void A5::updateShaderUniforms(
 		}
 		else{
 			//-- Set Material values:
-			location = shader.getUniformLocation("material.kd");
+			cout<<"id is "<<node.textureId<<endl;
+			if(node.textureId == 0){
+				glUniform1i( location, 0 );
+				location = shader.getUniformLocation("material.kd");
+				
+				vec3 kd = node.material.kd;
+				if(node.isSelected){
+					kd = vec3(0.19f, 0.82f, 0.55f);
+				}
+				glUniform3fv(location, 1, value_ptr(kd));
+				CHECK_GL_ERRORS;
+				location = shader.getUniformLocation("material.ks");
+				vec3 ks = node.material.ks;
+				if(node.isSelected){
+					ks = vec3(0.5f);
+				}
+				glUniform3fv(location, 1, value_ptr(ks));
+				CHECK_GL_ERRORS;
+				location = shader.getUniformLocation("material.shininess");
+				glUniform1f(location, node.material.shininess);
+				CHECK_GL_ERRORS;
+			}else{
+				glUniform1i( location, 1 );
+      			glBindTexture( GL_TEXTURE_2D, node.textureId );
+			}
 			
-			vec3 kd = node.material.kd;
-			if(node.isSelected){
-				kd = vec3(0.19f, 0.82f, 0.55f);
-			}
-			glUniform3fv(location, 1, value_ptr(kd));
-			CHECK_GL_ERRORS;
-			location = shader.getUniformLocation("material.ks");
-			vec3 ks = node.material.ks;
-			if(node.isSelected){
-				ks = vec3(0.5f);
-			}
-			glUniform3fv(location, 1, value_ptr(ks));
-			CHECK_GL_ERRORS;
-			location = shader.getUniformLocation("material.shininess");
-			glUniform1f(location, node.material.shininess);
-			CHECK_GL_ERRORS;
 		}
 
 	}
@@ -1589,6 +1607,33 @@ void A5::renderParticles(){
     
 }
 
+
+void A5::loadTexture(const char* path){
+	// follow the process from learnopengl website
+	// first create a new texture object
+	unsigned int texture;
+	glGenTextures(1, &texture);  
+	glBindTexture(GL_TEXTURE_2D, texture);  
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	int width, height, nrChannels;
+	unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	texture_count++;
+	stbi_image_free(data);
+}
 
 
 
