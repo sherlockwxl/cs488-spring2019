@@ -12,6 +12,8 @@ uniform LightSource light;
 
 uniform mat4 ModelView;
 uniform mat4 Perspective;
+uniform mat4 lightProjection;
+uniform mat4 lightView;
 
 // Remember, this is transpose(inverse(ModelView)).  Normals should be
 // transformed using this matrix instead of the ModelView matrix.
@@ -21,6 +23,7 @@ out VsOutFsIn {
 	vec3 position_ES; // Eye-space position
 	vec3 normal_ES;   // Eye-space normal
 	LightSource light;
+	vec4 lightSpace;  // position for light space
 } vs_out;
 
 
@@ -32,6 +35,8 @@ void main() {
 	vs_out.normal_ES = normalize(NormalMatrix * normal);
 
 	vs_out.light = light;
+
+	vs_out.lightSpace = lightProjection * lightView * pos4;
 
 	gl_Position = Perspective * ModelView * vec4(position, 1.0);
 }

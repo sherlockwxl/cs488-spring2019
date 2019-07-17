@@ -237,7 +237,7 @@ box Character::getBoundingBox(SceneNode* node){
     if(GeoNode->meshId == "cube"){
         Mult = 0.5f;
     }else{
-        Mult = 1.0f;
+        Mult = 0.6f;
     }
     glm::vec3 Box_base[] = {glm::vec3(-1.0f*Mult, -1.0f*Mult, -1.0f*Mult),
                            glm::vec3(-1.0f*Mult, -1.0f*Mult, 1.0f*Mult),

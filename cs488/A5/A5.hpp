@@ -62,7 +62,7 @@ protected:
 
 	void initPerspectiveMatrix();
 	void uploadCommonSceneUniforms();
-	void renderSceneGraph(const SceneNode &node);
+	void renderSceneGraph(const SceneNode &node, int pass);
 	void renderArcCircle();
 
 	glm::mat4 m_perpsective;
@@ -159,7 +159,7 @@ protected:
 
 	// update helper function
 	void selectNodeById(SceneNode &node, unsigned int id);
-	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix);
+	void updateShaderUniforms(const ShaderProgram & shader, const GeometryNode & node, const glm::mat4 & viewMatrix, int pass);
 	void rotateJointHelper(GLfloat angle, SceneNode & node, int type);
 	
 	void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix);
@@ -203,6 +203,17 @@ protected:
 
 	// texture mapping
 	void loadTexture(const char* path);
+
+	// shadow mapping
+	glm::mat4 lightProjection;
+	glm::mat4 lightView;
+	GLuint m_fbo_depthMap;
+  	GLuint depthMap_texture;
+  	ShaderProgram m_shader_depthMap;
+	void initDepthMap();
+	void renderSceneWithDepthMap(const SceneNode &node);
+	void uploadCommonSceneUniformsForDepthShader();
+
 
 };
 

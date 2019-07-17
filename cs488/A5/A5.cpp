@@ -42,6 +42,7 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vao_particle(0),
 	  m_vbo_particle(0),
 	  texture_count(0)
+
 {
 	animationModel = AnimationModel();
 	keyFrameHandler = KeyFrameHandler();
@@ -119,6 +120,9 @@ void A5::init()
 
 	// Extra ini for A5
 	initAnimationModel();
+	initDepthMap();
+
+
 
 }
 
@@ -238,6 +242,11 @@ void A5::createShaderProgram()
 	m_shader_particle.attachFragmentShader( getAssetFilePath("particle_FragmentShader.fs").c_str() );
 	m_shader_particle.link();
 
+	m_shader_depthMap.generateProgramObject();
+	m_shader_depthMap.attachVertexShader( getAssetFilePath("depthMap_VertexShader.vs").c_str() );
+	m_shader_depthMap.attachFragmentShader( getAssetFilePath("depthMap_FragmentShader.fs").c_str() );
+	m_shader_depthMap.link();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -337,10 +346,10 @@ void A5::uploadVertexDataToVbos (
 	{
 
 		static const GLfloat particle_data[] = {
-		-0.66f, -0.66f, 0.66f,
-		0.66f, -0.66f, 0.66f,
-		-0.66f, 0.66f, 0.66f,
+		-0.66f, 0.66f, -0.66f,
 		0.66f, 0.66f, 0.66f,
+		-0.66f, 0.66f, 0.66f,
+		0.66f, 0.66f, -0.66f,
 		};
 
 		glGenBuffers( 1, &m_vbo_particle );
@@ -421,8 +430,11 @@ void A5::initViewMatrix() {
 //----------------------------------------------------------------------------------------
 void A5::initLightSources() {
 	// World-space position
-	m_light.position = vec3(0.0f, 10.0f, 5.0f);
+	m_light.position = vec3(0.0f, 10.0f, -3.0f);
 	m_light.rgbIntensity = vec3(1.0f); // light
+	lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.0f, 40.0f);
+	lightView = glm::lookAt(m_light.position, vec3(0.0f, 0.0f, 0.0f),
+      vec3(0.0f, 1.0f, 0.0f));
 }
 
 //----------------------------------------------------------------------------------------
@@ -434,8 +446,11 @@ void A5::uploadCommonSceneUniforms() {
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(m_perpsective));
 		CHECK_GL_ERRORS;
 
-		//location = m_shader.getUniformLocation("picking");
-		//glUniform1i( location, need_reRender ? 1 : 0 );
+
+		location = m_shader.getUniformLocation("lightProjection");
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(lightProjection));
+		CHECK_GL_ERRORS; 
+		
 
 		if(!need_reRender){
 			//-- Set LightSource uniform for the scene:
@@ -461,6 +476,17 @@ void A5::uploadCommonSceneUniforms() {
 	m_shader.disable();
 }
 
+void A5::uploadCommonSceneUniformsForDepthShader() {
+	m_shader_depthMap.enable();
+	{
+		//-- Set Perpsective matrix uniform for the scene:
+		GLint location = m_shader_depthMap.getUniformLocation("lightProjection");
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(lightProjection));
+		CHECK_GL_ERRORS;
+	}
+	m_shader_depthMap.disable();
+}
+
 //----------------------------------------------------------------------------------------
 /*
  * Called once per frame, before guiLogic().
@@ -477,6 +503,8 @@ void A5::appLogic()
 	particleModel.update();
 
 	uploadCommonSceneUniforms();
+
+	uploadCommonSceneUniformsForDepthShader();
 }
 
 //----------------------------------------------------------------------------------------
@@ -603,65 +631,77 @@ void A5::guiLogic()
 void A5::updateShaderUniforms(
 		const ShaderProgram & shader,
 		const GeometryNode & node,
-		const glm::mat4 & viewMatrix
+		const glm::mat4 & viewMatrix,
+		int pass
 ) {
 
 	shader.enable();
 	{
-		//-- Set ModelView matrix:
-		GLint location = shader.getUniformLocation("ModelView");
-		mat4 modelView = viewMatrix * node.trans;
+		if(pass == 2){
+			//-- Set ModelView matrix:
+			GLint location = shader.getUniformLocation("ModelView");
+			mat4 modelView = viewMatrix * node.trans;
 
-		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(modelView));
-		CHECK_GL_ERRORS;
+			glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(modelView));
+			CHECK_GL_ERRORS;
 
-		//-- Set NormMatrix:
-		location = shader.getUniformLocation("NormalMatrix");
-		mat3 normalMatrix = glm::transpose(glm::inverse(mat3(modelView)));
-		glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
-		CHECK_GL_ERRORS;
+			location = shader.getUniformLocation("lightView");
+			mat4 lightViewN =    lightView * viewMatrix *  node.trans ;
+			glUniformMatrix4fv( location, 1, GL_FALSE, value_ptr(lightViewN) );
+			CHECK_GL_ERRORS;
 
-		location = shader.getUniformLocation("texture_enabled");
+			//-- Set NormMatrix:
+			location = shader.getUniformLocation("NormalMatrix");
+			mat3 normalMatrix = glm::transpose(glm::inverse(mat3(modelView)));
+			glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
+			CHECK_GL_ERRORS;
+			location = shader.getUniformLocation("texture_enabled");
 
-		if( need_reRender ) {
-			int id = node.m_nodeId;
-			float r = float(id&0xff) / 255.0f;
-			float g = float((id>>8)&0xff) / 255.0f;
-			float b = float((id>>16)&0xff) / 255.0f;
+			if( need_reRender ) {
+				int id = node.m_nodeId;
+				float r = float(id&0xff) / 255.0f;
+				float g = float((id>>8)&0xff) / 255.0f;
+				float b = float((id>>16)&0xff) / 255.0f;
 
-			location = m_shader.getUniformLocation("material.kd");
-			glUniform3f( location, r, g, b );
+				location = m_shader.getUniformLocation("material.kd");
+				glUniform3f( location, r, g, b );
+				CHECK_GL_ERRORS;
+			}
+			else{
+				//-- Set Material values:
+				if(node.textureId == 0){
+					glUniform1i( location, 0 );
+					location = shader.getUniformLocation("material.kd");
+					
+					vec3 kd = node.material.kd;
+					if(node.isSelected){
+						kd = vec3(0.19f, 0.82f, 0.55f);
+					}
+					glUniform3fv(location, 1, value_ptr(kd));
+					CHECK_GL_ERRORS;
+					location = shader.getUniformLocation("material.ks");
+					vec3 ks = node.material.ks;
+					if(node.isSelected){
+						ks = vec3(0.5f);
+					}
+					glUniform3fv(location, 1, value_ptr(ks));
+					CHECK_GL_ERRORS;
+					location = shader.getUniformLocation("material.shininess");
+					glUniform1f(location, node.material.shininess);
+					CHECK_GL_ERRORS;
+				}else{
+					glUniform1i( location, 1 );
+					glBindTexture( GL_TEXTURE_2D, node.textureId );
+				}
+				
+			}
+		}else{
+			GLint location = shader.getUniformLocation("lightView");
+			mat4 lightViewN =  lightView * viewMatrix *  node.trans;
+			glUniformMatrix4fv( location, 1, GL_FALSE, value_ptr(lightViewN) );
 			CHECK_GL_ERRORS;
 		}
-		else{
-			//-- Set Material values:
-			cout<<"id is "<<node.textureId<<endl;
-			if(node.textureId == 0){
-				glUniform1i( location, 0 );
-				location = shader.getUniformLocation("material.kd");
-				
-				vec3 kd = node.material.kd;
-				if(node.isSelected){
-					kd = vec3(0.19f, 0.82f, 0.55f);
-				}
-				glUniform3fv(location, 1, value_ptr(kd));
-				CHECK_GL_ERRORS;
-				location = shader.getUniformLocation("material.ks");
-				vec3 ks = node.material.ks;
-				if(node.isSelected){
-					ks = vec3(0.5f);
-				}
-				glUniform3fv(location, 1, value_ptr(ks));
-				CHECK_GL_ERRORS;
-				location = shader.getUniformLocation("material.shininess");
-				glUniform1f(location, node.material.shininess);
-				CHECK_GL_ERRORS;
-			}else{
-				glUniform1i( location, 1 );
-      			glBindTexture( GL_TEXTURE_2D, node.textureId );
-			}
-			
-		}
+		
 
 	}
 	shader.disable();
@@ -687,8 +727,8 @@ void A5::draw() {
 			glCullFace(GL_FRONT);
 		}
 	}
-	
-	renderSceneGraph(*m_rootNode);
+	renderSceneWithDepthMap(*m_rootNode);
+	//renderSceneGraph(*m_rootNode, 2);
 
 	if(z_buffer){
 		glDisable( GL_DEPTH_TEST );
@@ -706,7 +746,7 @@ void A5::draw() {
 }
 
 //----------------------------------------------------------------------------------------
-void A5::renderSceneGraph(const SceneNode & root) {
+void A5::renderSceneGraph(const SceneNode & root, int pass) {
 
 
 	// Bind the VAO once here, and reuse for all GeometryNode rendering below.
@@ -731,7 +771,7 @@ void A5::renderSceneGraph(const SceneNode & root) {
 			continue;
 
 		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
-		updateShaderUniforms(m_shader, *geometryNode, m_view);
+		
 
 		
 
@@ -739,9 +779,19 @@ void A5::renderSceneGraph(const SceneNode & root) {
 		BatchInfo batchInfo = m_batchInfoMap[geometryNode->meshId];
 
 		//-- Now render the mesh:
-		m_shader.enable();
-		glDrawArrays(GL_TRIANGLES, batchInfo.startIndex, batchInfo.numIndices);
-		m_shader.disable();
+		if(pass == 2){
+			updateShaderUniforms(m_shader, *geometryNode, m_view, 2);
+			m_shader.enable();
+			glDrawArrays(GL_TRIANGLES, batchInfo.startIndex, batchInfo.numIndices);
+			m_shader.disable();
+		}else{
+			glBindTexture( GL_TEXTURE_2D, depthMap_texture );
+			updateShaderUniforms(m_shader_depthMap, *geometryNode, m_view, 1);
+			m_shader_depthMap.enable();
+			glDrawArrays(GL_TRIANGLES, batchInfo.startIndex, batchInfo.numIndices);
+			m_shader_depthMap.disable();
+		}
+		
 
 		if(geometryNode->isHit){
 			//cout<<"find hit"<<endl;
@@ -754,7 +804,7 @@ void A5::renderSceneGraph(const SceneNode & root) {
 	CHECK_GL_ERRORS;
 
 	for(const SceneNode * node : root.children){
-		renderSceneGraph(*node);
+		renderSceneGraph(*node, pass);
 	}
 }
 
@@ -990,7 +1040,11 @@ bool A5::windowResizeEvent (
 		int height
 ) {
 	bool eventHandled(false);
+	lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.0f, 40.0f);
+	lightView = glm::lookAt(m_light.position, vec3(0.0f, 0.0f, 0.0f),
+      vec3(0.0f, 1.0f, 0.0f));
 	initPerspectiveMatrix();
+	initDepthMap();
 	return eventHandled;
 }
 
@@ -1633,6 +1687,35 @@ void A5::loadTexture(const char* path){
 	}
 	texture_count++;
 	stbi_image_free(data);
+}
+
+
+void A5::initDepthMap(){
+	glGenFramebuffers(1, &m_fbo_depthMap);  
+	glGenTextures(1, &depthMap_texture);
+	glBindTexture(GL_TEXTURE_2D, depthMap_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
+				m_windowWidth, m_windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_depthMap);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap_texture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+}
+
+void A5::renderSceneWithDepthMap(const SceneNode &node){
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_depthMap);
+    glClear(GL_DEPTH_BUFFER_BIT);
+	renderSceneGraph(node, 1);
+	glBindVertexArray(0);
+  	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	renderSceneGraph(node, 2);
+	glBindVertexArray(0);
 }
 
 
