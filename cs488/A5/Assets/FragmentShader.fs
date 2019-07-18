@@ -31,6 +31,44 @@ uniform Material material;
 uniform vec3 ambientIntensity;
 
 
+// follow tutrial from https://learnopengl.com/Lighting/Basic-Lighting
+vec3 PhongModelWithTextureAndShadow(vec3 fragPosition, vec3 fragNormal, float shadow, vec3 textureColor){
+    LightSource light = fs_in.light;
+    //ambient
+    vec3 ambientIntensityWithTexture = 0.3 * textureColor;
+
+    // diffuse
+    // Direction from fragment to light source.
+    vec3 norm = normalize(fragNormal);
+    vec3 l = normalize(light.position - fragPosition);
+    float diff = max(dot(norm, l), 0.0);
+    vec3 diffuse = diff * light.rgbIntensity;
+
+    // specular
+    float strength = 0.4;
+    // Direction from fragment to viewer (origin - fragPosition) -> the opposite
+    vec3 v = normalize(-fragPosition.xyz);
+    vec3 reflectV = reflect(-l,norm);
+
+    vec3 specular = vec3(0.0);
+
+    vec3 h = normalize(l + v);
+    if (diff > 0.0) {
+		// Halfway vector.
+		vec3 h = normalize(v + l);
+        float n_dot_h = max(dot(fragNormal, h), 0.0);
+
+        //specular = material.ks * pow(n_dot_h, material.shininess);
+        float spec = pow(max(dot(v, reflectV), 0.0), 32);
+        vec3 specular = strength * spec * light.rgbIntensity;
+    }
+
+    
+
+    return (ambientIntensityWithTexture + (diffuse + specular) * (1.0 - shadow)) * textureColor;
+}
+
+
 vec3 phongModel(vec3 fragPosition, vec3 fragNormal, float shadow) {
 	LightSource light = fs_in.light;
 
@@ -80,7 +118,8 @@ void main() {
     float shadow = shadowCalculation(fs_in.lightSpace, fs_in.normal_ES);
 
 	if( texture_enabled ) {
-		fragColour = texture(Texture, vec2(fs_in.position_ES.x, fs_in.position_ES.y));
+		vec4 colour = texture(Texture, vec2(fs_in.position_ES.x/20, fs_in.position_ES.y/20));
+        fragColour = vec4(PhongModelWithTextureAndShadow(fs_in.position_ES, fs_in.normal_ES, shadow, colour.rgb), 1.0);
 	} else {
 		fragColour = vec4(phongModel(fs_in.position_ES, fs_in.normal_ES, shadow), 1.0);
 	}

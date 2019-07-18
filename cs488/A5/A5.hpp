@@ -214,6 +214,8 @@ protected:
 	void renderSceneWithDepthMap(const SceneNode &node);
 	void uploadCommonSceneUniformsForDepthShader();
 
+	
+
 
 };
 

@@ -27,6 +27,7 @@ static bool show_gui = true;
 
 const size_t CIRCLE_PTS = 48;
 
+
 //----------------------------------------------------------------------------------------
 // Constructor
 A5::A5(const std::string & luaSceneFile)
@@ -80,6 +81,7 @@ void A5::init()
 
 	// process texture file
 	loadTexture("Assets/asphalt.jpg");
+	loadTexture("Assets/container.jpg");
 
 	// Load and decode all .obj files at once here.  You may add additional .obj files to
 	// this list in order to support rendering additional mesh types.  All vertex
@@ -121,7 +123,6 @@ void A5::init()
 	// Extra ini for A5
 	initAnimationModel();
 	initDepthMap();
-
 
 
 }
@@ -401,7 +402,7 @@ void A5::mapVboDataToVertexShaderInputLocations()
 	// Add paticle System
 	glBindVertexArray(m_vao_particle);
 
-	// Tell GL how to map data from the vertex buffer "m_vbo_arcCircle" into the
+	// Tell GL how to map data from the vertex buffer "m_vbo_particle" into the
 	// "position" vertex attribute location for any bound vertex shader program.
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_particle);
 	glVertexAttribPointer(m_particle_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -655,7 +656,7 @@ void A5::updateShaderUniforms(
 			mat3 normalMatrix = glm::transpose(glm::inverse(mat3(modelView)));
 			glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
 			CHECK_GL_ERRORS;
-			location = shader.getUniformLocation("texture_enabled");
+
 
 			if( need_reRender ) {
 				int id = node.m_nodeId;
@@ -670,9 +671,9 @@ void A5::updateShaderUniforms(
 			else{
 				//-- Set Material values:
 				if(node.textureId == 0){
+					location = shader.getUniformLocation("texture_enabled");
 					glUniform1i( location, 0 );
 					location = shader.getUniformLocation("material.kd");
-					
 					vec3 kd = node.material.kd;
 					if(node.isSelected){
 						kd = vec3(0.19f, 0.82f, 0.55f);
@@ -690,8 +691,10 @@ void A5::updateShaderUniforms(
 					glUniform1f(location, node.material.shininess);
 					CHECK_GL_ERRORS;
 				}else{
+					location = shader.getUniformLocation("texture_enabled");
 					glUniform1i( location, 1 );
-					glBindTexture( GL_TEXTURE_2D, node.textureId );
+					//glActiveTexture( GL_TEXTURE1 );
+					//glBindTexture( GL_TEXTURE_2D, node.textureId );
 				}
 				
 			}
@@ -785,6 +788,7 @@ void A5::renderSceneGraph(const SceneNode & root, int pass) {
 			glDrawArrays(GL_TRIANGLES, batchInfo.startIndex, batchInfo.numIndices);
 			m_shader.disable();
 		}else{
+			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_2D, depthMap_texture );
 			updateShaderUniforms(m_shader_depthMap, *geometryNode, m_view, 1);
 			m_shader_depthMap.enable();
@@ -819,8 +823,12 @@ void A5::renderArcCircle() {
 		glm::mat4 M;
 		if( aspect > 1.0 ) {
 			M = glm::scale( glm::mat4(), glm::vec3( 0.5/aspect, 0.5, 1.0 ) );
+			//M = glm::translate(M,m_light.position);
+			//cout<<M<<endl;
 		} else {
 			M = glm::scale( glm::mat4(), glm::vec3( 0.5, 0.5*aspect, 1.0 ) );
+			//M = glm::translate(M,m_light.position);
+			//cout<<M<<endl;
 		}
 		glUniformMatrix4fv( m_location, 1, GL_FALSE, value_ptr( M ) );
 		glDrawArrays( GL_LINE_LOOP, 0, CIRCLE_PTS );
@@ -1182,6 +1190,32 @@ bool A5::keyInputEvent (
 		if(key == GLFW_KEY_SPACE){
 			eventHandled = true;
 			character_1.move(4, 0);
+		}
+
+		if(key == GLFW_KEY_2){
+			m_light.position.y += 3.0f;
+			cout<<m_light.position<<endl;
+		}
+		if(key == GLFW_KEY_3){
+			m_light.position.y -= 3.0f;
+			cout<<m_light.position<<endl;
+		}
+		if(key == GLFW_KEY_4){
+			m_light.position.z += 3.0f;
+			cout<<m_light.position<<endl;
+		}
+		if(key == GLFW_KEY_5){
+			m_light.position.z -= 3.0f;
+			cout<<m_light.position<<endl;
+		}
+
+		if(key == GLFW_KEY_6){
+			m_light.position.x += 3.0f;
+			cout<<m_light.position<<endl;
+		}
+		if(key == GLFW_KEY_7){
+			m_light.position.x -= 3.0f;
+			cout<<m_light.position<<endl;
 		}
 		
 		
@@ -1698,8 +1732,12 @@ void A5::initDepthMap(){
 				m_windowWidth, m_windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+  float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+ 
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_depthMap);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap_texture, 0);

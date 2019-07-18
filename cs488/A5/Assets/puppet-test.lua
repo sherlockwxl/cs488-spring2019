@@ -13,12 +13,18 @@ darkgray = gr.material({0.25, 0.29, 0.30}, {0.1, 0.1, 0.1}, 10)
 
 -- add a platform
 
-platform = gr.mesh('cube', 'platform')
+platform = gr.mesh('cube', 'platform',2)
 rootnode:add_child(platform)
 platform:scale(25.0, 25.0, 0.1)
 platform:translate(0.0, 0.0, 5.0)
 platform:rotate('x',90)
 platform:set_material(darkgray)
+
+platform_back = gr.mesh('cube', 'platform_back')
+rootnode:add_child(platform_back)
+platform_back:scale(25.0, 25.0, 0.1)
+platform_back:translate(0.0, 0.0, -12.0)
+platform_back:set_material(darkgray)
 
 torso = gr.mesh('sphere', 'torso')
 rootnode:add_child(torso)
