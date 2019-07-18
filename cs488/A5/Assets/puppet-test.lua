@@ -13,9 +13,9 @@ darkgray = gr.material({0.25, 0.29, 0.30}, {0.1, 0.1, 0.1}, 10)
 
 -- add a platform
 
-platform = gr.mesh('cube', 'platform',2)
+platform = gr.mesh('cube', 'platform', 2)
 rootnode:add_child(platform)
-platform:scale(25.0, 25.0, 0.1)
+platform:scale(25.0, 25.0, 0.5)
 platform:translate(0.0, 0.0, 5.0)
 platform:rotate('x',90)
 platform:set_material(darkgray)

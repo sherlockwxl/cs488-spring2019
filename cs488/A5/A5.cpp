@@ -26,6 +26,66 @@ using namespace glm;
 static bool show_gui = true;
 
 const size_t CIRCLE_PTS = 48;
+const float platform_uv[] = {
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+  // top face bot right
+  0.0f, 1.0f,
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+  0.0f, 0.0f,
+
+  // Top face top left
+  0.0f, 1.0f,
+  1.0f, 1.0f,
+  0.0f, 0.0f
+};
 
 
 //----------------------------------------------------------------------------------------
@@ -42,7 +102,9 @@ A5::A5(const std::string & luaSceneFile)
 	  m_particle_positionAttribLocation(0),
 	  m_vao_particle(0),
 	  m_vbo_particle(0),
-	  texture_count(0)
+	  texture_count(0),
+	  m_vbo_textureUV(0),
+	  m_textureCoordsAttribLocation(0)
 
 {
 	animationModel = AnimationModel();
@@ -123,6 +185,8 @@ void A5::init()
 	// Extra ini for A5
 	initAnimationModel();
 	initDepthMap();
+	initTexture();
+
 
 
 }
@@ -265,6 +329,10 @@ void A5::enableVertexShaderInputSlots()
 		m_normalAttribLocation = m_shader.getAttribLocation("normal");
 		glEnableVertexAttribArray(m_normalAttribLocation);
 
+		// Enable the vertex shader attribute location for "textureUV" when rendering.
+		m_textureCoordsAttribLocation = m_shader.getAttribLocation("textureUV");
+		glEnableVertexAttribArray(m_textureCoordsAttribLocation);
+
 		CHECK_GL_ERRORS;
 	}
 
@@ -290,6 +358,7 @@ void A5::enableVertexShaderInputSlots()
 
 		CHECK_GL_ERRORS;
 	}
+
 
 	// Restore defaults
 	glBindVertexArray(0);
@@ -361,6 +430,19 @@ void A5::uploadVertexDataToVbos (
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERRORS;
 	}
+
+	{
+		 
+		glGenBuffers(1, &m_vbo_textureUV);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_textureUV);
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(platform_uv), platform_uv, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERRORS;
+  
+	}
 }
 
 //----------------------------------------------------------------------------------------
@@ -378,6 +460,10 @@ void A5::mapVboDataToVertexShaderInputLocations()
 	// "normal" vertex attribute location for any bound vertex shader program.
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_vertexNormals);
 	glVertexAttribPointer(m_normalAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_textureUV);
+   glVertexAttribPointer(m_textureCoordsAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
 
 	//-- Unbind target, and restore default values:
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -693,7 +779,7 @@ void A5::updateShaderUniforms(
 				}else{
 					location = shader.getUniformLocation("texture_enabled");
 					glUniform1i( location, 1 );
-					//glActiveTexture( GL_TEXTURE1 );
+					glActiveTexture( GL_TEXTURE1 );
 					glBindTexture( GL_TEXTURE_2D, node.textureId );
 				}
 				
@@ -1756,6 +1842,17 @@ void A5::renderSceneWithDepthMap(const SceneNode &node){
 	glBindVertexArray(0);
 }
 
+void A5::initTexture(){
+	GLuint shadowMap = m_shader.getUniformLocation("shadowMap");
+	m_shader.enable();
+	glUniform1i(shadowMap, 0);
+	m_shader.disable();
+
+	GLuint Texture = m_shader.getUniformLocation("Texture");
+	m_shader.enable();
+	glUniform1i(Texture, 1);
+	m_shader.disable();
+}
 
 
 

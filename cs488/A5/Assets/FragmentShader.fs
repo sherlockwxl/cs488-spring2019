@@ -15,6 +15,7 @@ in VsOutFsIn {
 	vec3 normal_ES;   // Eye-space normal
 	LightSource light;
     vec4 lightSpace;
+    vec3 textureUV;
 } fs_in;
 
 
@@ -118,8 +119,8 @@ void main() {
     float shadow = shadowCalculation(fs_in.lightSpace, fs_in.normal_ES);
 
 	if( texture_enabled ) {
-		vec4 colour = texture(Texture, vec2(fs_in.position_ES.x/20, fs_in.position_ES.y/20));
-        fragColour = vec4(PhongModelWithTextureAndShadow(fs_in.position_ES, fs_in.normal_ES, shadow, colour.rgb), 1.0);
+        vec4 colour1 = texture(Texture, vec2(fs_in.textureUV.x, fs_in.textureUV.y));
+        fragColour = vec4(PhongModelWithTextureAndShadow(fs_in.position_ES, fs_in.normal_ES, shadow, colour1.xyz), 1.0);
 	} else {
 		fragColour = vec4(phongModel(fs_in.position_ES, fs_in.normal_ES, shadow), 1.0);
 	}

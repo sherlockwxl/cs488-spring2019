@@ -3,6 +3,7 @@
 // Model-Space coordinates
 in vec3 position;
 in vec3 normal;
+in vec3 textureUV;
 
 struct LightSource {
     vec3 position;
@@ -24,6 +25,7 @@ out VsOutFsIn {
 	vec3 normal_ES;   // Eye-space normal
 	LightSource light;
 	vec4 lightSpace;  // position for light space
+	vec3 textureUV;
 } vs_out;
 
 
@@ -39,4 +41,5 @@ void main() {
 	vs_out.lightSpace = lightProjection * lightView * pos4;
 
 	gl_Position = Perspective * ModelView * vec4(position, 1.0);
+	vs_out.textureUV = textureUV;
 }

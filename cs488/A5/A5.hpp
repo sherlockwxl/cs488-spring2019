@@ -202,7 +202,10 @@ protected:
 	void renderParticles();
 
 	// texture mapping
+	GLint m_textureCoordsAttribLocation;
+	GLuint m_vbo_textureUV;
 	void loadTexture(const char* path);
+	void initTexture();
 
 	// shadow mapping
 	glm::mat4 lightProjection;
@@ -216,6 +219,7 @@ protected:
 
 	
 
+	
 
 };
 
