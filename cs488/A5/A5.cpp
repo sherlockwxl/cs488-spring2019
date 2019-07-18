@@ -694,7 +694,7 @@ void A5::updateShaderUniforms(
 					location = shader.getUniformLocation("texture_enabled");
 					glUniform1i( location, 1 );
 					//glActiveTexture( GL_TEXTURE1 );
-					//glBindTexture( GL_TEXTURE_2D, node.textureId );
+					glBindTexture( GL_TEXTURE_2D, node.textureId );
 				}
 				
 			}
