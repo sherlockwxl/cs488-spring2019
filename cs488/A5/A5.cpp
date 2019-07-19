@@ -112,8 +112,14 @@ A5::A5(const std::string & luaSceneFile)
 	keyFrameHandler = KeyFrameHandler();
 	character_1 = Character();
 	character_2 = Character();
+	character_1.id = 1;
+	character_2.id = 2;
 	character_1.enemy = &character_2;
 	character_2.enemy = &character_1;
+	character_1.animationModel = &animationModel;
+	character_2.animationModel = &animationModel;
+	character_1.keyFrameHandler = &keyFrameHandler;
+	character_2.keyFrameHandler = &keyFrameHandler;
 	glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	particleModel = ParticleModel(1.0f, color);
 	SoundEngine = createIrrKlangDevice();
@@ -260,6 +266,9 @@ void A5::processLuaSceneFile(const std::string & filename) {
 				character_1.geoIndexVector.push_back(id);
 				character_2.other_geoIndexVector.push_back(id);
 			}
+			if(node->m_nodeType == NodeType::JointNode){
+				jointIndex_c1.push(id);
+			}
 		}
 	}
 	for(int id = 0; id < totalNode; id++){
@@ -269,12 +278,25 @@ void A5::processLuaSceneFile(const std::string & filename) {
 				character_2.geoIndexVector.push_back(id);
 				character_1.other_geoIndexVector.push_back(id);
 			}
+			if(node->m_nodeType == NodeType::JointNode){
+				jointIndex_c2.push(id);
+			}
 		}
 	}
 	// push all joint node index into vector for easy access
 	while(!jointIndex.empty()) {
         jointIndexVector.push_back(jointIndex.top());
         jointIndex.pop();
+    }
+
+	// push joint node id for both characters
+	while(!jointIndex_c1.empty()) {
+        jointIndexVector_c1.push_back(jointIndex_c1.top());
+        jointIndex_c1.pop();
+    }
+	while(!jointIndex_c2.empty()) {
+        jointIndexVector_c2.push_back(jointIndex_c2.top());
+        jointIndex_c2.pop();
     }
 
 	// store all ori angle
@@ -284,6 +306,18 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		ori_joint_angle.push_back(jointNode->m_joint_x.init);
 	}
 	ori_joint_angle.push_back(head_rotation);
+
+	// back up joint angle for each character
+	for(auto const& id: jointIndexVector_c1) {
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		character_1.ori_joint_angle.push_back(jointNode->m_joint_x.init);
+	}
+	for(auto const& id: jointIndexVector_c2) {
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		character_2.ori_joint_angle.push_back(jointNode->m_joint_x.init);
+	}
 
 	if (!m_rootNode) {
 		std::cerr << "Could Not Open " << filename << std::endl;
@@ -1254,13 +1288,12 @@ bool A5::keyInputEvent (
 		}
 
 		if(key == GLFW_KEY_1){
-			AddKeyFrame(0);
+			character_1.hitwithLeftHand();
 		}
 
 		if(key == GLFW_KEY_RIGHT){
 			eventHandled = true;
 			character_1.move(1, 0);
-			AddKeyFrame(1);
 		}
 
 		if(key == GLFW_KEY_LEFT){
@@ -1679,32 +1712,40 @@ void A5::unselectJoints(){
 // functions for A5
 void A5::initAnimationModel(){
 	// first load all joint node pointer into animation model
-	for(auto const& id: jointIndexVector) {
+	for(auto const& id: jointIndexVector_c1) {
 		SceneNode * node = findNodeById(*m_rootNode, id);
-		animationModel.JointPointers_v.push_back(node);
-		animationModel.durationCont_v.push_back(0);
+		animationModel.JointPointers_v_c1.push_back(node);
+		animationModel.durationCont_v_ani_c1.push_back(0);
+		animationModel.durationCont_v_move_c1.push_back(0);
 		string s = "dummy";
 		glm::vec2 rotation = glm::vec2(0.0f, 0.0f);
-		KeyFrame kf = KeyFrame(s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
+		KeyFrame kf = KeyFrame(s, s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
 		vector<KeyFrame> temp;
 		temp.push_back(kf);
-		animationModel.keyFrame_v.push_back(temp);
+		animationModel.keyFrame_v_ani_c1.push_back(temp);
+		animationModel.keyFrame_v_move_c1.push_back(temp);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		animationModel.ori_joint_angle_c1.push_back(jointNode->m_joint_x.init);
 	}
+	
 
+	for(auto const& id: jointIndexVector_c2) {
+		SceneNode * node = findNodeById(*m_rootNode, id);
+		animationModel.JointPointers_v_c2.push_back(node);
+		animationModel.durationCont_v_ani_c2.push_back(0);
+		animationModel.durationCont_v_move_c2.push_back(0);
+		string s = "dummy";
+		glm::vec2 rotation = glm::vec2(0.0f, 0.0f);
+		KeyFrame kf = KeyFrame(s, s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
+		vector<KeyFrame> temp;
+		temp.push_back(kf);
+		animationModel.keyFrame_v_ani_c2.push_back(temp);
+		animationModel.keyFrame_v_move_c2.push_back(temp);
+		JointNode * jointNode = static_cast<JointNode*>(node);
+		animationModel.ori_joint_angle_c2.push_back(jointNode->m_joint_x.init);
+	}
 }
 
-
-// 0 for left arm attack
-void A5::AddKeyFrame(int type){
-	switch(type){
-		case 0: // left arm attack
-			keyFrameHandler.addKeyFrameforLeftHit(animationModel);
-			break;
-		case 1:
-			keyFrameHandler.addKeyFrameforRunForward(animationModel);
-			break;
-	}
-}
 
 
 void A5::renderParticles(){
@@ -1963,5 +2004,19 @@ void A5::moveBack(int target){
 		Right_rootNode->translate(vec3(0.0f, 0.0f, -1.0f));
 	}
 }
+
+
+/* 
+// 0 for left arm attack
+void A5::AddKeyFrame(int type){
+	switch(type){
+		case 0: // left arm attack
+			keyFrameHandler.addKeyFrameforLeftHit(animationModel);
+			break;
+		case 1:
+			keyFrameHandler.addKeyFrameforRunForward(animationModel);
+			break;
+	}
+} */
 
 // dropped till here

@@ -174,6 +174,10 @@ protected:
 	// change for project
 
 	AnimationModel animationModel;
+	std::vector<int> jointIndexVector_c1;
+	std::vector<int> jointIndexVector_c2;
+	std::priority_queue<int, vector<int>, greater<int> > jointIndex_c1;
+	std::priority_queue<int, vector<int>, greater<int> > jointIndex_c2;
 	KeyFrameHandler keyFrameHandler;
 	std::shared_ptr<SceneNode> Left_rootNode;
 	std::shared_ptr<SceneNode> Right_rootNode;
@@ -194,7 +198,6 @@ protected:
 
 
 	void initAnimationModel();
-	void AddKeyFrame(int type);
 	void moveHandler(int target, int type);
 	void moveLeft(int target);
 	void moveRight(int target);

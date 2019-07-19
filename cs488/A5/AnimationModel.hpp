@@ -20,10 +20,21 @@ using namespace glm;
 
 class AnimationModel{
 public:
-    vector<SceneNode *> JointPointers_v;
-    vector<vector<KeyFrame>> keyFrame_v;
-    vector<int> durationCont_v;
-    int countForLeftUpArm = 0;;
+
+// for character 1
+    vector<SceneNode *> JointPointers_v_c1;
+    vector<vector<KeyFrame>> keyFrame_v_ani_c1;
+    vector<vector<KeyFrame>> keyFrame_v_move_c1;
+    vector<int> durationCont_v_ani_c1;
+    vector<int> durationCont_v_move_c1;
+    std::vector<GLfloat> ori_joint_angle_c1;
+// for character 2
+    vector<SceneNode *> JointPointers_v_c2;
+    vector<vector<KeyFrame>> keyFrame_v_ani_c2;
+    vector<vector<KeyFrame>> keyFrame_v_move_c2;
+    vector<int> durationCont_v_ani_c2;
+    vector<int> durationCont_v_move_c2;
+    std::vector<GLfloat> ori_joint_angle_c2;
 
 
     AnimationModel();

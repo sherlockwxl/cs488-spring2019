@@ -1,3 +1,5 @@
+#ifndef Key_FrameHandler
+#define Key_FrameHandler
 #include <vector>
 #include <glm/glm.hpp>
 #include "KeyFrame.hpp"
@@ -11,7 +13,12 @@ class KeyFrameHandler{
         AnimationModel animationModel;
         KeyFrameHandler();
         
-    void addKeyFrameforLeftHit(AnimationModel &animationModel);
-    void addKeyFrameforRunForward(AnimationModel &animationModel);
+    void addKeyFrameforLeftHit(AnimationModel &animationModel, int character);// 1 for c1 2 for c2
+    void addKeyFrameforRunForward(AnimationModel &animationModel, int character);
+    void stopMovement(AnimationModel &animationModel, int character);
+    void stopAnimation(AnimationModel &animationModel, int character);
 
 };
+
+
+#endif

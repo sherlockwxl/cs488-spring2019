@@ -14,17 +14,19 @@ class KeyFrame{
 
 public:
     string KeyFrameName;
+    string KeyFrameTargetJointName;
     int totalTime;
     int type; // 0 for translation; 1 for rotation
     glm::vec2 rotationTarget;
     glm::vec3 translationTarget;
     int order; // 1 for x first, -1 for y first
 
-    KeyFrame(string KeyFrameName, int totalTime, int type, // 0 for translation; 1 for rotation
+    KeyFrame(string KeyFrameName, string KeyFrameTargetJointName, int totalTime, int type, // 0 for translation; 1 for rotation
     int order,
     glm::vec2 rotationTarget,
     glm::vec3 translationTarget)
     : KeyFrameName(KeyFrameName),
+    KeyFrameTargetJointName(KeyFrameTargetJointName),
 	  totalTime(totalTime),
       type(type),
       order(order),

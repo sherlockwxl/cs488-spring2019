@@ -6,6 +6,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "SceneNode.hpp"
+#include "AnimationModel.hpp"
+#include "KeyFrameHandler.hpp"
 
 #include "cs488-framework/OpenGLImport.hpp"
 
@@ -22,6 +24,7 @@ struct box{
 using namespace std;
 class Character{
     public:
+        int id;
         GLfloat v_upOrDown = 0.0f;
         GLfloat v_forOrBack = 0.0f;
         GLfloat v_leftOrRight = 0.0f;
@@ -44,6 +47,9 @@ class Character{
         int moveUpFrameCounter;
         int moveLeftFrameCounter;
         Character *enemy;
+        AnimationModel *animationModel;
+        KeyFrameHandler *keyFrameHandler;
+        std::vector<GLfloat> ori_joint_angle;
 
 
         Character(SceneNode m_rootNode);
@@ -60,6 +66,10 @@ class Character{
         irrklang::ISoundEngine *SoundEngine;
         irrklang::ISound *chracterWalkSound;
         irrklang::vec3df getPosition();
+
+        void hitwithLeftHand();
+        void stopMovement();
+        void stopAnimation();
 };
 
 

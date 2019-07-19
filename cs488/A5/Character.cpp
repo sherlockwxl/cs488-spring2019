@@ -166,13 +166,20 @@ void Character::update(){
         moveLeftFrameCounter = 0;
         moveLeftOrRight = 0;
         moveUpOrDown = 0;
+        keyFrameHandler->stopMovement(*animationModel, id);
     }else{
         irrklang::vec3df newPosition = getPosition();
         chracterWalkSound->setPosition(newPosition);
         //cout<<glm::length2(v_left)<<" "<<glm::length2(v_for)<<endl;
         if(glm::length2(v_left) > 0 || glm::length2(v_for) > 0){
             chracterWalkSound->setIsPaused(false);
+            keyFrameHandler->addKeyFrameforRunForward(*animationModel, id);
         }else{
+            if(moveLeftOrRight !=0 || moveUpOrDown != 0){
+                moveUpOrDown = 0;
+                moveLeftOrRight = 0;
+                keyFrameHandler->stopMovement(*animationModel, id);
+            }
             chracterWalkSound->setIsPaused(true);
         }
     }
@@ -321,6 +328,11 @@ irrklang::vec3df Character::getPosition(){
     return position;
 }
 
+
+
+void Character::hitwithLeftHand(){
+    keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+}
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
     GeometryNode * RightGeoNode = static_cast<GeometryNode *>(RightNode);
