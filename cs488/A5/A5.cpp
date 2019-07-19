@@ -22,6 +22,7 @@ using namespace std;
 #include "stb_image.h"
 
 using namespace glm;
+using namespace irrklang;
 
 static bool show_gui = true;
 
@@ -115,6 +116,7 @@ A5::A5(const std::string & luaSceneFile)
 	character_2.enemy = &character_1;
 	glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	particleModel = ParticleModel(1.0f, color);
+	SoundEngine = createIrrKlangDevice();
 }
 
 //----------------------------------------------------------------------------------------

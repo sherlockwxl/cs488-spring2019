@@ -9,6 +9,8 @@
 
 #include "cs488-framework/OpenGLImport.hpp"
 
+#include "irrklang/irrKlang.h"
+
 struct box{
     GLfloat min_x;
     GLfloat max_x;
@@ -54,6 +56,10 @@ class Character{
         SceneNode * findNodeById(SceneNode& rootNode, unsigned int id);
         box getBoundingBox(SceneNode * node);
         void gotHit(int NodeId);
+
+        irrklang::ISoundEngine *SoundEngine;
+        irrklang::ISound *chracterWalkSound;
+        irrklang::vec3df getPosition();
 };
 
 

@@ -2,11 +2,24 @@
 #include "Character.hpp"
 #include "GeometryNode.hpp"
 #include <glm/gtx/io.hpp>
+
+using namespace irrklang;
 Character::Character(){
     moveLeftOrRight = 0;
     moveUpOrDown = 0;
     moveUpFrameCounter = 0;
     moveLeftFrameCounter = 0;
+    SoundEngine = createIrrKlangDevice();
+    irrklang::vec3df position(0,3,3);        // position of the listener
+    irrklang::vec3df lookDirection(0,0,-2); // the direction the listener looks into
+    irrklang::vec3df velPerSecond(0,0,0);    // only relevant for doppler effects
+    irrklang::vec3df upVector(0,1,0);        // where 'up' is in your 3D scene
+
+    SoundEngine->setListenerPosition(position, lookDirection, velPerSecond, upVector);
+    chracterWalkSound = SoundEngine->play3D("Assets/walk_sound.wav",position, GL_TRUE,  GL_TRUE, GL_TRUE);
+    chracterWalkSound->setPlaybackSpeed(0.8f);
+    chracterWalkSound->setMinDistance(5.0f); // a loud sound
+    
 }
 Character::Character(SceneNode m_rootNode){
     m_rootNode = m_rootNode;
@@ -153,6 +166,15 @@ void Character::update(){
         moveLeftFrameCounter = 0;
         moveLeftOrRight = 0;
         moveUpOrDown = 0;
+    }else{
+        irrklang::vec3df newPosition = getPosition();
+        chracterWalkSound->setPosition(newPosition);
+        //cout<<glm::length2(v_left)<<" "<<glm::length2(v_for)<<endl;
+        if(glm::length2(v_left) > 0 || glm::length2(v_for) > 0){
+            chracterWalkSound->setIsPaused(false);
+        }else{
+            chracterWalkSound->setIsPaused(true);
+        }
     }
     
 }
@@ -281,6 +303,23 @@ void Character::gotHit(int NodeId){
     //TODO: reduce life value after
 }
 
+
+irrklang::vec3df Character::getPosition(){
+    irrklang::vec3df position;
+    
+    GeometryNode * GeoNode = static_cast<GeometryNode *>(m_rootNode.get());
+
+    //build box for each node
+    //cout<<LeftNode->trans<<endl;
+    // test
+    glm::vec3 trans = glm::vec3(GeoNode->trans[3][0], GeoNode->trans[3][1], GeoNode->trans[3][2]);
+    trans = glm::vec3( glm::vec4(trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
+    std::cout<<"run covert"<<trans<<std::endl;
+    position.X = -1 *(double)trans.x;
+    position.Y = 1 * (double)trans.y;
+    position.Z = 1 * (double)trans.z;
+    return position;
+}
 
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);

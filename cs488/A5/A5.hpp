@@ -16,6 +16,7 @@
 #include "KeyFrameHandler.hpp"
 #include "Character.hpp"
 #include "ParticleModel.hpp"
+#include "irrklang/irrKlang.h"
 
 
 #include <glm/glm.hpp>
@@ -217,7 +218,8 @@ protected:
 	void renderSceneWithDepthMap(const SceneNode &node);
 	void uploadCommonSceneUniformsForDepthShader();
 
-	
+	// sound 
+	irrklang::ISoundEngine *SoundEngine;
 
 	
 
