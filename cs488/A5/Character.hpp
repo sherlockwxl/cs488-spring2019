@@ -51,6 +51,9 @@ class Character{
         KeyFrameHandler *keyFrameHandler;
         std::vector<GLfloat> ori_joint_angle;
 
+        int animationDuration;
+        int movementDuration;
+
 
         Character(SceneNode m_rootNode);
         Character();

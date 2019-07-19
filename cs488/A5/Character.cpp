@@ -10,6 +10,8 @@ Character::Character(){
     moveUpFrameCounter = 0;
     moveLeftFrameCounter = 0;
     SoundEngine = createIrrKlangDevice();
+    animationDuration = 0;
+    movementDuration = 0;
     irrklang::vec3df position(0,3,3);        // position of the listener
     irrklang::vec3df lookDirection(0,0,-2); // the direction the listener looks into
     irrklang::vec3df velPerSecond(0,0,0);    // only relevant for doppler effects
@@ -63,7 +65,7 @@ void Character::move(int direction, int type){
             if(moveUpOrDown == 1 && type == 1){// to end
                 moveUpFrameCounter = persistence;
             }else{
-                if(moveUpOrDown == -1 && type == 1){
+                if((moveUpOrDown == -1  || moveUpOrDown == 0) && type == 1){
                     return;
                 }
                 moveUpOrDown = 1;
@@ -72,11 +74,11 @@ void Character::move(int direction, int type){
 
             break;
         case 2: // move down
-
+            //cout<<" current " << moveUpOrDown << " type : "<< type<< " counter :"<<moveUpFrameCounter<<endl;
             if(moveUpOrDown == -1 && type == 1){// to end
                 moveUpFrameCounter = persistence;
             }else{
-                if(moveUpOrDown == 1 && type == 1){
+                if((moveUpOrDown == 1 || moveUpOrDown == 0) && type == 1){
                     return;
                 }
                 moveUpOrDown = -1;
@@ -96,6 +98,7 @@ void Character::move(int direction, int type){
 
 
 void Character::update(){
+    animationDuration = std::max(animationDuration - 1,0);
     checkOntheGround();
     GLfloat v_up; 
     if(jump == 1){ // jump triggered
@@ -162,11 +165,10 @@ void Character::update(){
     }
     if(checkCollisions()){
         m_rootNode->translate(glm::vec3(temp * -1.0f));
-        moveUpFrameCounter = 0;
-        moveLeftFrameCounter = 0;
-        moveLeftOrRight = 0;
-        moveUpOrDown = 0;
-        keyFrameHandler->stopMovement(*animationModel, id);
+        stopMovement();
+        if(animationDuration > 0){
+            stopAnimation();
+        }
     }else{
         irrklang::vec3df newPosition = getPosition();
         chracterWalkSound->setPosition(newPosition);
@@ -176,9 +178,7 @@ void Character::update(){
             keyFrameHandler->addKeyFrameforRunForward(*animationModel, id);
         }else{
             if(moveLeftOrRight !=0 || moveUpOrDown != 0){
-                moveUpOrDown = 0;
-                moveLeftOrRight = 0;
-                keyFrameHandler->stopMovement(*animationModel, id);
+                stopMovement();
             }
             chracterWalkSound->setIsPaused(true);
         }
@@ -331,7 +331,21 @@ irrklang::vec3df Character::getPosition(){
 
 
 void Character::hitwithLeftHand(){
-    keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+    animationDuration += keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+}
+
+
+void Character::stopMovement(){
+    moveUpOrDown = 0;
+    moveLeftOrRight = 0;
+    moveLeftFrameCounter = 0;
+    moveUpFrameCounter = 0;
+    keyFrameHandler->stopMovement(*animationModel, id);
+}
+
+void Character::stopAnimation(){
+    animationDuration = 0;
+    keyFrameHandler->stopAnimation(*animationModel, id);
 }
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);

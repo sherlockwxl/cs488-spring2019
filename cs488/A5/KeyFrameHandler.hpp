@@ -12,9 +12,10 @@ class KeyFrameHandler{
     public:
         AnimationModel animationModel;
         KeyFrameHandler();
-        
-    void addKeyFrameforLeftHit(AnimationModel &animationModel, int character);// 1 for c1 2 for c2
-    void addKeyFrameforRunForward(AnimationModel &animationModel, int character);
+    
+    // return duration
+    int addKeyFrameforLeftHit(AnimationModel &animationModel, int character);// 1 for c1 2 for c2
+    int addKeyFrameforRunForward(AnimationModel &animationModel, int character);
     void stopMovement(AnimationModel &animationModel, int character);
     void stopAnimation(AnimationModel &animationModel, int character);
 
