@@ -314,7 +314,7 @@ irrklang::vec3df Character::getPosition(){
     // test
     glm::vec3 trans = glm::vec3(GeoNode->trans[3][0], GeoNode->trans[3][1], GeoNode->trans[3][2]);
     trans = glm::vec3( glm::vec4(trans,0.0f) * glm::inverse(trackBallRotationMatrix) );
-    std::cout<<"run covert"<<trans<<std::endl;
+    //std::cout<<"run covert"<<trans<<std::endl;
     position.X = -1 *(double)trans.x;
     position.Y = 1 * (double)trans.y;
     position.Z = 1 * (double)trans.z;

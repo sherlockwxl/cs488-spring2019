@@ -219,6 +219,7 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		}
 		if(node->m_name == "platform"){
 			character_1.ground_Node = std::shared_ptr<SceneNode>(node);
+			character_2.ground_Node = std::shared_ptr<SceneNode>(node);
 		}
 		if(node->m_name == "torso"){
 			GLfloat angel = 3.141592f * 0.5f;
@@ -588,6 +589,7 @@ void A5::appLogic()
 	animationModel.update();
 
 	character_1.update();
+	character_2.update();
 
 	particleModel.update();
 
@@ -1258,6 +1260,7 @@ bool A5::keyInputEvent (
 		if(key == GLFW_KEY_RIGHT){
 			eventHandled = true;
 			character_1.move(1, 0);
+			AddKeyFrame(1);
 		}
 
 		if(key == GLFW_KEY_LEFT){
@@ -1696,6 +1699,10 @@ void A5::AddKeyFrame(int type){
 	switch(type){
 		case 0: // left arm attack
 			keyFrameHandler.addKeyFrameforLeftHit(animationModel);
+			break;
+		case 1:
+			keyFrameHandler.addKeyFrameforRunForward(animationModel);
+			break;
 	}
 }
 

@@ -12,5 +12,6 @@ class KeyFrameHandler{
         KeyFrameHandler();
         
     void addKeyFrameforLeftHit(AnimationModel &animationModel);
+    void addKeyFrameforRunForward(AnimationModel &animationModel);
 
 };
