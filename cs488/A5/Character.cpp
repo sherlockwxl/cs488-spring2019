@@ -98,6 +98,7 @@ void Character::move(int direction, int type){
 
 
 void Character::update(){
+    updatecurrentStatus();
     animationDuration = std::max(animationDuration - 1,0);
     checkOntheGround();
     GLfloat v_up; 
@@ -184,6 +185,8 @@ void Character::update(){
         }
     }
     
+
+    updateAllNodeStatus();
 }
 
 // check if two geometry node has collision
@@ -220,7 +223,9 @@ bool Character::checkCollisions(){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
                 //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
-                enemy->gotHit(other_id);
+                if(status == -1){
+                    enemy->gotHit(other_id);
+                }
                 //should trigger movement stop
                 return true;
 
@@ -306,7 +311,11 @@ void Character::gotHit(int NodeId){
     SceneNode * node = findNodeById(*m_rootNode, NodeId);
     GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
     //cout<<" got hit on : " << node->m_name<<endl;
-    GeoNode->isHit = true;
+    if(GeoNode->hitTimeCount == 0){
+        GeoNode->isHit = true;
+        GeoNode->hitTimeCount = 60;
+    }
+    
     //TODO: reduce life value after
 }
 
@@ -331,7 +340,9 @@ irrklang::vec3df Character::getPosition(){
 
 
 void Character::hitwithLeftHand(){
-    animationDuration += keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+    if(animationDuration<60){
+         animationDuration += keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+    }
 }
 
 
@@ -346,6 +357,29 @@ void Character::stopMovement(){
 void Character::stopAnimation(){
     animationDuration = 0;
     keyFrameHandler->stopAnimation(*animationModel, id);
+}
+
+void Character::updateAllNodeStatus(){
+    for(auto const& id: geoIndexVector) {
+        SceneNode * node = findNodeById(*m_rootNode, id);
+        if(node->m_nodeType == NodeType::GeometryNode){
+            GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
+            if(GeoNode->isHit){
+                if(GeoNode->particleTriggered == true){
+                    GeoNode->hitTimeCount = std::max(GeoNode->hitTimeCount - 1, 0);
+                    if(GeoNode->hitTimeCount == 0){
+                        GeoNode->isHit = false;
+                        GeoNode->particleTriggered =false;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void Character::updatecurrentStatus(){
+    status = animationModel->getCurrentStatus(id);
 }
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);

@@ -16,6 +16,9 @@ public:
 		const std::string & name
 	); */
 	bool isHit = false;
+	int hitTimeCount = 0;
+	bool particleTriggered = false;
+	int status = 0;// 0 for fefault, -1 for attack, 1 for defence
 	Material material;
 
 	// Mesh Identifier. This must correspond to an object name of

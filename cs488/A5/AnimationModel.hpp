@@ -27,20 +27,21 @@ public:
     vector<vector<KeyFrame>> keyFrame_v_move_c1;
     vector<int> durationCont_v_ani_c1;
     vector<int> durationCont_v_move_c1;
-    std::vector<GLfloat> ori_joint_angle_c1;
+    std::vector<glm::vec3> ori_joint_angle_c1;
 // for character 2
     vector<SceneNode *> JointPointers_v_c2;
     vector<vector<KeyFrame>> keyFrame_v_ani_c2;
     vector<vector<KeyFrame>> keyFrame_v_move_c2;
     vector<int> durationCont_v_ani_c2;
     vector<int> durationCont_v_move_c2;
-    std::vector<GLfloat> ori_joint_angle_c2;
+    std::vector<glm::vec3> ori_joint_angle_c2;
 
 
     AnimationModel();
-    void rotateJointHelper(GLfloat anglex, GLfloat angley, SceneNode & root, int type, int order);
+    void rotateJointHelper(GLfloat anglex, GLfloat angley, GLfloat anglez,SceneNode & root, int type, int order);
     void recursiveRotate(glm::mat4 revserseTargetMatrix, SceneNode& root, glm::mat4 rotatematrix); 
     void update();
+    int getCurrentStatus(int character_id);
 };
 
 #endif

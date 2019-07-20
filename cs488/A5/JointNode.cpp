@@ -26,3 +26,10 @@ void JointNode::set_joint_y(double min, double init, double max) {
 	m_joint_y.init = init;
 	m_joint_y.max = max;
 }
+
+//---------------------------------------------------------------------------------------
+void JointNode::set_joint_z(double min, double init, double max) {
+	m_joint_z.min = min;
+	m_joint_z.init = init;
+	m_joint_z.max = max;
+}

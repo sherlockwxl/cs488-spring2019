@@ -311,12 +311,12 @@ void A5::processLuaSceneFile(const std::string & filename) {
 	for(auto const& id: jointIndexVector_c1) {
 		SceneNode * node = findNodeById(*m_rootNode, id);
 		JointNode * jointNode = static_cast<JointNode*>(node);
-		character_1.ori_joint_angle.push_back(jointNode->m_joint_x.init);
+		character_1.ori_joint_angle.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
 	}
 	for(auto const& id: jointIndexVector_c2) {
 		SceneNode * node = findNodeById(*m_rootNode, id);
 		JointNode * jointNode = static_cast<JointNode*>(node);
-		character_2.ori_joint_angle.push_back(jointNode->m_joint_x.init);
+		character_2.ori_joint_angle.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
 	}
 
 	if (!m_rootNode) {
@@ -802,6 +802,11 @@ void A5::updateShaderUniforms(
 					if(node.isSelected){
 						kd = vec3(0.19f, 0.82f, 0.55f);
 					}
+					if(node.isHit){
+						if(node.hitTimeCount > 0){
+							kd = vec3(1.0f, 0.0f, 0.0f) + (1 - (float)node.hitTimeCount/60) * (node.material.kd - vec3(1.0f, 0.0f, 0.0f));
+						}
+					}
 					glUniform3fv(location, 1, value_ptr(kd));
 					CHECK_GL_ERRORS;
 					location = shader.getUniformLocation("material.ks");
@@ -923,8 +928,11 @@ void A5::renderSceneGraph(const SceneNode & root, int pass) {
 
 		if(geometryNode->isHit){
 			//cout<<"find hit"<<endl;
-			geometryNode->isHit = false;
-			particleModel.addParticle(  geometryNode->trans);
+			if(geometryNode->particleTriggered == false){
+				particleModel.addParticle(  geometryNode->trans);
+				geometryNode->particleTriggered = true;
+			}
+			
 		}
 	}
 
@@ -1718,14 +1726,14 @@ void A5::initAnimationModel(){
 		animationModel.durationCont_v_ani_c1.push_back(0);
 		animationModel.durationCont_v_move_c1.push_back(0);
 		string s = "dummy";
-		glm::vec2 rotation = glm::vec2(0.0f, 0.0f);
+		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		KeyFrame kf = KeyFrame(s, s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
 		vector<KeyFrame> temp;
 		temp.push_back(kf);
 		animationModel.keyFrame_v_ani_c1.push_back(temp);
 		animationModel.keyFrame_v_move_c1.push_back(temp);
 		JointNode * jointNode = static_cast<JointNode*>(node);
-		animationModel.ori_joint_angle_c1.push_back(jointNode->m_joint_x.init);
+		animationModel.ori_joint_angle_c1.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
 	}
 	
 
@@ -1735,14 +1743,14 @@ void A5::initAnimationModel(){
 		animationModel.durationCont_v_ani_c2.push_back(0);
 		animationModel.durationCont_v_move_c2.push_back(0);
 		string s = "dummy";
-		glm::vec2 rotation = glm::vec2(0.0f, 0.0f);
+		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		KeyFrame kf = KeyFrame(s, s, 0, 1, 1, rotation, glm::vec3(0.0f, 0.0f,0.0f));
 		vector<KeyFrame> temp;
 		temp.push_back(kf);
 		animationModel.keyFrame_v_ani_c2.push_back(temp);
 		animationModel.keyFrame_v_move_c2.push_back(temp);
 		JointNode * jointNode = static_cast<JointNode*>(node);
-		animationModel.ori_joint_angle_c2.push_back(jointNode->m_joint_x.init);
+		animationModel.ori_joint_angle_c2.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
 	}
 }
 

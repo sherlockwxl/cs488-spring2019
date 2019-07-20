@@ -49,10 +49,12 @@ class Character{
         Character *enemy;
         AnimationModel *animationModel;
         KeyFrameHandler *keyFrameHandler;
-        std::vector<GLfloat> ori_joint_angle;
+        std::vector<glm::vec3> ori_joint_angle;
 
         int animationDuration;
         int movementDuration;
+
+        int status;// 0 for default, -1 for attack, 1 for defence
 
 
         Character(SceneNode m_rootNode);
@@ -73,6 +75,8 @@ class Character{
         void hitwithLeftHand();
         void stopMovement();
         void stopAnimation();
+        void updateAllNodeStatus();
+        void updatecurrentStatus();
 };
 
 

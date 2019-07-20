@@ -16,6 +16,7 @@ class KeyFrameHandler{
     // return duration
     int addKeyFrameforLeftHit(AnimationModel &animationModel, int character);// 1 for c1 2 for c2
     int addKeyFrameforRunForward(AnimationModel &animationModel, int character);
+    int addKeyFrameforLeftLegHit(AnimationModel &animationModel, int character);
     void stopMovement(AnimationModel &animationModel, int character);
     void stopAnimation(AnimationModel &animationModel, int character);
 
