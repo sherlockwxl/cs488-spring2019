@@ -323,8 +323,85 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
 }
 
 
-int addKeyFrameforDefend(AnimationModel &animationModel, int character){
+int KeyFrameHandler::addKeyFrameforDefend(AnimationModel &animationModel, int character){
+    string keyFrameName = "Defend";
 
+
+    string s1 = "leftShoulderJoint";
+    string s2 = "leftElbow";
+    string s3 = "rightShoulderJoint";
+    string s4 = "rightElbow";
+    if(character == 2){
+        s1.append("_baymax");
+        s2.append("_baymax");
+        s3.append("_baymax");
+        s4.append("_baymax");
+    }
+
+    glm::vec3 s1_rotation1 = glm::vec3(-0.55f, 0.5f, -0.7f);
+    glm::vec3 s1_rotation2 = glm::vec3(0.0f, 0.0f, 0.0f);
+    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 30, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 60, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+
+    glm::vec3 s2_rotation1 = glm::vec3(-1.8f, 0.1f, 0.2f);
+    glm::vec3 s2_rotation2 = glm::vec3(0.0f, 0.0f, 0.0f);
+    KeyFrame s2_kf1 = KeyFrame(keyFrameName, s2, 32, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf2 = KeyFrame(keyFrameName, s2, 60, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf3 = KeyFrame(keyFrameName, s2, 10, 1, 1, s2_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+
+    glm::vec3 s3_rotation1 = glm::vec3(-0.8f, 0.5f, -0.7f);
+    glm::vec3 s3_rotation2 = glm::vec3(0.0f, 0.0f, 0.0f);
+    KeyFrame s3_kf1 = KeyFrame(keyFrameName, s3, 30, 1, 1, s3_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf2 = KeyFrame(keyFrameName, s3, 60, 1, 1, s3_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf3 = KeyFrame(keyFrameName, s3, 10, 1, 1, s3_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+
+    glm::vec3 s4_rotation1 = glm::vec3(1.55f, -0.1f, -0.2f);
+    glm::vec3 s4_rotation2 = glm::vec3(0.0f, 0.0f, 0.0f);
+    KeyFrame s4_kf1 = KeyFrame(keyFrameName, s4, 32, 1, 1, s4_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s4_kf2 = KeyFrame(keyFrameName, s4, 60, 1, 1, s4_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s4_kf3 = KeyFrame(keyFrameName, s4, 10, 1, 1, s4_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+
+    int size;
+    std::vector<SceneNode *> *JointPointers_v;
+    std::vector<std::vector<KeyFrame>> *keyFrame_v;
+
+    if(character == 1){
+        size = animationModel.JointPointers_v_c1.size();
+        JointPointers_v = &animationModel.JointPointers_v_c1;
+        keyFrame_v = &animationModel.keyFrame_v_ani_c1;
+    }else{
+        size = animationModel.JointPointers_v_c2.size();
+        JointPointers_v = &animationModel.JointPointers_v_c2;
+        keyFrame_v = &animationModel.keyFrame_v_ani_c2;
+    }
+
+    for(int i = 0 ; i < size; i ++){
+        SceneNode * node = JointPointers_v->at(i);
+        if(node->m_name == s1){
+            keyFrame_v->at(i).push_back(s1_kf1);
+            keyFrame_v->at(i).push_back(s1_kf2);
+            keyFrame_v->at(i).push_back(s1_kf3);
+        }
+        if(node->m_name == s2){ // push for leftElbow
+            keyFrame_v->at(i).push_back(s2_kf1);
+            keyFrame_v->at(i).push_back(s2_kf2);
+            keyFrame_v->at(i).push_back(s2_kf3);
+        }
+
+        if(node->m_name == s3){
+            keyFrame_v->at(i).push_back(s3_kf1);
+            keyFrame_v->at(i).push_back(s3_kf2);
+            keyFrame_v->at(i).push_back(s3_kf3);
+        }
+        if(node->m_name == s4){ // push for leftElbow
+            keyFrame_v->at(i).push_back(s4_kf1);
+            keyFrame_v->at(i).push_back(s4_kf2);
+            keyFrame_v->at(i).push_back(s4_kf3);
+        }
+    }
+
+    return 70;
 }
 
 

@@ -74,6 +74,7 @@ class Character{
 
         void hitwithLeftHand();
         void hitwithLeftLeg();
+        void defend();
         void stopMovement();
         void stopAnimation();
         void updateAllNodeStatus();

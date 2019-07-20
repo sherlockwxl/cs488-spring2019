@@ -257,7 +257,7 @@ int AnimationModel::getCurrentStatus(int character_id){
                     
                    if(currentKeyFrame_ani.KeyFrameName == "leftArmHit" || currentKeyFrame_ani.KeyFrameName == "leftLegHit"){
                        return -1;
-                   }else if(1==1){
+                   }else if(currentKeyFrame_ani.KeyFrameName=="Defend"){
                        return 1;
                    }
                 }
@@ -279,7 +279,7 @@ int AnimationModel::getCurrentStatus(int character_id){
                     
                    if(currentKeyFrame_ani.KeyFrameName == "leftArmHit"||currentKeyFrame_ani.KeyFrameName == "leftLegHit"){
                        return -1;
-                   }else if(1==1){
+                   }else if(currentKeyFrame_ani.KeyFrameName=="Defend"){
                        return 1;
                    }
                 }

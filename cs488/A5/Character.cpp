@@ -168,7 +168,10 @@ void Character::update(){
         m_rootNode->translate(glm::vec3(temp * -1.0f));
         stopMovement();
         if(animationDuration > 0){
-            stopAnimation();
+            if(status != 1){
+                stopAnimation();
+            }
+            
         }
     }else{
         irrklang::vec3df newPosition = getPosition();
@@ -311,10 +314,13 @@ void Character::gotHit(int NodeId){
     SceneNode * node = findNodeById(*m_rootNode, NodeId);
     GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
     //cout<<" got hit on : " << node->m_name<<endl;
-    if(GeoNode->hitTimeCount == 0){
-        GeoNode->isHit = true;
-        GeoNode->hitTimeCount = 60;
+    if(status != 1){
+        if(GeoNode->hitTimeCount == 0){
+            GeoNode->isHit = true;
+            GeoNode->hitTimeCount = 60;
+        }
     }
+    
     
     //TODO: reduce life value after
 }
@@ -351,6 +357,11 @@ void Character::hitwithLeftLeg(){
     }
 }
 
+void Character::defend(){
+    if(animationDuration<40){
+         animationDuration += keyFrameHandler->addKeyFrameforDefend(*animationModel, id);
+    }
+}
 
 void Character::stopMovement(){
     cout<<"stop movement called"<<endl;

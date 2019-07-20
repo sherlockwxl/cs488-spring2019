@@ -1293,6 +1293,9 @@ bool A5::keyInputEvent (
 		if(key == GLFW_KEY_2){
 			character_1.hitwithLeftLeg();
 		}
+		if(key == GLFW_KEY_3){
+			character_1.defend();
+		}
 		if(key == GLFW_KEY_PAGE_UP){
 			character_2.hitwithLeftHand();
 		}
