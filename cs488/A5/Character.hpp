@@ -73,6 +73,7 @@ class Character{
         irrklang::vec3df getPosition();
 
         void hitwithLeftHand();
+        void hitwithLeftLeg();
         void stopMovement();
         void stopAnimation();
         void updateAllNodeStatus();

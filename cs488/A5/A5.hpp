@@ -224,6 +224,9 @@ protected:
 	// sound 
 	irrklang::ISoundEngine *SoundEngine;
 
+	// test
+	void printAll(SceneNode & root);
+
 	
 
 };

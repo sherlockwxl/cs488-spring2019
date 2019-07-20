@@ -222,7 +222,7 @@ bool Character::checkCollisions(){
         for(auto const& other_id: other_geoIndexVector){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
-                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
                 if(status == -1){
                     enemy->gotHit(other_id);
                 }
@@ -340,13 +340,20 @@ irrklang::vec3df Character::getPosition(){
 
 
 void Character::hitwithLeftHand(){
-    if(animationDuration<60){
+    if(animationDuration<40){
          animationDuration += keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+    }
+}
+
+void Character::hitwithLeftLeg(){
+    if(animationDuration<40){
+         animationDuration += keyFrameHandler->addKeyFrameforLeftLegHit(*animationModel, id);
     }
 }
 
 
 void Character::stopMovement(){
+    cout<<"stop movement called"<<endl;
     moveUpOrDown = 0;
     moveLeftOrRight = 0;
     moveLeftFrameCounter = 0;
@@ -355,6 +362,7 @@ void Character::stopMovement(){
 }
 
 void Character::stopAnimation(){
+    cout<<"stop animation called"<<endl;
     animationDuration = 0;
     keyFrameHandler->stopAnimation(*animationModel, id);
 }

@@ -7,6 +7,7 @@ JointNode::JointNode(const std::string& name)
 	: SceneNode(name)
 {
 	m_nodeType = NodeType::JointNode;
+	set_joint_z(-3.14, 0, 3.14);
 }
 
 //---------------------------------------------------------------------------------------

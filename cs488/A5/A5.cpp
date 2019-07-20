@@ -1209,13 +1209,7 @@ bool A5::keyInputEvent (
 			resetHandler(0);
 		} 
 
-		//reset orientation
-		if (key == GLFW_KEY_O){
-
-			eventHandled = true;
-
-			resetHandler(1);
-		} 
+		
 
 		//reset Joints
 		if (key == GLFW_KEY_S){
@@ -1225,13 +1219,7 @@ bool A5::keyInputEvent (
 			resetHandler(2);
 		} 
 
-		//reset Joints
-		if (key == GLFW_KEY_A){
-
-			eventHandled = true;
-
-			resetHandler(3);
-		}
+		
 
 		// Exit
 		if (key == GLFW_KEY_Q){
@@ -1295,26 +1283,57 @@ bool A5::keyInputEvent (
 			show_gui = !show_gui;
 		}
 
+		if(key == GLFW_KEY_0){
+			printAll(*character_1.m_rootNode);
+		}
+
 		if(key == GLFW_KEY_1){
 			character_1.hitwithLeftHand();
 		}
-
+		if(key == GLFW_KEY_2){
+			character_1.hitwithLeftLeg();
+		}
+		if(key == GLFW_KEY_PAGE_UP){
+			character_2.hitwithLeftHand();
+		}
+		if(key == GLFW_KEY_PAGE_DOWN){
+			character_2.hitwithLeftLeg();
+		}
 		if(key == GLFW_KEY_RIGHT){
+			eventHandled = true;
+			character_2.move(1, 0);
+		}
+		if(key == GLFW_KEY_D){
 			eventHandled = true;
 			character_1.move(1, 0);
 		}
 
 		if(key == GLFW_KEY_LEFT){
 			eventHandled = true;
+			character_2.move(0, 0);
+		}
+
+		if(key == GLFW_KEY_A){
+			eventHandled = true;
 			character_1.move(0, 0);
 		}
 
 		if(key == GLFW_KEY_UP){
 			eventHandled = true;
-			character_1.move(2, 0);
+			character_2.move(2, 0);
 		}
 
+		//reset orientation
+		if (key == GLFW_KEY_W){
+			eventHandled = true;
+			character_1.move(2, 0);
+		} 
+
 		if(key == GLFW_KEY_DOWN){
+			eventHandled = true;
+			character_2.move(3, 0);
+		}
+		if(key == GLFW_KEY_S){
 			eventHandled = true;
 			character_1.move(3, 0);
 		}
@@ -1324,14 +1343,8 @@ bool A5::keyInputEvent (
 			character_1.move(4, 0);
 		}
 
-		if(key == GLFW_KEY_2){
-			m_light.position.y += 3.0f;
-			cout<<m_light.position<<endl;
-		}
-		if(key == GLFW_KEY_3){
-			m_light.position.y -= 3.0f;
-			cout<<m_light.position<<endl;
-		}
+		
+		
 		if(key == GLFW_KEY_4){
 			m_light.position.z += 3.0f;
 			cout<<m_light.position<<endl;
@@ -1353,18 +1366,34 @@ bool A5::keyInputEvent (
 		
 	}else if(action == GLFW_RELEASE){
 		if(key == GLFW_KEY_RIGHT){
-			character_1.move(1, 1);
+			character_2.move(1, 1);
 		}
 
 		if(key == GLFW_KEY_LEFT){
-			character_1.move(0, 1);
+			character_2.move(0, 1);
 		}
 
 		if(key == GLFW_KEY_UP){
-			character_1.move(2, 1);
+			character_2.move(2, 1);
 		}
 
 		if(key == GLFW_KEY_DOWN){
+			character_2.move(3 ,1);
+		}
+
+		if(key == GLFW_KEY_D){
+			character_1.move(1, 1);
+		}
+
+		if(key == GLFW_KEY_A){
+			character_1.move(0, 1);
+		}
+
+		if(key == GLFW_KEY_W){
+			character_1.move(2, 1);
+		}
+
+		if(key == GLFW_KEY_S){
 			character_1.move(3 ,1);
 		}
 	}
@@ -1734,6 +1763,10 @@ void A5::initAnimationModel(){
 		animationModel.keyFrame_v_move_c1.push_back(temp);
 		JointNode * jointNode = static_cast<JointNode*>(node);
 		animationModel.ori_joint_angle_c1.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
+		if(node->m_name == "leftAnkle"){
+			cout<<"ori trans :"<<node->trans<<endl;
+		}
+		animationModel.ori_joint_trans_c1.push_back(node->trans);
 	}
 	
 
@@ -1751,6 +1784,7 @@ void A5::initAnimationModel(){
 		animationModel.keyFrame_v_move_c2.push_back(temp);
 		JointNode * jointNode = static_cast<JointNode*>(node);
 		animationModel.ori_joint_angle_c2.push_back(glm::vec3(jointNode->m_joint_x.init,jointNode->m_joint_y.init,jointNode->m_joint_z.init));
+		animationModel.ori_joint_trans_c2.push_back(node->trans);
 	}
 }
 
@@ -2028,3 +2062,16 @@ void A5::AddKeyFrame(int type){
 } */
 
 // dropped till here
+
+// test use
+void A5::printAll(SceneNode & root){
+	cout<<root.m_name<<root.trans<<endl;
+	if(root.m_nodeType == NodeType::JointNode){
+		JointNode * jointNode = static_cast<JointNode*>(&root);
+		std::cout<<" trans: x "<<jointNode->m_joint_x.init<<" trans: y "<<jointNode->m_joint_y.init<<" trans: z "<<jointNode->m_joint_z.init<<std::endl;
+		
+	}
+	for (SceneNode * node : root.children) {
+			printAll(*node);
+	}
+};
