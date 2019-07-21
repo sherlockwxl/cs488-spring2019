@@ -26,6 +26,18 @@ platform_back:scale(60.0, 25.0, 0.5)
 platform_back:translate(0.0, 5.0, -12.0)
 platform_back:set_material(darkgray)
 
+platform_left = gr.mesh('cube', 'platform_left',3)
+rootnode:add_child(platform_left)
+platform_left:scale(5.0, 25.0, 50.0)
+platform_left:translate(-30.0, 5.0, -12.0)
+platform_left:set_material(darkgray)
+
+platform_right = gr.mesh('cube', 'platform_right',3)
+rootnode:add_child(platform_right)
+platform_right:scale(5.0, 25.0, 50.0)
+platform_right:translate(30.0, 5.0, -12.0)
+platform_right:set_material(darkgray)
+
 torso = gr.mesh('sphere', 'torso')
 rootnode:add_child(torso)
 torso:scale(0.5, 0.8, 0.5)

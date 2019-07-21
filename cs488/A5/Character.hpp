@@ -30,13 +30,16 @@ class Character{
         GLfloat v_leftOrRight = 0.0f;
         GLfloat mass;
         GLfloat u = 0.1f;
-        int persistence = 20;
+        int persistence = 40;
         GLfloat g = 0.098f;
         std::shared_ptr<SceneNode> m_rootNode;
         std::shared_ptr<SceneNode> other_rootNode;
         std::shared_ptr<SceneNode> leftFoot_Node;
         std::shared_ptr<SceneNode> rightFoot_Node;
         std::shared_ptr<SceneNode> ground_Node;
+        std::shared_ptr<SceneNode> back_Node;
+        std::shared_ptr<SceneNode> left_Node;
+        std::shared_ptr<SceneNode> right_Node;
         std::vector<int> geoIndexVector;
         std::vector<int> other_geoIndexVector;
         glm::mat4 trackBallRotationMatrix;

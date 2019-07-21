@@ -30,8 +30,8 @@ const size_t CIRCLE_PTS = 48;
 const float platform_uv[] = {
 
   0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
+  1.0f, 0.0f,
+  1.0f, 1.0f,
 
   0.0f, 1.0f,
   1.0f, 1.0f,
@@ -39,11 +39,11 @@ const float platform_uv[] = {
 
   // top face bot right
   0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-
-
+  1.0f, 0.0f,
+  1.0f, 1.0f,
   
+  
+
   1.0f, 0.0f,
   1.0f, 1.0f,
   0.0f, 0.0f,
@@ -59,9 +59,11 @@ const float platform_uv[] = {
   0.0f, 0.0f,
 
 
+  0.0f, 1.0f,
   0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
+  1.0f, 1.0f,
+  
+  
 
 
   0.0f, 1.0f, //2
@@ -69,11 +71,9 @@ const float platform_uv[] = {
   1.0f, 1.0f, //3
 
 
+  0.0f, 1.0f,
   0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-
-
+  1.0f, 1.0f,
   
   0.0f, 0.0f,
   1.0f, 1.0f,
@@ -251,6 +251,18 @@ void A5::processLuaSceneFile(const std::string & filename) {
 		if(node->m_name == "platform"){
 			character_1.ground_Node = std::shared_ptr<SceneNode>(node);
 			character_2.ground_Node = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == "platform_back"){
+			character_1.back_Node = std::shared_ptr<SceneNode>(node);
+			character_2.back_Node = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == "platform_left"){
+			character_1.left_Node = std::shared_ptr<SceneNode>(node);
+			character_2.left_Node = std::shared_ptr<SceneNode>(node);
+		}
+		if(node->m_name == "platform_right"){
+			character_1.right_Node = std::shared_ptr<SceneNode>(node);
+			character_2.right_Node = std::shared_ptr<SceneNode>(node);
 		}
 		if(node->m_name == "torso"){
 			GLfloat angel = 3.141592f * 0.5f;

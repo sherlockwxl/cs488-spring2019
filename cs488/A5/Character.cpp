@@ -236,6 +236,17 @@ bool Character::checkCollisions(){
             }
         }
     }
+
+    for(auto const& id: geoIndexVector) {
+        SceneNode * node = findNodeById(*m_rootNode, id);
+        if(isCollision(node, back_Node.get())||
+           isCollision(node, left_Node.get())||
+           isCollision(node, right_Node.get())){
+            cout<<"collision"<<endl;
+            return true;
+
+        }
+    }
     return false;
 }
 
@@ -372,6 +383,8 @@ void Character::stopMovement(){
     moveLeftOrRight = 0;
     moveLeftFrameCounter = 0;
     moveUpFrameCounter = 0;
+    v_forOrBack = 0.0f;
+    v_leftOrRight = 0.0f;
     keyFrameHandler->stopMovement(*animationModel, id);
 }
 
