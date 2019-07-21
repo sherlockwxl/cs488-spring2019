@@ -29,6 +29,7 @@ Character::Character(SceneNode m_rootNode){
     moveUpOrDown = 0;
     moveUpFrameCounter = 0;
     moveLeftFrameCounter = 0;
+    moveRecord = glm::vec3(0.0f);
 }
 
 void Character::move(int direction, int type){
@@ -104,7 +105,7 @@ void Character::update(){
     GLfloat v_up; 
     if(jump == 1){ // jump triggered
         if(isOntheGround){
-            v_upOrDown = 0.6f;
+            v_upOrDown = jumpstartSpeed;
             jump = 2;
         }
     }else if (jump == 2){
@@ -134,7 +135,7 @@ void Character::update(){
     v_up = v_upOrDown;
     GLfloat v_for; 
     if(moveUpFrameCounter == -1){// keep moving
-        v_forOrBack = 0.1f;
+        v_forOrBack = startSpeed;
     }else{
         v_forOrBack = std::max(v_forOrBack - g*u, 0.0f);
     }
@@ -142,7 +143,7 @@ void Character::update(){
 
     GLfloat v_left;
     if(moveLeftFrameCounter == -1){// keep moving
-        v_leftOrRight = 0.1f;
+        v_leftOrRight = startSpeed;
     }else{
         v_leftOrRight = std::max(v_leftOrRight - g*u, 0.0f);
     }
@@ -151,6 +152,7 @@ void Character::update(){
 
     glm::vec4 temp = glm::vec4(v_left * moveLeftOrRight, v_up , v_for * moveUpOrDown, 0.0f);
 	temp = trackBallRotationMatrix * temp;
+    moveRecord = moveRecord-vec3(temp);
    // std::cout<<"translate " <<temp<<std::endl;
     m_rootNode->translate(glm::vec3(temp));
     if(moveUpFrameCounter > 0 ){
@@ -415,6 +417,15 @@ void Character::updateAllNodeStatus(){
 
 void Character::updatecurrentStatus(){
     status = animationModel->getCurrentStatus(id);
+}
+
+void Character::resetCharacter(){
+
+    m_rootNode->translate(glm::vec3(moveRecord));
+    moveRecord = glm::vec3(0.0f);
+    lifeValue = 100;
+
+
 }
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);

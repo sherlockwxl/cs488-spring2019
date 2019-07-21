@@ -404,7 +404,48 @@ int KeyFrameHandler::addKeyFrameforDefend(AnimationModel &animationModel, int ch
     return 70;
 }
 
+int addKeyFrameforFail(AnimationModel &animationModel, int character){
+    string keyFrameName = "Fail";
 
+
+    string s1 = "torso";
+    if(character == 2){
+        s1.append("_baymax");
+
+    }
+
+    glm::vec3 s1_rotation1 = glm::vec3(-0.55f, 0.5f, -0.7f);
+    glm::vec3 s1_rotation2 = glm::vec3(0.0f, 0.0f, 0.0f);
+    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 30, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 60, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+
+    int size;
+    std::vector<SceneNode *> *JointPointers_v;
+    std::vector<std::vector<KeyFrame>> *keyFrame_v;
+
+    if(character == 1){
+        size = animationModel.JointPointers_v_c1.size();
+        JointPointers_v = &animationModel.JointPointers_v_c1;
+        keyFrame_v = &animationModel.keyFrame_v_ani_c1;
+    }else{
+        size = animationModel.JointPointers_v_c2.size();
+        JointPointers_v = &animationModel.JointPointers_v_c2;
+        keyFrame_v = &animationModel.keyFrame_v_ani_c2;
+    }
+
+    for(int i = 0 ; i < size; i ++){
+        SceneNode * node = JointPointers_v->at(i);
+        if(node->m_name == s1){
+            keyFrame_v->at(i).push_back(s1_kf1);
+            keyFrame_v->at(i).push_back(s1_kf2);
+            keyFrame_v->at(i).push_back(s1_kf3);
+        }
+
+    }
+
+    return 70;
+}
 void KeyFrameHandler::stopMovement(AnimationModel &animationModel, int character){
     // target nodes
     string s1 = "leftHipJoint";

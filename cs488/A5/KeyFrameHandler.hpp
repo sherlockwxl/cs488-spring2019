@@ -18,6 +18,7 @@ class KeyFrameHandler{
     int addKeyFrameforRunForward(AnimationModel &animationModel, int character);
     int addKeyFrameforLeftLegHit(AnimationModel &animationModel, int character);
     int addKeyFrameforDefend(AnimationModel &animationModel, int character);
+    int addKeyFrameforFail(AnimationModel &animationModel, int character);    
     void stopMovement(AnimationModel &animationModel, int character);
     void stopAnimation(AnimationModel &animationModel, int character);
 

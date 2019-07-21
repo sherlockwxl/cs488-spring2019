@@ -500,7 +500,7 @@ rightWing_baymax:set_material(red)
 
 
 
-rootnode:translate(0.0, -4.0, -15.0)
-torso:translate(-5.0,-2.25,0.0)
-torso_baymax:translate(5.0,0.0,0.0)
+rootnode:translate(0.0, -8.0, -18.0)
+torso:translate(-5.0,-2.25, 0.0)
+torso_baymax:translate(5.0,-2.25, 0.0)
 return rootnode

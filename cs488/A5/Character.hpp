@@ -29,10 +29,14 @@ class Character{
         GLfloat v_forOrBack = 0.0f;
         GLfloat v_leftOrRight = 0.0f;
         GLfloat mass;
+        GLfloat startSpeed = 0.1f;
+        GLfloat jumpstartSpeed = 0.6f;
         GLfloat u = 0.1f;
         int persistence = 40;
         GLfloat g = 0.098f;
         std::shared_ptr<SceneNode> m_rootNode;
+        glm::mat4 ori_trans;
+        glm::vec3 moveRecord;
         std::shared_ptr<SceneNode> other_rootNode;
         std::shared_ptr<SceneNode> leftFoot_Node;
         std::shared_ptr<SceneNode> rightFoot_Node;
@@ -85,6 +89,8 @@ class Character{
         void stopAnimation();
         void updateAllNodeStatus();
         void updatecurrentStatus();
+
+        void resetCharacter();
 };
 
 
