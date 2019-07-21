@@ -34,7 +34,7 @@ void AnimationModel::update(){
                     }
                     
 
-
+                    
                     rotateJointHelper(remainRotation_X_perframe, remainRotation_Y_perframe, remainRotation_Z_perframe, *curTargetNode_s, currentKeyFrame_ani.type, currentKeyFrame_ani.order, i, 1);
                     if(curTargetNode_s->m_name == "leftAnkle"){
                        // cout<<"target angle : "<<currentKeyFrame_ani.rotationTarget<<endl;
@@ -109,8 +109,9 @@ void AnimationModel::update(){
                     }
                    // cout<<"prev angle"<<jointNode->m_joint_x.init << " and " << jointNode->m_joint_y.init<<endl;
 
-
-                    rotateJointHelper(remainRotation_X_perframe, remainRotation_Y_perframe, remainRotation_Z_perframe, *curTargetNode_s, currentKeyFrame_ani.type, currentKeyFrame_ani.order, i, 2);
+                    if(currentKeyFrame_ani.rotationTarget.x != 0.001f){
+                        rotateJointHelper(remainRotation_X_perframe, remainRotation_Y_perframe, remainRotation_Z_perframe, *curTargetNode_s, currentKeyFrame_ani.type, currentKeyFrame_ani.order, i, 2);
+                    }
                     //cout<<"after angle"<<jointNode->m_joint_x.init << " and " << jointNode->m_joint_y.init<<endl;
                     durationCont_v_ani_c2[i]++;
                 }else{
@@ -218,10 +219,11 @@ void AnimationModel::rotateJointHelper(GLfloat anglex, GLfloat angley,GLfloat an
                 //cout<<" after trans:"<<node.trans<<endl;
             }
         }else{
-             /* cout<< " newAngle_x :   " << newAngle_x <<" newAngle_y: " << newAngle_y<<" newAngle_z: " << newAngle_z<<endl;
+            cout<<"node name : "<<node.m_name<<endl;
+              cout<< " newAngle_x :   " << newAngle_x <<" newAngle_y: " << newAngle_y<<" newAngle_z: " << newAngle_z<<endl;
             cout<< " newAngle_x  limit :   " << jointNode->m_joint_x.max << " and " << jointNode->m_joint_x.min
             <<" newAngle_y: limit" << jointNode->m_joint_y.max<< " and : " <<jointNode->m_joint_y.min
-            <<" newAngle_z: limit" << jointNode->m_joint_z.max<< " and : " <<jointNode->m_joint_z.min <<endl; */
+            <<" newAngle_z: limit" << jointNode->m_joint_z.max<< " and : " <<jointNode->m_joint_z.min <<endl; 
 
         }
     }

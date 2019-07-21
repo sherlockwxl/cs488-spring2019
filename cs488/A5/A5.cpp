@@ -158,7 +158,7 @@ A5::~A5()
  * Called once, at program start.
  */
 void A5::init()
-{
+{	
 	// Set the background colour.
 	glClearColor(0.45, 0.45, 0.45, 1.0);
 
@@ -271,6 +271,7 @@ void A5::processLuaSceneFile(const std::string & filename) {
 			Left_rootNode = std::shared_ptr<SceneNode>(node);
 			character_1.m_rootNode = Left_rootNode;
 			character_2.other_rootNode = Left_rootNode;
+			character_1.ori_trans = Left_rootNode->trans;
 		}
 		if(node->m_name == "leftFoot"){
 			character_1.leftFoot_Node = std::shared_ptr<SceneNode>(node);
@@ -285,6 +286,7 @@ void A5::processLuaSceneFile(const std::string & filename) {
 			Right_rootNode = std::shared_ptr<SceneNode>(node);
 			character_2.m_rootNode = Right_rootNode;
 			character_1.other_rootNode = Right_rootNode;
+			character_2.ori_trans = Right_rootNode->trans;
 		}
 		if(node->m_name == "leftFoot_baymax"){
 			character_2.leftFoot_Node = std::shared_ptr<SceneNode>(node);
@@ -675,7 +677,7 @@ void A5::initViewMatrix() {
 //----------------------------------------------------------------------------------------
 void A5::initLightSources() {
 	// World-space position
-	m_light.position = vec3(0.0f, 10.0f, -3.0f);
+	m_light.position = vec3(0.0f, 12.0f, 8.0f);
 	m_light.rgbIntensity = vec3(1.0f); // light
 	lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.0f, 40.0f);
 	lightView = glm::lookAt(m_light.position, vec3(0.0f, 0.0f, 0.0f),
@@ -773,18 +775,18 @@ void A5::guiLogic()
 	static bool showDebugWindow(true);
 	ImGuiWindowFlags windowFlags(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 	float opacity(0.5f);
-
-	ImGui::Begin("Properties", &showDebugWindow, ImVec2(100,100), opacity,
+	
+	 ImGui::Begin("Properties", &showDebugWindow, ImVec2(100,100), opacity,
 			windowFlags);
 
-
+	ImGui::SetWindowFontScale(2.0f);
 		// Add more gui elements here here ...
 
 
 		// Create Button, and check if it was clicked
 
 		if(ImGui::BeginMainMenuBar()){
-
+			ImGui::SetWindowFontScale(2.0f);
 			// Application Menu
 			if(ImGui::BeginMenu("Application")){
 				if(ImGui::MenuItem("Reset Position (I)")) {
@@ -870,7 +872,7 @@ void A5::guiLogic()
 
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
-	ImGui::End();
+	ImGui::End(); 
 }
 
 //----------------------------------------------------------------------------------------
@@ -997,7 +999,7 @@ void A5::draw() {
 		//renderArcCircle();
 	}
 
-	//renderParticles();
+	renderParticles();
 	renderBar_c1();
 	renderBar_c2();
 
@@ -1555,6 +1557,8 @@ void A5::resetAll(){
 	//resetJoints();
 	resetVariables();
 	resetMouseLocation();
+	character_1.resetCharacter();
+	character_2.resetCharacter();
 }
 
 void A5::resetVariables(){
@@ -1572,8 +1576,6 @@ void A5::resetVariables(){
 	mouse_left_pressed = false;
 	mouse_mid_pressed = false;
 	mouse_right_pressed = false;
-	character_1.lifeValue = 100;
-	character_2.lifeValue = 100;
 	lose = 0;
 	loseSoundPlayed = 0;
 }
@@ -2207,11 +2209,17 @@ void A5::updateLifeValue(){
 	int c2_life = character_2.lifeValue;
 	if(c1_life == 0){
 		lose = 1;
+		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player1 lost!");
 
-		if(ImGui::BeginPopupModal("Player1 lost!")) {
+		if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
+			ImGui::Spacing ();
+			ImGui::SameLine(100.0f);
+			ImGui::SetWindowFontScale(2.0f);
 			ImGui::Text("Player1 lost!");
-			if(ImGui::Button("OK", ImVec2(100, 10))) {
+			ImGui::Spacing ();
+			ImGui::SameLine(50.0f);
+			if(ImGui::Button("Try Again", ImVec2(300, 40))) {
 				resetAll();
 				ImGui::CloseCurrentPopup();
 			}
@@ -2221,13 +2229,16 @@ void A5::updateLifeValue(){
 	}
 	if(c2_life == 0){
 		lose = 1;
-		
+		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player2 lost!");
-
-
 		if(ImGui::BeginPopupModal("Player2 lost!")) {
+			ImGui::Spacing ();
+			ImGui::SameLine(100.0f);
+			ImGui::SetWindowFontScale(2.0f);
 			ImGui::Text("Player2 lost!");
-			if(ImGui::Button("OK", ImVec2(100, 10))) {
+			ImGui::Spacing ();
+			ImGui::SameLine(50.0f);
+			if(ImGui::Button("Try Again", ImVec2(300, 40))) {
 				resetAll();
 				ImGui::CloseCurrentPopup();
 			}

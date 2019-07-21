@@ -9,7 +9,7 @@ int  KeyFrameHandler::addKeyFrameforLeftHit(AnimationModel &animationModel,int c
 
 
     string s1 = "leftShoulderJoint";
-    string s2 = "leftElbow";
+    string s2 = "leftArmJoint";
     if(character == 2){
         s1.append("_baymax");
         s2.append("_baymax");
@@ -93,9 +93,9 @@ int KeyFrameHandler::addKeyFrameforRunForward(AnimationModel &animationModel,int
     string keyFrameName = "run";
     // target nodes
     string s1 = "leftHipJoint";
-    string s2 = "leftKnee";
+    string s2 = "leftKneeJoint";
     string s3 = "rightHipJoint";
-    string s4 = "rightKnee";
+    string s4 = "rightKneeJoint";
     if(character == 2){
         s1.append("_baymax");
         s2.append("_baymax");
@@ -208,8 +208,8 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
 
 
     string s1 = "leftHipJoint";
-    string s2 = "leftKnee";
-    string s3 = "leftAnkle";
+    string s2 = "leftKneeJoint";
+    string s3 = "leftAnkleJoint";
 
     if(character == 2){
         s1.append("_baymax");
@@ -302,20 +302,20 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
             keyFrame_v->at(i).push_back(s1_kf6);
             keyFrame_v->at(i).push_back(s1_kf7);
         }
-         if(node->m_name == s2){ // push for leftElbow
+        if(node->m_name == s2){ // push for leftElbow
             keyFrame_v->at(i).push_back(s2_kf1);
             keyFrame_v->at(i).push_back(s2_kf2);
             keyFrame_v->at(i).push_back(s2_kf3);
             keyFrame_v->at(i).push_back(s2_kf4);
 
         }
-        if(node->m_name == s3){ // push for leftElbow
+         if(node->m_name == s3){ // push for leftElbow
             keyFrame_v->at(i).push_back(s3_kf1);
             keyFrame_v->at(i).push_back(s3_kf2);
             keyFrame_v->at(i).push_back(s3_kf3);
             keyFrame_v->at(i).push_back(s3_kf4);
 
-        } 
+        }  
     }
 
     return 75;
@@ -449,9 +449,9 @@ int addKeyFrameforFail(AnimationModel &animationModel, int character){
 void KeyFrameHandler::stopMovement(AnimationModel &animationModel, int character){
     // target nodes
     string s1 = "leftHipJoint";
-    string s2 = "leftKnee";
+    string s2 = "leftKneeJoint";
     string s3 = "rightHipJoint";
-    string s4 = "rightKnee";
+    string s4 = "rightKneeJoint";
     
     if(character == 2){
         s1.append("_baymax");
@@ -522,11 +522,11 @@ void KeyFrameHandler::stopMovement(AnimationModel &animationModel, int character
 void KeyFrameHandler::stopAnimation(AnimationModel &animationModel, int character){
     // target nodes
     string s1 = "leftShoulderJoint";
-    string s2 = "leftElbow";
+    string s2 = "leftArmJoint";
 
     string s3 = "leftHipJoint";
-    string s4 = "leftKnee";
-    string s5 = "leftAnkle";
+    string s4 = "leftKneeJoint";
+    string s5 = "leftAnkleJoint";
 
 
     if(character == 2){
