@@ -227,6 +227,43 @@ protected:
 	// test
 	void printAll(SceneNode & root);
 
+
+	// for c1 bar
+	GLuint m_vbo_bar_c1;
+	GLuint m_vao_c1;
+	GLint m_bar_c1_positionAttribLocation;
+	ShaderProgram m_shader_bar_c1;
+
+	void renderBar_c1();
+	float shift_x_c1 = -0.7f;
+	float shift_y_c1 = 16.0f;
+	float shift_z_c1 = 0.0f;
+	float scale_x_c1 = 1.2f;
+	float scale_y_c1 = 0.05f;
+	float scale_z_c1 = 0.1f;
+
+	float life_c1 = 1.0f;
+
+
+	// for c2 bar
+	GLuint m_vbo_bar_c2;
+	GLuint m_vao_c2;
+	GLint m_bar_c2_positionAttribLocation;
+	ShaderProgram m_shader_bar_c2;
+
+	void renderBar_c2();
+	float shift_x_c2 = 0.2f;
+	float shift_y_c2 = 16.0f;
+	float shift_z_c2 = 0.0f;
+	float scale_x_c2 = 1.2f;
+	float scale_y_c2 = 0.05f;
+	float scale_z_c2 = 0.1f;
+
+	float life_c2 = 18.0f;
+
+
+
+
 	
 
 };

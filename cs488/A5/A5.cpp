@@ -88,6 +88,19 @@ const float platform_uv[] = {
   0.0f, 0.0f
 };
 
+static const GLfloat vertices[] = {
+0.5f,  0.5f,
+0.5f, -0.5f,
+-0.5f, -0.5f,
+-0.5f, 0.5f,
+0.5f,  0.5f
+};
+static const GLint face_indice[][3] = {
+		// front
+		0, 1, 2,
+		1, 2, 3
+};
+
 
 //----------------------------------------------------------------------------------------
 // Constructor
@@ -105,7 +118,14 @@ A5::A5(const std::string & luaSceneFile)
 	  m_vbo_particle(0),
 	  texture_count(0),
 	  m_vbo_textureUV(0),
-	  m_textureCoordsAttribLocation(0)
+	  m_textureCoordsAttribLocation(0),
+	  m_vao_c1(0),
+	  m_vbo_bar_c1(0),
+	  m_bar_c1_positionAttribLocation(0),
+	  m_vao_c2(0),
+	  m_vbo_bar_c2(0),
+	  m_bar_c2_positionAttribLocation(0)
+
 
 {
 	animationModel = AnimationModel();
@@ -145,6 +165,8 @@ void A5::init()
 	glGenVertexArrays(1, &m_vao_arcCircle);
 	glGenVertexArrays(1, &m_vao_meshData);
 	glGenVertexArrays(1, &m_vao_particle);
+	glGenVertexArrays(1, &m_vao_c1);
+	glGenVertexArrays(1, &m_vao_c2);
 	enableVertexShaderInputSlots();
 
 	processLuaSceneFile(m_luaSceneFile);
@@ -349,6 +371,16 @@ void A5::createShaderProgram()
 	m_shader_depthMap.attachFragmentShader( getAssetFilePath("depthMap_FragmentShader.fs").c_str() );
 	m_shader_depthMap.link();
 
+	m_shader_bar_c1.generateProgramObject();
+	m_shader_bar_c1.attachVertexShader( getAssetFilePath("bar_VertexShader.vs").c_str() );
+	m_shader_bar_c1.attachFragmentShader( getAssetFilePath("bar_FragmentShader.fs").c_str() );
+	m_shader_bar_c1.link();
+
+	m_shader_bar_c2.generateProgramObject();
+	m_shader_bar_c2.attachVertexShader( getAssetFilePath("bar_VertexShader.vs").c_str() );
+	m_shader_bar_c2.attachFragmentShader( getAssetFilePath("bar_FragmentShader.fs").c_str() );
+	m_shader_bar_c2.link();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -381,7 +413,6 @@ void A5::enableVertexShaderInputSlots()
 		// Enable the vertex shader attribute location for "position" when rendering.
 		m_arc_positionAttribLocation = m_shader_arcCircle.getAttribLocation("position");
 		glEnableVertexAttribArray(m_arc_positionAttribLocation);
-
 		CHECK_GL_ERRORS;
 	}
 
@@ -392,7 +423,27 @@ void A5::enableVertexShaderInputSlots()
 		// Enable the vertex shader attribute location for "position" when rendering.
 		m_particle_positionAttribLocation = m_shader_particle.getAttribLocation("position");
 		glEnableVertexAttribArray(m_particle_positionAttribLocation);
+		
+		CHECK_GL_ERRORS;
+	}
 
+	{
+		glBindVertexArray(m_vao_c1);
+
+		// Enable the vertex shader attribute location for "position" when rendering.
+		m_bar_c1_positionAttribLocation = m_shader_bar_c1.getAttribLocation("position");
+		glEnableVertexAttribArray(m_bar_c1_positionAttribLocation);
+		
+		CHECK_GL_ERRORS;
+	}
+
+	{
+		glBindVertexArray(m_vao_c2);
+
+		// Enable the vertex shader attribute location for "position" when rendering.
+		m_bar_c2_positionAttribLocation = m_shader_bar_c2.getAttribLocation("position");
+		glEnableVertexAttribArray(m_bar_c2_positionAttribLocation);
+		
 		CHECK_GL_ERRORS;
 	}
 
@@ -436,14 +487,7 @@ void A5::uploadVertexDataToVbos (
 		glGenBuffers( 1, &m_vbo_arcCircle );
 		glBindBuffer( GL_ARRAY_BUFFER, m_vbo_arcCircle );
 
-		float *pts = new float[ 2 * CIRCLE_PTS ];
-		for( size_t idx = 0; idx < CIRCLE_PTS; ++idx ) {
-			float ang = 2.0 * M_PI * float(idx) / CIRCLE_PTS;
-			pts[2*idx] = cos( ang );
-			pts[2*idx+1] = sin( ang );
-		}
-
-		glBufferData(GL_ARRAY_BUFFER, 2*CIRCLE_PTS*sizeof(float), pts, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERRORS;
@@ -479,6 +523,44 @@ void A5::uploadVertexDataToVbos (
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERRORS;
   
+	}
+
+	// Generate VBO to for the bar
+	{
+		static const GLfloat bar_data2[] = {
+		0.0f,  0.0f, 1.0f,
+		0.5f,  0.0f,1.0f,
+		0.5f,  0.5f,1.0f,
+		0.0f,  0.5f,1.0f,
+		0.0f,  0.0f,1.0f
+		};
+
+		glGenBuffers( 1, &m_vbo_bar_c1 );
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo_bar_c1 );
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof( bar_data2 ), bar_data2, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERRORS;
+	}
+
+	// Generate VBO to for the bar
+	{
+		static const GLfloat bar_data2[] = {
+		0.0f,  0.0f, 1.0f,
+		0.5f,  0.0f,1.0f,
+		0.5f,  0.5f,1.0f,
+		0.0f,  0.5f,1.0f,
+		0.0f,  0.0f,1.0f
+		};
+
+		glGenBuffers( 1, &m_vbo_bar_c2 );
+		glBindBuffer( GL_ARRAY_BUFFER, m_vbo_bar_c2 );
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof( bar_data2 ), bar_data2, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERRORS;
 	}
 }
 
@@ -529,6 +611,30 @@ void A5::mapVboDataToVertexShaderInputLocations()
 	// "position" vertex attribute location for any bound vertex shader program.
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_particle);
 	glVertexAttribPointer(m_particle_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	//-- Unbind target, and restore default values:
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	CHECK_GL_ERRORS;
+
+	glBindVertexArray(m_vao_c1);
+	// Tell GL how to map data from the vertex buffer "m_vbo_bar_c1" into the
+	// "position" vertex attribute location for any bound vertex shader program.
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_bar_c1);
+	glVertexAttribPointer(m_bar_c1_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	//-- Unbind target, and restore default values:
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	CHECK_GL_ERRORS;
+
+	glBindVertexArray(m_vao_c2);
+	// Tell GL how to map data from the vertex buffer "m_vbo_bar_c1" into the
+	// "position" vertex attribute location for any bound vertex shader program.
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_bar_c2);
+	glVertexAttribPointer(m_bar_c2_positionAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	//-- Unbind target, and restore default values:
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -846,6 +952,8 @@ void A5::updateShaderUniforms(
  * Called once per frame, after guiLogic().
  */
 void A5::draw() {
+
+
 	if(z_buffer){
 		glEnable( GL_DEPTH_TEST );
 	}
@@ -859,7 +967,7 @@ void A5::draw() {
 			glCullFace(GL_FRONT);
 		}
 	}
-	renderSceneWithDepthMap(*m_rootNode);
+	//renderSceneWithDepthMap(*m_rootNode);
 	//renderSceneGraph(*m_rootNode, 2);
 
 	if(z_buffer){
@@ -870,10 +978,12 @@ void A5::draw() {
 	}
 		
 	if(circle){
-		renderArcCircle();
+		//renderArcCircle();
 	}
 
-	renderParticles();
+	//renderParticles();
+	renderBar_c1();
+	renderBar_c2();
 
 }
 
@@ -950,9 +1060,9 @@ void A5::renderArcCircle() {
 	glBindVertexArray(m_vao_arcCircle);
 
 	m_shader_arcCircle.enable();
-		GLint m_location = m_shader_arcCircle.getUniformLocation( "M" );
+		/* GLint m_location = m_shader_arcCircle.getUniformLocation( "M" );
 		float aspect = float(m_framebufferWidth)/float(m_framebufferHeight);
-		glm::mat4 M;
+ 		glm::mat4 M;
 		if( aspect > 1.0 ) {
 			M = glm::scale( glm::mat4(), glm::vec3( 0.5/aspect, 0.5, 1.0 ) );
 			//M = glm::translate(M,m_light.position);
@@ -961,14 +1071,17 @@ void A5::renderArcCircle() {
 			M = glm::scale( glm::mat4(), glm::vec3( 0.5, 0.5*aspect, 1.0 ) );
 			//M = glm::translate(M,m_light.position);
 			//cout<<M<<endl;
-		}
-		glUniformMatrix4fv( m_location, 1, GL_FALSE, value_ptr( M ) );
-		glDrawArrays( GL_LINE_LOOP, 0, CIRCLE_PTS );
+		} 
+
+		glUniformMatrix4fv(m_location, 1, GL_FALSE, value_ptr(M)); */
+		glDrawArrays( GL_LINE_LOOP, 0, 5 );
+		CHECK_GL_ERRORS;
 	m_shader_arcCircle.disable();
 
 	glBindVertexArray(0);
 	CHECK_GL_ERRORS;
 }
+
 
 //----------------------------------------------------------------------------------------
 /*
@@ -1200,7 +1313,21 @@ bool A5::keyInputEvent (
 	bool eventHandled(false);
 	if( action == GLFW_PRESS ) {
 		// Respond to some key events.
+		if (key == GLFW_KEY_MINUS){
 
+			eventHandled = true;
+
+			life_c2 *= 0.8f;
+			life_c2 = std::max(1.0f, life_c2);
+			cout<<life_c2<<endl;
+		} 
+		if (key == GLFW_KEY_EQUAL){
+
+			eventHandled = true;
+
+			life_c2 *= 1.2f;
+			cout<<life_c2<<endl;
+		}
 		// reset position
 		if (key == GLFW_KEY_I){
 
@@ -1810,17 +1937,6 @@ void A5::renderParticles(){
 
 
 
-			//cout << " will draw particle "<<i<<endl;
-			//cout<< " location : "<<particle.location<<endl;
-			//cout<<" model view " << modelView<<endl;
-
-
-			/* location = m_shader_particle.getUniformLocation("NormalMatrix");
-			mat3 normalMatrix = glm::transpose(glm::inverse(mat3(modelView)));
-			glUniformMatrix3fv(location, 1, GL_FALSE, value_ptr(normalMatrix));
-			CHECK_GL_ERRORS; */
-
-
 			location = m_shader_particle.getUniformLocation("Perspective");
 			glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(m_perpsective));
 			CHECK_GL_ERRORS;
@@ -1832,37 +1948,7 @@ void A5::renderParticles(){
 			//cout<<"will call draw"<<endl;
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			//cout<<"will call draw done"<<endl;
-			/* if( need_reRender ) {
-				int id = node.m_nodeId;
-				float r = float(id&0xff) / 255.0f;
-				float g = float((id>>8)&0xff) / 255.0f;
-				float b = float((id>>16)&0xff) / 255.0f;
 
-				location = m_shader.getUniformLocation("material.kd");
-				glUniform3f( location, r, g, b );
-				CHECK_GL_ERRORS;
-			}
-			else{
-				//-- Set Material values:
-				location = shader.getUniformLocation("material.kd");
-				
-				vec3 kd = node.material.kd;
-				if(node.isSelected){
-					kd = vec3(0.19f, 0.82f, 0.55f);
-				}
-				glUniform3fv(location, 1, value_ptr(kd));
-				CHECK_GL_ERRORS;
-				location = shader.getUniformLocation("material.ks");
-				vec3 ks = node.material.ks;
-				if(node.isSelected){
-					ks = vec3(0.5f);
-				}
-				glUniform3fv(location, 1, value_ptr(ks));
-				CHECK_GL_ERRORS;
-				location = shader.getUniformLocation("material.shininess");
-				glUniform1f(location, node.material.shininess);
-				CHECK_GL_ERRORS;
-			} */
 
 		}
 	}
@@ -1950,7 +2036,155 @@ void A5::initTexture(){
 }
 
 
+// render life value bar for c1
+void A5::renderBar_c1(){
+	glBindVertexArray(m_vao_c1);
+	m_shader_bar_c1.enable();
+	{
 
+		
+		//-- Set ModelView matrix:
+ 		GLint location = m_shader_bar_c1.getUniformLocation("translation");
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c1, scale_y_c1, scale_z_c1 ));
+
+		translation = glm::translate(translation,  glm::vec3( shift_x_c1, shift_y_c1, shift_z_c1 ));
+		//mat4 translation = mat4();
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
+		CHECK_GL_ERRORS; 
+
+		
+		location = m_shader_bar_c1.getUniformLocation("color");
+		//cout<<particleModel.particle_color<<endl;
+		glUniform4fv(location, 1, value_ptr( glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		CHECK_GL_ERRORS;
+		//cout<<"will call draw"<<endl;
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+		CHECK_GL_ERRORS;
+		//cout<<"draw done"<<endl;
+		//cout<<"will call draw done"<<endl;
+
+
+
+	}
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+	//cout<<"exit 1 "<<endl;
+	m_shader_bar_c1.disable();
+	glBindVertexArray(m_vao_c1);
+	m_shader_bar_c1.enable();
+	{
+
+		
+		//-- Set ModelView matrix:
+ 		GLint location = m_shader_bar_c1.getUniformLocation("translation");
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c1/life_c1, scale_y_c1, scale_z_c1 ));
+
+		translation = glm::translate(translation,  glm::vec3( shift_x_c1*life_c1, shift_y_c1, shift_z_c1 ));
+
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
+		CHECK_GL_ERRORS; 
+
+		
+		location = m_shader_bar_c1.getUniformLocation("color");
+		//cout<<particleModel.particle_color<<endl;
+		glUniform4fv(location, 1, value_ptr( glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
+		CHECK_GL_ERRORS;
+		//cout<<"will call draw"<<endl;
+		if(life_c1 < 18.0f){
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+		}
+		
+		CHECK_GL_ERRORS;
+		//cout<<"draw done"<<endl;
+		//cout<<"will call draw done"<<endl;
+
+
+
+	}
+	//cout<<"bind done"<<endl;
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+	//cout<<"exit 1 "<<endl;
+	m_shader_bar_c1.disable();
+	CHECK_GL_ERRORS;
+}
+
+// render life value bar for c2
+void A5::renderBar_c2(){
+	glBindVertexArray(m_vao_c2);
+	m_shader_bar_c2.enable();
+	{
+
+		
+		//-- Set ModelView matrix:
+ 		GLint location = m_shader_bar_c2.getUniformLocation("translation");
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c2, scale_y_c2, scale_z_c2 ));
+
+		translation = glm::translate(translation,  glm::vec3( shift_x_c2, shift_y_c2, shift_z_c2 ));
+		//mat4 translation = mat4();
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
+		CHECK_GL_ERRORS; 
+
+		
+		location = m_shader_bar_c2.getUniformLocation("color");
+		//cout<<particleModel.particle_color<<endl;
+		glUniform4fv(location, 1, value_ptr( glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
+		CHECK_GL_ERRORS;
+		//cout<<"will call draw"<<endl;
+		if(life_c2 > 1.1f){
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+		}
+		
+		CHECK_GL_ERRORS;
+		//cout<<"draw done"<<endl;
+		//cout<<"will call draw done"<<endl;
+
+
+
+	}
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+	//cout<<"exit 1 "<<endl;
+	m_shader_bar_c2.disable();
+	glBindVertexArray(m_vao_c2);
+	m_shader_bar_c2.enable();
+	{
+
+		
+		//-- Set ModelView matrix:
+ 		GLint location = m_shader_bar_c2.getUniformLocation("translation");
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c2/life_c2, scale_y_c2, scale_z_c2 ));
+
+		translation = glm::translate(translation,  glm::vec3( shift_x_c2*life_c2, shift_y_c2, shift_z_c2 ));
+
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
+		CHECK_GL_ERRORS; 
+
+		
+		location = m_shader_bar_c2.getUniformLocation("color");
+		//cout<<particleModel.particle_color<<endl;
+		glUniform4fv(location, 1, value_ptr( glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		CHECK_GL_ERRORS;
+		//cout<<"will call draw"<<endl;
+		if(life_c2 < 18.0f){
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+		}
+		
+		
+		CHECK_GL_ERRORS;
+		//cout<<"draw done"<<endl;
+		//cout<<"will call draw done"<<endl;
+
+
+
+	}
+	//cout<<"bind done"<<endl;
+	glBindVertexArray(0);
+	CHECK_GL_ERRORS;
+	//cout<<"exit 1 "<<endl;
+	m_shader_bar_c2.disable();
+	CHECK_GL_ERRORS;
+}
 
 
 
