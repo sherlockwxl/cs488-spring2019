@@ -124,6 +124,7 @@ void Character::update(){
             
             
         if(isOntheGround){
+            jumpSound = SoundEngine->play2D("Assets/walk_sound.wav",GL_FALSE);
             v_upOrDown = 0.0f;
             jump = 0;
         }
@@ -319,6 +320,7 @@ void Character::gotHit(int NodeId){
             GeoNode->isHit = true;
             GeoNode->hitTimeCount = 60;
             lifeValue -= 10;
+            gotHitSound = SoundEngine->play2D("Assets/gothit.wav", GL_FALSE);
         }
     }
     

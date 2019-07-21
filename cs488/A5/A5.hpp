@@ -223,6 +223,10 @@ protected:
 
 	// sound 
 	irrklang::ISoundEngine *SoundEngine;
+	irrklang::ISound *backGroundSound;
+	irrklang::ISound *loseSound;
+	int lose;
+	int loseSoundPlayed;
 
 	// test
 	void printAll(SceneNode & root);

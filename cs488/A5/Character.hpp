@@ -71,6 +71,8 @@ class Character{
 
         irrklang::ISoundEngine *SoundEngine;
         irrklang::ISound *chracterWalkSound;
+        irrklang::ISound *gotHitSound;
+        irrklang::ISound *jumpSound;
         irrklang::vec3df getPosition();
 
         void hitwithLeftHand();

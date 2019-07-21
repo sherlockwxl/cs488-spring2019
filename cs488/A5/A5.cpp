@@ -143,6 +143,7 @@ A5::A5(const std::string & luaSceneFile)
 	glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	particleModel = ParticleModel(1.0f, color);
 	SoundEngine = createIrrKlangDevice();
+    backGroundSound = SoundEngine->play2D("Assets/background.wav", GL_TRUE);
 }
 
 //----------------------------------------------------------------------------------------
@@ -1559,6 +1560,8 @@ void A5::resetVariables(){
 	mouse_right_pressed = false;
 	character_1.lifeValue = 100;
 	character_2.lifeValue = 100;
+	lose = 0;
+	loseSoundPlayed = 0;
 }
 
 void A5::resetMouseLocation(){
@@ -2189,8 +2192,8 @@ void A5::updateLifeValue(){
 	int c1_life = character_1.lifeValue;
 	int c2_life = character_2.lifeValue;
 	if(c1_life == 0){
+		lose = 1;
 		ImGui::OpenPopup("Player1 lost!");
-
 
 		if(ImGui::BeginPopupModal("Player1 lost!")) {
 			ImGui::Text("Player1 lost!");
@@ -2203,6 +2206,8 @@ void A5::updateLifeValue(){
 		}
 	}
 	if(c2_life == 0){
+		lose = 1;
+		
 		ImGui::OpenPopup("Player2 lost!");
 
 
@@ -2215,6 +2220,11 @@ void A5::updateLifeValue(){
 
 			ImGui::EndPopup();
 		}
+	}
+
+	if( lose == 1 && loseSoundPlayed == 0){
+		loseSoundPlayed =1;
+		loseSound = SoundEngine->play2D("Assets/lose.wav", GL_FALSE);
 	}
 	//cout<<" c2 life" << c2_life<<endl;
 	int c1_time = (100 - c1_life)/10;
