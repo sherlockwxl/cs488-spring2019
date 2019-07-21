@@ -15,15 +15,15 @@ darkgray = gr.material({0.25, 0.29, 0.30}, {0.1, 0.1, 0.1}, 10)
 
 platform = gr.mesh('cube', 'platform', 2)
 rootnode:add_child(platform)
-platform:scale(25.0, 25.0, 0.5)
+platform:scale(60.0, 25.0, 0.5)
 platform:translate(0.0, 0.0, 5.0)
 platform:rotate('x',90)
 platform:set_material(darkgray)
 
-platform_back = gr.mesh('cube', 'platform_back')
+platform_back = gr.mesh('cube', 'platform_back',3)
 rootnode:add_child(platform_back)
-platform_back:scale(25.0, 25.0, 0.1)
-platform_back:translate(0.0, 0.0, -12.0)
+platform_back:scale(60.0, 25.0, 0.5)
+platform_back:translate(0.0, 5.0, -12.0)
 platform_back:set_material(darkgray)
 
 torso = gr.mesh('sphere', 'torso')
@@ -488,7 +488,7 @@ rightWing_baymax:set_material(red)
 
 
 
-rootnode:translate(0.0, 0.0, -10.0)
+rootnode:translate(0.0, -4.0, -15.0)
 torso:translate(-5.0,-2.25,0.0)
 torso_baymax:translate(5.0,0.0,0.0)
 return rootnode

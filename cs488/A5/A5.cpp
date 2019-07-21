@@ -33,28 +33,19 @@ const float platform_uv[] = {
   0.0f, 0.0f,
   0.0f, 0.0f,
 
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-
-  // top face bot right
   0.0f, 1.0f,
   1.0f, 1.0f,
   1.0f, 0.0f,
 
-
+  // top face bot right
   0.0f, 0.0f,
   0.0f, 0.0f,
   0.0f, 0.0f,
 
 
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 0.0f,
-
-
-  0.0f, 0.0f,
-  0.0f, 0.0f,
+  
+  1.0f, 0.0f,
+  1.0f, 1.0f,
   0.0f, 0.0f,
 
 
@@ -73,11 +64,21 @@ const float platform_uv[] = {
   0.0f, 0.0f,
 
 
+  0.0f, 1.0f, //2
+  0.0f, 0.0f, //6
+  1.0f, 1.0f, //3
+
+
   0.0f, 0.0f,
   0.0f, 0.0f,
   0.0f, 0.0f,
 
 
+  
+  0.0f, 0.0f,
+  1.0f, 1.0f,
+  0.0f, 1.0f,
+  
   0.0f, 0.0f,
   0.0f, 0.0f,
   0.0f, 0.0f,
@@ -175,6 +176,7 @@ void A5::init()
 	// process texture file
 	loadTexture("Assets/asphalt.jpg");
 	loadTexture("Assets/container.jpg");
+	loadTexture("Assets/fighter_background_2.jpg");
 
 	// Load and decode all .obj files at once here.  You may add additional .obj files to
 	// this list in order to support rendering additional mesh types.  All vertex
@@ -582,7 +584,7 @@ void A5::mapVboDataToVertexShaderInputLocations()
 	glVertexAttribPointer(m_normalAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_textureUV);
-   glVertexAttribPointer(m_textureCoordsAttribLocation, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+   glVertexAttribPointer(m_textureCoordsAttribLocation, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 
 	//-- Unbind target, and restore default values:

@@ -3,7 +3,7 @@
 // Model-Space coordinates
 in vec3 position;
 in vec3 normal;
-in vec3 textureUV;
+in vec2 textureUV;
 
 struct LightSource {
     vec3 position;
@@ -25,7 +25,7 @@ out VsOutFsIn {
 	vec3 normal_ES;   // Eye-space normal
 	LightSource light;
 	vec4 lightSpace;  // position for light space
-	vec3 textureUV;
+	vec2 textureUV;
 } vs_out;
 
 

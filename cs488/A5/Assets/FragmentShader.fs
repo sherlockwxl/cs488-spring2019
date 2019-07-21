@@ -15,7 +15,7 @@ in VsOutFsIn {
 	vec3 normal_ES;   // Eye-space normal
 	LightSource light;
     vec4 lightSpace;
-    vec3 textureUV;
+    vec2 textureUV;
 } fs_in;
 
 
