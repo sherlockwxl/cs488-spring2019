@@ -243,6 +243,7 @@ protected:
 	float scale_z_c1 = 0.1f;
 
 	float life_c1 = 1.0f;
+	int  prev_life_c1 = 100;
 
 
 	// for c2 bar
@@ -259,7 +260,9 @@ protected:
 	float scale_y_c2 = 0.05f;
 	float scale_z_c2 = 0.1f;
 
-	float life_c2 = 18.0f;
+	float life_c2 = 0.0f;
+	int prev_life_c2 = 100;
+	void updateLifeValue();
 
 
 

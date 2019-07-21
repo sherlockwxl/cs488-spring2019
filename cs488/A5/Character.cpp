@@ -225,7 +225,7 @@ bool Character::checkCollisions(){
         for(auto const& other_id: other_geoIndexVector){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
-                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
                 if(status == -1){
                     enemy->gotHit(other_id);
                 }
@@ -318,6 +318,7 @@ void Character::gotHit(int NodeId){
         if(GeoNode->hitTimeCount == 0){
             GeoNode->isHit = true;
             GeoNode->hitTimeCount = 60;
+            lifeValue -= 10;
         }
     }
     
@@ -364,7 +365,7 @@ void Character::defend(){
 }
 
 void Character::stopMovement(){
-    cout<<"stop movement called"<<endl;
+    //cout<<"stop movement called"<<endl;
     moveUpOrDown = 0;
     moveLeftOrRight = 0;
     moveLeftFrameCounter = 0;
@@ -373,7 +374,7 @@ void Character::stopMovement(){
 }
 
 void Character::stopAnimation(){
-    cout<<"stop animation called"<<endl;
+    //cout<<"stop animation called"<<endl;
     animationDuration = 0;
     keyFrameHandler->stopAnimation(*animationModel, id);
 }

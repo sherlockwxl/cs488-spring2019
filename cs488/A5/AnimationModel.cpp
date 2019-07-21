@@ -26,7 +26,7 @@ void AnimationModel::update(){
                     if(currentKeyFrame_ani.totalTime - durationCont_v_ani_c1.at(i) == 1 && currentKeyFrame_ani.rotationTarget.x == ori_joint_angle_c1.at(i).x
                     && currentKeyFrame_ani.rotationTarget.y == ori_joint_angle_c1.at(i).y && currentKeyFrame_ani.rotationTarget.z == ori_joint_angle_c1.at(i).z){
                         currentKeyFrame_ani.order = 2;
-                        cout<<"joint : "<<curTargetNode_s->m_name <<" will reset"<<endl;
+                        //cout<<"joint : "<<curTargetNode_s->m_name <<" will reset"<<endl;
                     }
                     JointNode * jointNode = static_cast<JointNode*>(curTargetNode_s);
                     if(curTargetNode_s->m_name == "leftAnkle"){
@@ -105,7 +105,7 @@ void AnimationModel::update(){
                     if(currentKeyFrame_ani.totalTime - durationCont_v_ani_c2.at(i) == 1 && currentKeyFrame_ani.rotationTarget.x == ori_joint_angle_c2.at(i).x
                     && currentKeyFrame_ani.rotationTarget.y == ori_joint_angle_c2.at(i).y && currentKeyFrame_ani.rotationTarget.z == ori_joint_angle_c2.at(i).z){
                         currentKeyFrame_ani.order = 2;
-                        cout<<"joint : "<<curTargetNode_s->m_name <<" will reset"<<endl;
+                        //cout<<"joint : "<<curTargetNode_s->m_name <<" will reset"<<endl;
                     }
                    // cout<<"prev angle"<<jointNode->m_joint_x.init << " and " << jointNode->m_joint_y.init<<endl;
 

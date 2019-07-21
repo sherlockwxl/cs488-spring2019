@@ -730,6 +730,7 @@ void A5::appLogic()
 
 	character_1.update();
 	character_2.update();
+	updateLifeValue();
 
 	particleModel.update();
 
@@ -967,7 +968,7 @@ void A5::draw() {
 			glCullFace(GL_FRONT);
 		}
 	}
-	//renderSceneWithDepthMap(*m_rootNode);
+	renderSceneWithDepthMap(*m_rootNode);
 	//renderSceneGraph(*m_rootNode, 2);
 
 	if(z_buffer){
@@ -1536,7 +1537,7 @@ bool A5::keyInputEvent (
 void A5::resetAll(){
 	resetOrietation();
 	resetPosition();
-	resetJoints();
+	//resetJoints();
 	resetVariables();
 	resetMouseLocation();
 }
@@ -1556,6 +1557,8 @@ void A5::resetVariables(){
 	mouse_left_pressed = false;
 	mouse_mid_pressed = false;
 	mouse_right_pressed = false;
+	character_1.lifeValue = 100;
+	character_2.lifeValue = 100;
 }
 
 void A5::resetMouseLocation(){
@@ -2077,9 +2080,9 @@ void A5::renderBar_c1(){
 		
 		//-- Set ModelView matrix:
  		GLint location = m_shader_bar_c1.getUniformLocation("translation");
-		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c1/life_c1, scale_y_c1, scale_z_c1 ));
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c1*life_c1, scale_y_c1, scale_z_c1 ));
 
-		translation = glm::translate(translation,  glm::vec3( shift_x_c1*life_c1, shift_y_c1, shift_z_c1 ));
+		translation = glm::translate(translation,  glm::vec3( shift_x_c1/life_c1, shift_y_c1, shift_z_c1 ));
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
 		CHECK_GL_ERRORS; 
@@ -2090,9 +2093,7 @@ void A5::renderBar_c1(){
 		glUniform4fv(location, 1, value_ptr( glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
 		CHECK_GL_ERRORS;
 		//cout<<"will call draw"<<endl;
-		if(life_c1 < 18.0f){
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
-		}
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
 		
 		CHECK_GL_ERRORS;
 		//cout<<"draw done"<<endl;
@@ -2131,9 +2132,8 @@ void A5::renderBar_c2(){
 		glUniform4fv(location, 1, value_ptr( glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
 		CHECK_GL_ERRORS;
 		//cout<<"will call draw"<<endl;
-		if(life_c2 > 1.1f){
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
-		}
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+		
 		
 		CHECK_GL_ERRORS;
 		//cout<<"draw done"<<endl;
@@ -2153,9 +2153,9 @@ void A5::renderBar_c2(){
 		
 		//-- Set ModelView matrix:
  		GLint location = m_shader_bar_c2.getUniformLocation("translation");
-		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c2/life_c2, scale_y_c2, scale_z_c2 ));
+		mat4 translation = glm::scale( glm::mat4(), glm::vec3( scale_x_c2*life_c2, scale_y_c2, scale_z_c2 ));
 
-		translation = glm::translate(translation,  glm::vec3( shift_x_c2*life_c2, shift_y_c2, shift_z_c2 ));
+		translation = glm::translate(translation,  glm::vec3( shift_x_c2/life_c2, shift_y_c2, shift_z_c2 ));
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(translation));
 		CHECK_GL_ERRORS; 
@@ -2166,9 +2166,7 @@ void A5::renderBar_c2(){
 		glUniform4fv(location, 1, value_ptr( glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 		CHECK_GL_ERRORS;
 		//cout<<"will call draw"<<endl;
-		if(life_c2 < 18.0f){
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
-		}
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
 		
 		
 		CHECK_GL_ERRORS;
@@ -2186,6 +2184,55 @@ void A5::renderBar_c2(){
 	CHECK_GL_ERRORS;
 }
 
+
+void A5::updateLifeValue(){
+	int c1_life = character_1.lifeValue;
+	int c2_life = character_2.lifeValue;
+	if(c1_life == 0){
+		ImGui::OpenPopup("Player1 lost!");
+
+
+		if(ImGui::BeginPopupModal("Player1 lost!")) {
+			ImGui::Text("Player1 lost!");
+			if(ImGui::Button("OK", ImVec2(100, 10))) {
+				resetAll();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+	if(c2_life == 0){
+		ImGui::OpenPopup("Player2 lost!");
+
+
+		if(ImGui::BeginPopupModal("Player2 lost!")) {
+			ImGui::Text("Player2 lost!");
+			if(ImGui::Button("OK", ImVec2(100, 10))) {
+				resetAll();
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+	//cout<<" c2 life" << c2_life<<endl;
+	int c1_time = (100 - c1_life)/10;
+	int c2_time = (100 - c2_life)/10;
+	float each_time_c1 = pow(18.0f, 1.0f/10.0f);
+	float each_time_c2 = pow(1.0f/18.0f, 1.0f/10.0f);
+	if( prev_life_c1 != c1_life){
+		life_c1 = 1.0f - 0.1f * (100 - c1_life)/10;
+		prev_life_c1 = c1_life;
+		//cout<<"current c1 value : "<<life_c1<<endl;
+	}
+	if( prev_life_c2 != c2_life){
+		life_c2 = 0.0f + 0.1f* (100 - c2_life)/10;
+		prev_life_c2 = c2_life;
+		//cout<<"each time is : "<<each_time<<"current c2 value : "<<life_c2<<endl;
+	}
+	
+}
 
 
 

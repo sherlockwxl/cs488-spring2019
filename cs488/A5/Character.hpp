@@ -55,6 +55,7 @@ class Character{
         int movementDuration;
 
         int status;// 0 for default, -1 for attack, 1 for defence
+        int lifeValue = 100;
 
 
         Character(SceneNode m_rootNode);
