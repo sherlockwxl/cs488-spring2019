@@ -268,7 +268,7 @@ protected:
 	int prev_life_c2 = 100;
 	void updateLifeValue();
 
-
+	bool gamePaused;
 
 
 	

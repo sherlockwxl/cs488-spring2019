@@ -145,6 +145,7 @@ A5::A5(const std::string & luaSceneFile)
 	particleModel = ParticleModel(1.0f, color);
 	SoundEngine = createIrrKlangDevice();
     backGroundSound = SoundEngine->play2D("Assets/background.wav", GL_TRUE);
+	gamePaused = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1329,222 +1330,236 @@ bool A5::keyInputEvent (
 		int mods
 ) {
 	bool eventHandled(false);
-	if( action == GLFW_PRESS ) {
-		// Respond to some key events.
-		if (key == GLFW_KEY_MINUS){
+	if(!gamePaused){
+			if( action == GLFW_PRESS ) {
+			// Respond to some key events.
+			
+			// reset position
+			if (key == GLFW_KEY_I){
 
-			eventHandled = true;
+				eventHandled = true;
 
-			life_c2 *= 0.8f;
-			life_c2 = std::max(1.0f, life_c2);
-			cout<<life_c2<<endl;
-		} 
-		if (key == GLFW_KEY_EQUAL){
+				resetHandler(0);
+			} 
 
-			eventHandled = true;
+			
 
-			life_c2 *= 1.2f;
-			cout<<life_c2<<endl;
-		}
-		// reset position
-		if (key == GLFW_KEY_I){
+			//reset Joints
+			if (key == GLFW_KEY_S){
 
-			eventHandled = true;
+				eventHandled = true;
 
-			resetHandler(0);
-		} 
+				resetHandler(2);
+			} 
 
-		
+			
 
-		//reset Joints
-		if (key == GLFW_KEY_S){
+			// Exit
+			if (key == GLFW_KEY_Q){
 
-			eventHandled = true;
+				eventHandled = true;
 
-			resetHandler(2);
-		} 
-
-		
-
-		// Exit
-		if (key == GLFW_KEY_Q){
-
-			eventHandled = true;
-
-			glfwSetWindowShouldClose(m_window, GL_TRUE);
-		}
+				glfwSetWindowShouldClose(m_window, GL_TRUE);
+			}
 
 
-		// Undo
-		if(key == GLFW_KEY_U){
-			eventHandled = true;
-			undo();
-		}
+			// Undo
+			if(key == GLFW_KEY_U){
+				eventHandled = true;
+				undo();
+			}
 
-		// Redo
-		if(key == GLFW_KEY_R){
-			eventHandled = true;
-			redo();
-		}
+			// Redo
+			if(key == GLFW_KEY_R){
+				eventHandled = true;
+				redo();
+			}
 
-		// circle
-		if(key == GLFW_KEY_C){
-			eventHandled = true;
-			circle = !circle;
-		}
+			// circle
+			if(key == GLFW_KEY_C){
+				eventHandled = true;
+				circle = !circle;
+			}
 
-		// z_buffer
-		if(key == GLFW_KEY_Z){
-			eventHandled = true;
-			z_buffer = !z_buffer;
-		}
+			// z_buffer
+			if(key == GLFW_KEY_Z){
+				eventHandled = true;
+				z_buffer = !z_buffer;
+			}
 
-		// Backface culling
-		if(key == GLFW_KEY_B){
-			eventHandled = true;
-			backface_culling = !backface_culling;
-		}
+			// Backface culling
+	/* 		if(key == GLFW_KEY_B){
+				eventHandled = true;
+				backface_culling = !backface_culling;
+			} */
 
-		// Frontface culling
-		if(key == GLFW_KEY_F){
-			eventHandled = true;
-			frontface_culling = !frontface_culling;
-		}
-		// Position/Orientation (P)
-		if(key == GLFW_KEY_P){
-			eventHandled = true;
-			i_mode = 0;
-		}
+			// Frontface culling
+			if(key == GLFW_KEY_F){
+				eventHandled = true;
+				frontface_culling = !frontface_culling;
+			}
+			// Position/Orientation (P)
+			if(key == GLFW_KEY_P){
+				eventHandled = true;
+				i_mode = 0;
+			}
 
-		// Joints (J)
-		if(key == GLFW_KEY_J){
-			eventHandled = true;
-			i_mode = 1;
-		}
+			// Joints (J)
+			if(key == GLFW_KEY_J){
+				eventHandled = true;
+				i_mode = 1;
+			}
 
-		// Joints (J)
-		if(key == GLFW_KEY_M){
-			eventHandled = true;
-			show_gui = !show_gui;
-		}
+			// Joints (J)
+			if(key == GLFW_KEY_M){
+				eventHandled = true;
+				show_gui = !show_gui;
+			}
 
-		if(key == GLFW_KEY_0){
-			printAll(*character_1.m_rootNode);
-		}
+	/* 		if(key == GLFW_KEY_0){
+				printAll(*character_1.m_rootNode);
+			} */
 
-		if(key == GLFW_KEY_1){
-			character_1.hitwithLeftHand();
-		}
-		if(key == GLFW_KEY_2){
-			character_1.hitwithLeftLeg();
-		}
-		if(key == GLFW_KEY_3){
-			character_1.defend();
-		}
-		if(key == GLFW_KEY_PAGE_UP){
-			character_2.hitwithLeftHand();
-		}
-		if(key == GLFW_KEY_PAGE_DOWN){
-			character_2.hitwithLeftLeg();
-		}
-		if(key == GLFW_KEY_RIGHT){
-			eventHandled = true;
-			character_2.move(1, 0);
-		}
-		if(key == GLFW_KEY_D){
-			eventHandled = true;
-			character_1.move(1, 0);
-		}
 
-		if(key == GLFW_KEY_LEFT){
-			eventHandled = true;
-			character_2.move(0, 0);
-		}
+			// character control
 
-		if(key == GLFW_KEY_A){
-			eventHandled = true;
-			character_1.move(0, 0);
-		}
+			if(key == GLFW_KEY_V){
+				character_1.hitwithLeftHand();
+			}
+			if(key == GLFW_KEY_B){
+				character_1.hitwithLeftLeg();
+			}
+			if(key == GLFW_KEY_N){
+				character_1.defend();
+			}
+			if(key == GLFW_KEY_PAGE_UP){
+				character_2.hitwithLeftHand();
+			}
+			if(key == GLFW_KEY_PAGE_DOWN){
+				character_2.hitwithLeftLeg();
+			}
+			if(key == GLFW_KEY_RIGHT){
+				eventHandled = true;
+				character_2.move(1, 0);
+			}
+			if(key == GLFW_KEY_D){
+				eventHandled = true;
+				character_1.move(1, 0);
+			}
 
-		if(key == GLFW_KEY_UP){
-			eventHandled = true;
-			character_2.move(2, 0);
-		}
+			if(key == GLFW_KEY_LEFT){
+				eventHandled = true;
+				character_2.move(0, 0);
+			}
 
-		//reset orientation
-		if (key == GLFW_KEY_W){
-			eventHandled = true;
-			character_1.move(2, 0);
-		} 
+			if(key == GLFW_KEY_A){
+				eventHandled = true;
+				character_1.move(0, 0);
+			}
 
-		if(key == GLFW_KEY_DOWN){
-			eventHandled = true;
-			character_2.move(3, 0);
-		}
-		if(key == GLFW_KEY_S){
-			eventHandled = true;
-			character_1.move(3, 0);
-		}
+			if(key == GLFW_KEY_UP){
+				eventHandled = true;
+				character_2.move(2, 0);
+			}
 
-		if(key == GLFW_KEY_SPACE){
-			eventHandled = true;
-			character_1.move(4, 0);
-		}
+			if (key == GLFW_KEY_W){
+				eventHandled = true;
+				character_1.move(2, 0);
+			} 
 
-		
-		
-		if(key == GLFW_KEY_4){
-			m_light.position.z += 3.0f;
-			cout<<m_light.position<<endl;
-		}
-		if(key == GLFW_KEY_5){
-			m_light.position.z -= 3.0f;
-			cout<<m_light.position<<endl;
-		}
+			if(key == GLFW_KEY_DOWN){
+				eventHandled = true;
+				character_2.move(3, 0);
+			}
+			if(key == GLFW_KEY_S){
+				eventHandled = true;
+				character_1.move(3, 0);
+			}
 
-		if(key == GLFW_KEY_6){
-			m_light.position.x += 3.0f;
-			cout<<m_light.position<<endl;
-		}
-		if(key == GLFW_KEY_7){
-			m_light.position.x -= 3.0f;
-			cout<<m_light.position<<endl;
-		}
-		
-		
-	}else if(action == GLFW_RELEASE){
-		if(key == GLFW_KEY_RIGHT){
-			character_2.move(1, 1);
-		}
+			if(key == GLFW_KEY_SPACE){
+				eventHandled = true;
+				character_1.move(4, 0);
+			}
 
-		if(key == GLFW_KEY_LEFT){
-			character_2.move(0, 1);
-		}
+			if (key == GLFW_KEY_0){
 
-		if(key == GLFW_KEY_UP){
-			character_2.move(2, 1);
-		}
+				eventHandled = true;
+				character_2.hitwithLeftHand();
+			} 
+			if (key == GLFW_KEY_MINUS){
 
-		if(key == GLFW_KEY_DOWN){
-			character_2.move(3 ,1);
-		}
+				eventHandled = true;
+				character_2.hitwithLeftLeg();
+			} 
+			if (key == GLFW_KEY_EQUAL){
 
-		if(key == GLFW_KEY_D){
-			character_1.move(1, 1);
-		}
+				eventHandled = true;
 
-		if(key == GLFW_KEY_A){
-			character_1.move(0, 1);
-		}
+				character_2.defend();
+			}
+			if(key == GLFW_KEY_9){
+				eventHandled = true;
+				character_2.move(4, 0);
+			}
+			
+			if(key == GLFW_KEY_4){
+				m_light.position.z += 3.0f;
+				cout<<m_light.position<<endl;
+			}
+			if(key == GLFW_KEY_5){
+				m_light.position.z -= 3.0f;
+				cout<<m_light.position<<endl;
+			}
 
-		if(key == GLFW_KEY_W){
-			character_1.move(2, 1);
-		}
+			if(key == GLFW_KEY_6){
+				m_light.position.x += 3.0f;
+				cout<<m_light.position<<endl;
+			}
+			if(key == GLFW_KEY_7){
+				m_light.position.x -= 3.0f;
+				cout<<m_light.position<<endl;
+			}
+			if(key == GLFW_KEY_8){
+				character_1.resetCharacter();
+				character_2.resetCharacter();
+			}
+			
+			
+		}else if(action == GLFW_RELEASE){
+			if(key == GLFW_KEY_RIGHT){
+				character_2.move(1, 1);
+			}
 
-		if(key == GLFW_KEY_S){
-			character_1.move(3 ,1);
+			if(key == GLFW_KEY_LEFT){
+				character_2.move(0, 1);
+			}
+
+			if(key == GLFW_KEY_UP){
+				character_2.move(2, 1);
+			}
+
+			if(key == GLFW_KEY_DOWN){
+				character_2.move(3 ,1);
+			}
+
+			if(key == GLFW_KEY_D){
+				character_1.move(1, 1);
+			}
+
+			if(key == GLFW_KEY_A){
+				character_1.move(0, 1);
+			}
+
+			if(key == GLFW_KEY_W){
+				character_1.move(2, 1);
+			}
+
+			if(key == GLFW_KEY_S){
+				character_1.move(3 ,1);
+			}
 		}
 	}
+	
 	// Fill in with event handling code...
 	eventHandled = true;
 	return eventHandled;
@@ -1578,6 +1593,7 @@ void A5::resetVariables(){
 	mouse_right_pressed = false;
 	lose = 0;
 	loseSoundPlayed = 0;
+	gamePaused = false;
 }
 
 void A5::resetMouseLocation(){
@@ -2211,7 +2227,7 @@ void A5::updateLifeValue(){
 		lose = 1;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player1 lost!");
-
+		gamePaused = true;
 		if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
 			ImGui::Spacing ();
 			ImGui::SameLine(100.0f);
@@ -2231,6 +2247,7 @@ void A5::updateLifeValue(){
 		lose = 1;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player2 lost!");
+		gamePaused = true;
 		if(ImGui::BeginPopupModal("Player2 lost!")) {
 			ImGui::Spacing ();
 			ImGui::SameLine(100.0f);

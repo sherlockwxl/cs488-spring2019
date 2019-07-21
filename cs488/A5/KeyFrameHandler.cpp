@@ -328,9 +328,9 @@ int KeyFrameHandler::addKeyFrameforDefend(AnimationModel &animationModel, int ch
 
 
     string s1 = "leftShoulderJoint";
-    string s2 = "leftElbow";
+    string s2 = "leftArmJoint";
     string s3 = "rightShoulderJoint";
-    string s4 = "rightElbow";
+    string s4 = "rightArmJoint";
     if(character == 2){
         s1.append("_baymax");
         s2.append("_baymax");

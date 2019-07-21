@@ -219,7 +219,7 @@ leftUpArm:translate(-1.0, 0.3, 0.3)
 leftUpArm:set_material(white)
 
 -- add a cute hand
-leftArmJoint = gr.joint('leftArmJoint', {-3.14/(1.2), 0, 3.14/2}, {-3.14/4, 0, 3.14/4})
+leftArmJoint = gr.joint('leftArmJoint', {-3.14/4, 0, 3.14/4}, {-3.14/4, 0, 3.14/4})
 leftUpArm:add_child(leftArmJoint)
 leftArmJoint:translate(-1.22, -0.22, 0.3)
 
@@ -269,7 +269,7 @@ rightUpArm:set_material(white)
 
 
 -- add a cute hand
-rightArmJoint = gr.joint('rightArmJoint', {-3.14/(1.2), 0, 3.14/2}, {-3.14/4, 0, 3.14/4})
+rightArmJoint = gr.joint('rightArmJoint', {-3.14/4, 0, 3.14/4}, {-3.14/4, 0, 3.14/4})
 rightUpArm:add_child(rightArmJoint)
 rightArmJoint:translate(1.22, -0.22, 0.3)
 
@@ -537,7 +537,7 @@ leftUpArm_baymax:translate(-1.0, 0.3, 0.3)
 leftUpArm_baymax:set_material(white)
 
 -- add a cute hand
-leftArmJoint_baymax = gr.joint('leftArmJoint_baymax', {-3.14/(1.2), 0, 3.14/2}, {-3.14/4, 0, 3.14/4})
+leftArmJoint_baymax = gr.joint('leftArmJoint_baymax', {-3.14/4, 0, 3.14/4}, {-3.14/4, 0, 3.14/4})
 leftUpArm_baymax:add_child(leftArmJoint_baymax)
 leftArmJoint_baymax:translate(-1.22, -0.22, 0.3)
 
@@ -587,7 +587,7 @@ rightUpArm_baymax:set_material(white)
 
 
 -- add a cute hand
-rightArmJoint_baymax = gr.joint('rightArmJoint_baymax', {-3.14/(1.2), 0, 3.14/2}, {-3.14/4, 0, 3.14/4})
+rightArmJoint_baymax = gr.joint('rightArmJoint_baymax', {-3.14/4, 0, 3.14/4}, {-3.14/4, 0, 3.14/4})
 rightUpArm_baymax:add_child(rightArmJoint_baymax)
 rightArmJoint_baymax:translate(1.22, -0.22, 0.3)
 
@@ -680,6 +680,6 @@ rightWing_baymax:set_material(red)
 
 
 rootnode:translate(0.0, -8.0, -18.0)
-torso:translate(-5.0,-2.25, 0.0)
-torso_baymax:translate(5.0,-2.25, 0.0)
+torso:translate(-5.0,2.25, 0.0)
+torso_baymax:translate(5.0,2.25, 0.0)
 return rootnode

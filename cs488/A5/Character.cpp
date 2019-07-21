@@ -169,6 +169,7 @@ void Character::update(){
     }
     if(checkCollisions()){
         m_rootNode->translate(glm::vec3(temp * -1.0f));
+        moveRecord = moveRecord+vec3(temp);
         stopMovement();
         if(animationDuration > 0){
             if(status != 1){
@@ -424,6 +425,7 @@ void Character::resetCharacter(){
     m_rootNode->translate(glm::vec3(moveRecord));
     moveRecord = glm::vec3(0.0f);
     lifeValue = 100;
+    jump = 2;
 
 
 }

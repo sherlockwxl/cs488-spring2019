@@ -219,12 +219,12 @@ void AnimationModel::rotateJointHelper(GLfloat anglex, GLfloat angley,GLfloat an
                 //cout<<" after trans:"<<node.trans<<endl;
             }
         }else{
-            cout<<"node name : "<<node.m_name<<endl;
+           /*  cout<<"node name : "<<node.m_name<<endl;
               cout<< " newAngle_x :   " << newAngle_x <<" newAngle_y: " << newAngle_y<<" newAngle_z: " << newAngle_z<<endl;
             cout<< " newAngle_x  limit :   " << jointNode->m_joint_x.max << " and " << jointNode->m_joint_x.min
             <<" newAngle_y: limit" << jointNode->m_joint_y.max<< " and : " <<jointNode->m_joint_y.min
             <<" newAngle_z: limit" << jointNode->m_joint_z.max<< " and : " <<jointNode->m_joint_z.min <<endl; 
-
+ */
         }
     }
 
