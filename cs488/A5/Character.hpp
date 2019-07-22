@@ -8,6 +8,7 @@
 #include "SceneNode.hpp"
 #include "AnimationModel.hpp"
 #include "KeyFrameHandler.hpp"
+#include "ball.hpp"
 
 #include "cs488-framework/OpenGLImport.hpp"
 
@@ -68,6 +69,7 @@ class Character{
 
         Character(SceneNode m_rootNode);
         Character();
+        virtual ~Character();
         void move(int direction, int type); // 0 for left; 1 for right; 2 for up; 3 for down; type: 0 for start 1 for end
         void update();
         bool checkCollisions();
@@ -95,6 +97,12 @@ class Character{
         bool isCollisionStrict(SceneNode * LeftNode, SceneNode * RightNode);
         void checkOntheGroundStrict();
         bool isOntheGroundStrict;
+
+        ball *weaponBall;
+        bool checkBallCollisions();
+        void gotHitByBall(int NodeId);
+        void releaseBall();
+        int hitByBallTimeCount;
 };
 
 

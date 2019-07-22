@@ -17,6 +17,7 @@
 #include "Character.hpp"
 #include "ParticleModel.hpp"
 #include "irrklang/irrKlang.h"
+#include "ball.hpp"
 
 
 #include <glm/glm.hpp>
@@ -282,6 +283,10 @@ protected:
 	bool display_texture;
 	bool display_shadow;
 
+
+	// ball
+	ball ballPlayer1;
+	ball ballPlayer2;
 	
 
 };

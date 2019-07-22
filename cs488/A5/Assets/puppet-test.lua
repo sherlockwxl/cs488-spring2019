@@ -51,6 +51,18 @@ platform_front:scale(60.0, 25.0, 0.2)
 platform_front:translate(0.0, 5.0, 13.0)
 platform_front:set_material(darkgray)
 
+ball_p1 = gr.mesh('sphere', 'ball_p1')
+rootnode:add_child(ball_p1)
+ball_p1:scale(4.5, 0.5, 1.5)
+ball_p1:translate(-5.0,2.25, 0.0)
+ball_p1:set_material(lightBlue)
+
+ball_p2 = gr.mesh('sphere', 'ball_p2')
+rootnode:add_child(ball_p2)
+ball_p2:scale(4.5, 0.5, 1.5)
+ball_p2:translate(5.0,2.25, 0.0)
+ball_p2:set_material(red)
+
 
 
 

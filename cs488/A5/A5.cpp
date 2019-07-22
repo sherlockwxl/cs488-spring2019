@@ -278,6 +278,18 @@ void A5::processLuaSceneFile(const std::string & filename) {
 			character_1.front_Node = std::shared_ptr<SceneNode>(node);
 			character_2.front_Node = std::shared_ptr<SceneNode>(node);
 		}
+		if(node->m_name == "ball_p1"){
+			ballPlayer1 = ball();
+			ballPlayer1.id = 1;
+			ballPlayer1.m_rootNode = std::shared_ptr<SceneNode>(node);
+			character_1.weaponBall = &ballPlayer1;
+		}
+		if(node->m_name == "ball_p2"){
+			ballPlayer2 = ball();
+			ballPlayer2.id = -1;
+			ballPlayer2.m_rootNode = std::shared_ptr<SceneNode>(node);
+			character_2.weaponBall = &ballPlayer2;
+		}
 		if(node->m_name == "torso"){
 			GLfloat angel = 3.141592f * 0.5f;
 			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), angel, vec3(0.0f, 1.0f, 0.0f));
@@ -879,7 +891,7 @@ void A5::guiLogic()
 		ImGui::OpenPopup("Game Paused");
 		if(ImGui::BeginPopupModal("Game Paused", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
 			ImGui::Spacing ();
-			ImGui::SameLine(100.0f);
+			ImGui::SameLine(20.0f);
 			ImGui::SetWindowFontScale(2.0f);
 			ImGui::Text("You wanna take a break?");
 			ImGui::Dummy(ImVec2(0.0f, 40.0f));
@@ -1076,6 +1088,12 @@ void A5::renderSceneGraph(const SceneNode & root, int pass) {
 		if (node->m_nodeType != NodeType::GeometryNode)
 			continue;
 		if (node->m_name == "platform_front"){
+			continue;
+		}
+		if (node->m_name == "ball_p1" && ballPlayer1.status == 0){
+			continue;
+		}
+		if (node->m_name == "ball_p2" && ballPlayer2.status == 0){
 			continue;
 		}
 		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
@@ -1400,6 +1418,9 @@ bool A5::keyInputEvent (
 			if(key == GLFW_KEY_N){
 				character_1.defend();
 			}
+			if(key == GLFW_KEY_6){
+				character_1.releaseBall();
+			}
 			if(key == GLFW_KEY_PAGE_UP){
 				character_2.hitwithLeftHand();
 			}
@@ -1464,6 +1485,9 @@ bool A5::keyInputEvent (
 				eventHandled = true;
 
 				character_2.defend();
+			}
+			if(key == GLFW_KEY_8){
+				character_2.releaseBall();
 			}
 			if(key == GLFW_KEY_9){
 				eventHandled = true;
@@ -1809,6 +1833,8 @@ void A5::trackballHandler(double xPos, double yPos){
 	glm::mat4 y_rotateMatrix = glm::rotate(mat4(), 1.5f, vec3(0.0f, 1.0f, 0.0f));
 	character_1.trackBallRotationMatrix = trackBallRotationMatrix;
 	character_2.trackBallRotationMatrix = trackBallRotationMatrix;
+	character_1.weaponBall->trackBallRotationMatrix = trackBallRotationMatrix;
+	character_2.weaponBall->trackBallRotationMatrix = trackBallRotationMatrix;
 	recursiveRotate(m_rootNode->trans, *m_rootNode, rotationMatrix);
 }
 
@@ -2174,19 +2200,18 @@ void A5::renderBar_c2(){
 
 
 void A5::updateLifeValue(){
-	int c1_life = character_1.lifeValue;
-
-
-	if(c1_life == 0 &&  (lose == 0 || lose == 1)){
+	int c1_life =  character_1.lifeValue;
+	int c2_life =  character_2.lifeValue;
+	if(c1_life == 0 && c2_life == 0 && (lose == 0 || lose == 3)){
 		gamestage = 2;
-		lose = 1;
+		lose = 3;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
-		ImGui::OpenPopup("Player1 lost!");
-		if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
+		ImGui::OpenPopup("Tie!");
+		if(ImGui::BeginPopupModal("Tie!", 0 , ImGuiWindowFlags_NoResize)) {
 			ImGui::Spacing ();
-			ImGui::SameLine(120.0f);
+			ImGui::SameLine(180.0f);
 			ImGui::SetWindowFontScale(2.0f);
-			ImGui::Text("Player1 lost!");
+			ImGui::Text("Tie!");
 			ImGui::Spacing ();
 			ImGui::SameLine(50.0f);
 			if(ImGui::Button("Try Again", ImVec2(300, 40))) {
@@ -2196,30 +2221,57 @@ void A5::updateLifeValue(){
 
 			ImGui::EndPopup();
 		}
-	}
-	int c2_life = character_2.lifeValue;
-	if(c2_life == 0 &&  (lose == 0 || lose == 2)){
-		gamestage = 2;
-		lose = 2;
-		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
-		ImGui::OpenPopup("Player2 lost!");
-		if(ImGui::BeginPopupModal("Player2 lost!", 0 , ImGuiWindowFlags_NoResize)) {
-			ImGui::Spacing ();
-			ImGui::SameLine(120.0f);
-			ImGui::SetWindowFontScale(2.0f);
-			ImGui::Text("Player2 lost!");
-			ImGui::Spacing ();
-			ImGui::SameLine(50.0f);
-			if(ImGui::Button("Try Again", ImVec2(300, 40))) {
-				resetAll();
-				ImGui::CloseCurrentPopup();
-			}
+	}else{
+			if(c1_life == 0 &&  (lose == 0 || lose == 1) && lose != 3){
+				gamestage = 2;
+				lose = 1;
+				ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
+				ImGui::OpenPopup("Player1 lost!");
+				if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
+					ImGui::Spacing ();
+					ImGui::SameLine(120.0f);
+					ImGui::SetWindowFontScale(2.0f);
+					ImGui::Text("Player1 lost!");
+					ImGui::Spacing ();
+					ImGui::SameLine(50.0f);
+					if(ImGui::Button("Try Again", ImVec2(300, 40))) {
+						resetAll();
+						ImGui::CloseCurrentPopup();
+					}
 
-			ImGui::EndPopup();
-		}
+					ImGui::EndPopup();
+				}
+			}
+			
+			else if(c2_life == 0 &&  (lose == 0 || lose == 2) && lose != 3){
+				gamestage = 2;
+				lose = 2;
+				ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
+				ImGui::OpenPopup("Player2 lost!");
+				if(ImGui::BeginPopupModal("Player2 lost!", 0 , ImGuiWindowFlags_NoResize)) {
+					ImGui::Spacing ();
+					ImGui::SameLine(120.0f);
+					ImGui::SetWindowFontScale(2.0f);
+					ImGui::Text("Player2 lost!");
+					ImGui::Spacing ();
+					ImGui::SameLine(50.0f);
+					if(ImGui::Button("Try Again", ImVec2(300, 40))) {
+						resetAll();
+						ImGui::CloseCurrentPopup();
+					}
+
+					ImGui::EndPopup();
+				}
+			}
 	}
+
+
 
 	if( lose != 0 && loseSoundPlayed == 0){
+		character_1.stopAnimation();
+		character_2.stopAnimation();
+		character_1.stopMovement();
+		character_2.stopMovement();
 		loseSoundPlayed =1;
 		loseSound = SoundEngine->play2D("Assets/lose.wav", GL_FALSE);
 	}

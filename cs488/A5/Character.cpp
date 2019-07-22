@@ -32,8 +32,11 @@ Character::Character(SceneNode m_rootNode){
     moveRecord = glm::vec3(0.0f);
     isOntheGround = false;
     isOntheGroundStrict = false;
+    hitByBallTimeCount = 0;
 }
-
+Character::~Character()
+{
+}
 void Character::move(int direction, int type){
 
     switch (direction){
@@ -102,6 +105,9 @@ void Character::move(int direction, int type){
 
 
 void Character::update(){
+    if(hitByBallTimeCount != 0){
+        hitByBallTimeCount = std::max(hitByBallTimeCount - 1, 0);
+    }
     updatecurrentStatus();
     animationDuration = std::max(animationDuration - 1,0);
     checkOntheGround();
@@ -209,7 +215,16 @@ void Character::update(){
             chracterWalkSound->setIsPaused(true);
         }
     }
-    
+    weaponBall->update();
+    if(enemy->weaponBall->status == 1 && weaponBall->status == 1){
+        if(isCollision(weaponBall->m_rootNode.get(), enemy->weaponBall->m_rootNode.get())){
+            weaponBall->hit();
+            enemy->weaponBall->hit();
+        }
+    }
+    if(checkBallCollisions()){
+        weaponBall->hit();
+    }
 
     updateAllNodeStatus();
 }
@@ -272,6 +287,38 @@ bool Character::checkCollisions(){
 
         }
     }
+    return false;
+}
+
+bool Character::checkBallCollisions(){
+    SceneNode * node = weaponBall->m_rootNode.get();
+    if(weaponBall->status == 1){
+        for(auto const& other_id: other_geoIndexVector){
+            SceneNode * other_node = findNodeById(*other_rootNode, other_id);
+            if(isCollision(node, other_node)){
+                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+
+                enemy->gotHitByBall(other_id);
+
+                //should trigger movement stop
+                return true;
+
+            }
+        }
+
+
+        if(isCollision(node, back_Node.get())||
+            isCollision(node, left_Node.get())||
+            isCollision(node, right_Node.get())||
+            isCollision(node, front_Node.get())){
+            //cout<<"collision"<<endl;
+            return true;
+
+        }
+        
+    }
+    
+
     return false;
 }
 
@@ -355,6 +402,23 @@ void Character::gotHit(int NodeId){
             GeoNode->isHit = true;
             GeoNode->hitTimeCount = 60;
             lifeValue -= 10;
+            gotHitSound = SoundEngine->play2D("Assets/gothit.wav", GL_FALSE);
+        }
+    }
+    
+    
+    //TODO: reduce life value after
+}
+
+void Character::gotHitByBall(int NodeId){
+    SceneNode * node = findNodeById(*m_rootNode, NodeId);
+    GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
+    //cout<<" got hit by ball on : " << node->m_name<<endl;
+    if(status != 1){
+        if(hitByBallTimeCount == 0){
+            GeoNode->isHit = true;
+            hitByBallTimeCount = 60;
+            lifeValue = std::max(lifeValue-50, 0);
             gotHitSound = SoundEngine->play2D("Assets/gothit.wav", GL_FALSE);
         }
     }
@@ -483,6 +547,11 @@ void Character::checkOntheGroundStrict(){
     }else{
         isOntheGroundStrict = false;
     }
+}
+
+
+void Character::releaseBall(){
+    weaponBall->release(m_rootNode->trans);
 }
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);
