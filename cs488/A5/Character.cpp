@@ -21,6 +21,12 @@ Character::Character(){
     chracterWalkSound = SoundEngine->play3D("Assets/walk_sound.wav",position, GL_TRUE,  GL_TRUE, GL_TRUE);
     chracterWalkSound->setPlaybackSpeed(0.8f);
     chracterWalkSound->setMinDistance(5.0f); // a loud sound
+
+    moveRecord = glm::vec3(0.0f);
+    isOntheGround = false;
+    isOntheGroundStrict = false;
+    hitByBallTimeCount = 0;
+    status = 0;
     
 }
 Character::Character(SceneNode m_rootNode){
@@ -33,6 +39,7 @@ Character::Character(SceneNode m_rootNode){
     isOntheGround = false;
     isOntheGroundStrict = false;
     hitByBallTimeCount = 0;
+    status = 0;
 }
 Character::~Character()
 {
@@ -414,10 +421,11 @@ void Character::gotHitByBall(int NodeId){
     SceneNode * node = findNodeById(*m_rootNode, NodeId);
     GeometryNode * GeoNode = static_cast<GeometryNode *>(node);
     //cout<<" got hit by ball on : " << node->m_name<<endl;
+    //cout<<" current stautus" << status<< " time : "<< hitByBallTimeCount<<endl;
     if(status != 1){
         if(hitByBallTimeCount == 0){
             GeoNode->isHit = true;
-            hitByBallTimeCount = 60;
+            hitByBallTimeCount = 30;
             lifeValue = std::max(lifeValue-50, 0);
             gotHitSound = SoundEngine->play2D("Assets/gothit.wav", GL_FALSE);
         }
@@ -506,11 +514,22 @@ void Character::updatecurrentStatus(){
 }
 
 void Character::resetCharacter(){
-
+    stopAnimation();
+    stopAnimation();
     m_rootNode->translate(glm::vec3(moveRecord));
     moveRecord = glm::vec3(0.0f);
     lifeValue = 100;
     jump = 2;
+
+    animationDuration = 0;
+    movementDuration = 0;
+    isOntheGround = false;
+    isOntheGroundStrict = false;
+    hitByBallTimeCount = 0;
+    status = 0;
+
+    startSpeed = 0.1f;
+    jumpstartSpeed = 0.6f;
 
 
 }

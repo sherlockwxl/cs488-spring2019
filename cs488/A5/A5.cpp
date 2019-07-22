@@ -1399,9 +1399,6 @@ bool A5::keyInputEvent (
 			if( action == GLFW_PRESS ) {
 			// Respond to some key events.
 			// game pause
-			if(key == GLFW_KEY_P){
-				gamestage = 3;
-			}
 
 			if(key == GLFW_KEY_R){
 				resetAll();
@@ -1418,7 +1415,7 @@ bool A5::keyInputEvent (
 			if(key == GLFW_KEY_N){
 				character_1.defend();
 			}
-			if(key == GLFW_KEY_6){
+			if(key == GLFW_KEY_T){
 				character_1.releaseBall();
 			}
 			if(key == GLFW_KEY_PAGE_UP){
@@ -1486,7 +1483,7 @@ bool A5::keyInputEvent (
 
 				character_2.defend();
 			}
-			if(key == GLFW_KEY_8){
+			if(key == GLFW_KEY_P){
 				character_2.releaseBall();
 			}
 			if(key == GLFW_KEY_9){
@@ -1588,13 +1585,13 @@ void A5::mouseMoveEventHandler(double xPos, double yPos){
 	{
 	case 0: // rotate position/poientation
 		if(mouse_left_pressed){
-			rotateP_OHandler(offsetX, offsetY, 0);
+			//rotateP_OHandler(offsetX, offsetY, 0);
 		}
 		if(mouse_mid_pressed){
-			rotateP_OHandler(offsetX, offsetY, 1);
+			//rotateP_OHandler(offsetX, offsetY, 1);
 		}
 		if(mouse_right_pressed){
-			rotateP_OHandler(xPos, yPos, 2);
+			//rotateP_OHandler(xPos, yPos, 2);
 		}
 		break;
 
@@ -1603,10 +1600,10 @@ void A5::mouseMoveEventHandler(double xPos, double yPos){
 			
 		}
 		if(mouse_mid_pressed){
-			rotateJointHandler(offsetX, offsetY, 1);
+			//rotateJointHandler(offsetX, offsetY, 1);
 		}
 		if(mouse_right_pressed){
-			rotateJointHandler(offsetX, offsetY, 2);
+			//rotateJointHandler(offsetX, offsetY, 2);
 		}
 		break;
 

@@ -9,6 +9,40 @@ Steps:
 Machine: gl36
 ===============================================================================
 Manual:
+1. Setting window:
+    This window is startup menu, player 1 and player 2 may adjust settings.
+    Difficulty setting will affect the default life value.
+        Default -> 100%
+        Medium  -> 80%
+        Hard    -> 60%
+    Movement Speed bar will adjust the character's movement Speed.
+        Range: 50% ~ 150% of the default value
+    
+    The start button will start the game      
+2. Game Scene:
+    Player may click instruction button to review the key mapping
+    Player may click pause tp pause the game, a popup will be displayed during the pause duration. And player could click
+        the "I'm ready" button to resume the game.
+    Player may click restart to restart the game.
+    Player may click quit to exit the game.
+    A setting window will be displayed which contains two checkboxes which could enable/disable the texture mapping and shadow.
+    Two bar will be displayed on the top of the screen to show the remaining life values for each player. (Left is for P1, right is for P2).
+    Game Control:
+        P1: Move:   WASD
+            Punch:  V
+            kick:   B
+            Defend: N
+            Jump:   Space
+        P2: Move:   Arrow Key
+            Punch:  0
+            kick:   -
+            Defend: =
+            Jump:   9
+                                                                                                                                                                                                                                                                                                    (Secret weapon: Key T for P1 and Key P for P2 )     
+3.  Game Over Scene:
+    Once  one/both players' remaining reaches 0. A popup will be displayed to show which one lose first. (Tie is possible)
+    Player may click "Try Again" to restart the game.
+
 
 All objectives implemented.
 
