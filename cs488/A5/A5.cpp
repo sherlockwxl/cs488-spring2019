@@ -852,6 +852,11 @@ void A5::guiLogic()
 				gamestage = 4;
 				ImGui::EndMenu();
 			}
+
+			if(ImGui::BeginMenu("Quit")){
+				glfwSetWindowShouldClose(m_window, GL_TRUE);
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
 		}
 
