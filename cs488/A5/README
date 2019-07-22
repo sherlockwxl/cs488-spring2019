@@ -1,49 +1,52 @@
 ===============================================================================
-Compilation: (base directory: A3)
+Compilation: (base directory: A5)
 Steps:
     1. $ premake4 gmake
     2. $ make
-    3. $ ./A3 Assets/puppet.lua
+    3. $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/xilingwu/Documents/cs488-spring2019/cs488/A5/lib/  
+    3. $ ./A5 Assets/puppet.lua
 
 Machine: gl36
 ===============================================================================
 Manual:
 
-All required features implemented.
+All objectives implemented.
 
-Data structure change: 
-1. add a parent member in the SceneNode for picking implementation.
-2. update the translate function for correctly displaying the model
+Objectives:
+_ _ _ 1: Modelling the scene: A scene that represents the fighting room should be rendered. 
 
-Undo/Redo structure:
-I used two stacks for store undo/redo operations. Each time mouse button is released, all current joint info will be saved into a
-vector of GLfloat( the head angle will be pushed into the vector at the end). Then the vector will be pushed into undo stack.
-when user perform undo, the program will check if undo stack contains more than one operation( one base operation which is the default value is always in undo stack)
-, if not a warning popup will be displayed. Then, the program will pop a joint info vector from the top and reverse the change and push the vector into  the redo stack.
-For redo, it is a similar process.
+ 
 
-trackball:
-I reused the provided code with minor change.
+_ _ _ 2: UI: User should be able to start, pause, restart the game and able to see the life value bar for each character. 
 
+ 
 
-puppet model: It is a baymax!
+_ _ _ 3: Animation: Keyframe animation is implemented using linear interpolation and the characters’ movement should be smooth and natural. 
 
-torso --------> |-------->neckJoint-------->neck-------->headJoint-------->head--------> |-------->leftEye
-                |                                                                        |-------->rightEye
-                |                                                                        |-------->line
-                |
-                |-------->absJoint-------->abs--------> |-------->tailJoint-------->tail
-                |                                       |-------->leftHipJoint-------->leftThigh-------->leftThighJoint-------->leftFoot
-                |                                       |-------->rightHipJoint-------->rightThigh-------->rightThighJoint-------->rightFoot
-                |
-                |-------->leftShoulder-------->leftShoulderJoint-------->leftUpArm-------->leftUpArmJoint-------->leftHand
-                |
-                |-------->rightShoulder-------->rightShoulderJoint-------->rightUpArm-------->rightUpArmJoint-------->rightHand
-                |
-                |-------->leftWingBaseJoint-------->leftWingBase-------->leftWingJoint-------->leftWing
-                |
-                |-------->rightWingBaseJoint-------->rightWingBase-------->rightWingJoint-------->rightWing
-                |
+ 
 
+_ _ _ 4: Dynamic Collision detection: A character should be able to hit the other one with the attack. 
 
-There are 16 joints(DOFs) in total(including the tail one at the back, you may need to rotate the baymax in order to see it).
+ 
+
+_ _ _ 5: Sound: background sound added and hit sound correctly synchronized with movement. 
+
+ 
+
+_ _ _ 6: Physics engine: The characters are subject to gravitational force (parameter: g) and the static fraction (parameters: coefficient of friction(u) and character’s mass (M)) should be implemented. 
+
+ 
+
+_ _ _ 7: Texture mapping: Characters and background should have texture being displayed. 
+
+ 
+
+_ _ _ 8: Particle system: Particle effect should be visible when a character is hit successfully. 
+
+ 
+
+_ _ _ 9: Static Collision detection: Two characters will be able to stand on the stationary fight platform without falling through. 
+
+ 
+
+_ _ _ 10: Shadow: Shadow will be implemented using shadow map and the shadow should be at the correct location (under the character’s feet).  
