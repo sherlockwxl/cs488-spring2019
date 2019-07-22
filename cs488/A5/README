@@ -1,10 +1,11 @@
 ===============================================================================
 Compilation: (base directory: A5)
 Steps:
-    1. $ premake4 gmake
-    2. $ make
-    3. $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/xilingwu/Documents/cs488-spring2019/cs488/A5/lib/  
-    3. $ ./A5 Assets/puppet.lua
+    1. $ make clean
+    2. $ premake4 gmake
+    3. $ make
+    4. $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./lib/  
+    5. $ ./A5 Assets/puppet.lua
 
 Machine: gl36
 ===============================================================================
