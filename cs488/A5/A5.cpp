@@ -274,6 +274,10 @@ void A5::processLuaSceneFile(const std::string & filename) {
 			character_1.right_Node = std::shared_ptr<SceneNode>(node);
 			character_2.right_Node = std::shared_ptr<SceneNode>(node);
 		}
+		if(node->m_name == "platform_front"){
+			character_1.front_Node = std::shared_ptr<SceneNode>(node);
+			character_2.front_Node = std::shared_ptr<SceneNode>(node);
+		}
 		if(node->m_name == "torso"){
 			GLfloat angel = 3.141592f * 0.5f;
 			glm::mat4 y_rotateMatrix = glm::rotate(mat4(), angel, vec3(0.0f, 1.0f, 0.0f));
@@ -1066,7 +1070,9 @@ void A5::renderSceneGraph(const SceneNode & root, int pass) {
 
 		if (node->m_nodeType != NodeType::GeometryNode)
 			continue;
-
+		if (node->m_name == "platform_front"){
+			continue;
+		}
 		GeometryNode * geometryNode = static_cast<GeometryNode *>(node);
 		
 

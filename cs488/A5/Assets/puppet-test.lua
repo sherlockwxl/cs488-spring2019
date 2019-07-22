@@ -45,6 +45,12 @@ platform_right:scale(5.0, 25.0, 50.0)
 platform_right:translate(30.0, 5.0, -12.0)
 platform_right:set_material(darkgray)
 
+platform_front = gr.mesh('cube', 'platform_front')
+rootnode:add_child(platform_front)
+platform_front:scale(60.0, 25.0, 0.2)
+platform_front:translate(0.0, 5.0, 13.0)
+platform_front:set_material(darkgray)
+
 
 
 

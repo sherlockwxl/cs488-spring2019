@@ -218,26 +218,29 @@ void Character::update(){
 // meshid 0 cube; meshid 1 sephere
 bool Character::isCollision(SceneNode * LeftNode, SceneNode * RightNode){
 
-    
+
     box leftBox = getBoundingBox(LeftNode);
     box rightBox = getBoundingBox(RightNode);
     if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
          (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
          {
-/*                cout<<LeftNode->trans<<endl;
+             /* if(LeftNode->m_name == "leftFoot"){
+                  cout<<LeftNode->trans<<endl;
                cout<<RightNode->trans<<endl;
                cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
                cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
                cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
                cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
                cout<<"left z : " << leftBox.min_z << " max z: " << leftBox.max_z<<endl;
-               cout<<"right z : " << rightBox.min_z << " max z : " << rightBox.max_z<<endl; */
+               cout<<"right z : " << rightBox.min_z << " max z : " << rightBox.max_z<<endl;  
                //exit(0);
+             } */
+              
          }
-    return (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+    return ((leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
          (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
-         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z);
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z));
 }
 
 bool Character::checkCollisions(){
@@ -262,7 +265,8 @@ bool Character::checkCollisions(){
         SceneNode * node = findNodeById(*m_rootNode, id);
         if(isCollision(node, back_Node.get())||
            isCollision(node, left_Node.get())||
-           isCollision(node, right_Node.get())){
+           isCollision(node, right_Node.get())||
+           isCollision(node, front_Node.get())){
             //cout<<"collision"<<endl;
             return true;
 
@@ -288,7 +292,6 @@ SceneNode * Character::findNodeById(SceneNode& rootNode, unsigned int id){
 void Character::checkOntheGround(){
     if(isCollision(leftFoot_Node.get(), ground_Node.get()) || isCollision(rightFoot_Node.get(), ground_Node.get())){
         isOntheGround = true;
-        //cout<<"on the ground"<<endl;
        // exit(0);
     }else{
         isOntheGround = false;

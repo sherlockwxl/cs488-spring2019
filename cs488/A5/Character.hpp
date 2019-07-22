@@ -44,6 +44,7 @@ class Character{
         std::shared_ptr<SceneNode> back_Node;
         std::shared_ptr<SceneNode> left_Node;
         std::shared_ptr<SceneNode> right_Node;
+        std::shared_ptr<SceneNode> front_Node;
         std::vector<int> geoIndexVector;
         std::vector<int> other_geoIndexVector;
         glm::mat4 trackBallRotationMatrix;
