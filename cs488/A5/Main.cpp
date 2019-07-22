@@ -9,9 +9,8 @@ int main( int argc, char **argv )
 {
 	if (argc > 1) {
 		std::string luaSceneFile(argv[1]);
-		std::string title("** Assignment 5 - [");
-		title += luaSceneFile;
-		title += "]";
+		std::string title("The King of Cute Fighters ");
+
 
 		CS488Window::launch(argc, argv, new A5(luaSceneFile), 2048, 1024, title);
 
