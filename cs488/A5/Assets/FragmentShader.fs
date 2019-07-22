@@ -4,6 +4,7 @@ uniform bool texture_enabled;
 uniform bool picking;
 uniform sampler2D Texture;
 uniform sampler2D shadowMap;
+uniform bool shadow_enabled;
 
 struct LightSource {
     vec3 position;
@@ -117,7 +118,11 @@ float shadowCalculation(vec4 fragPosition, vec3 fragNormal){
 }
 void main() {
     float shadow = shadowCalculation(fs_in.lightSpace, fs_in.normal_ES);
-
+    if(!shadow_enabled){
+        shadow = 0.0f;
+    }else{
+        shadow = shadow;
+    }
 	if( texture_enabled ) {
         vec4 colour1 = texture(Texture, vec2(fs_in.textureUV.x, fs_in.textureUV.y));
         fragColour = vec4(PhongModelWithTextureAndShadow(fs_in.position_ES, fs_in.normal_ES, shadow, colour1.xyz), 1.0);

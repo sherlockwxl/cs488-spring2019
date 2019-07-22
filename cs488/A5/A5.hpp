@@ -279,6 +279,9 @@ protected:
 	unsigned int loadTexture2(const char* path);
 	unsigned int instructionId;
 
+	bool display_texture;
+	bool display_shadow;
+
 	
 
 };

@@ -150,6 +150,8 @@ A5::A5(const std::string & luaSceneFile)
 	hard_c2 = 0; // 0 for default 1 for medium 2 for hard
 	speed_c1 = 1.0f; // 0.5 ~ 1.5
 	speed_c2 = 1.0f; // 0.5 ~ 1.5
+	display_shadow = true;
+	display_texture = true;
 
 }
 
@@ -183,7 +185,7 @@ void A5::init()
 	loadTexture("Assets/asphalt.jpg");
 	loadTexture("Assets/container.jpg");
 	loadTexture("Assets/fighter_background_2.jpg");
-	instructionId = loadTexture2("Assets/blue-sky.jpg");
+	instructionId = loadTexture2("Assets/instruction.jpg");
 
 	// Load and decode all .obj files at once here.  You may add additional .obj files to
 	// this list in order to support rendering additional mesh types.  All vertex
@@ -848,6 +850,19 @@ void A5::guiLogic()
 			ImGui::EndMainMenuBar();
 		}
 
+		ImGui::Begin("Settings", &showDebugWindow, ImVec2(100,100), opacity,
+		windowFlags);
+		if(ImGui::Checkbox("Display Texture", &display_texture)) {
+		}
+
+		if(ImGui::Checkbox("Display Shadow", &display_shadow)) {
+                
+        }
+
+		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
+
+		ImGui::End();
+
 	}
 	if(gamestage == 3){
 		ImGui::SetNextWindowSize(ImVec2(600, 200));
@@ -869,7 +884,7 @@ void A5::guiLogic()
 		}
 	}
 	if(gamestage == 4){
-		ImGui::SetNextWindowSize(ImVec2(600, 200));
+		ImGui::SetNextWindowSize(ImVec2(800, 600));
 
 		ImGui::OpenPopup("Instruction");
 		if(ImGui::BeginPopupModal("Instruction", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
@@ -878,7 +893,7 @@ void A5::guiLogic()
 			GLuint my_opengl_texture;
 			my_opengl_texture = instructionId;
 			//ImGui::Image((void*)(intptr_t)my_opengl_texture, ImGui::GetContentRegionAvail());
-			if(ImGui::ImageButton((void*)(intptr_t)my_opengl_texture,  ImVec2(600, 200), ImVec2(1,1),ImVec2(0,0),2)){
+			if(ImGui::ImageButton((void*)(intptr_t)my_opengl_texture,  ImVec2(800, 600), ImVec2(0,0),ImVec2(1,1),-1)){
 				gamestage = 1;
 				ImGui::CloseCurrentPopup();
 			}
@@ -899,6 +914,7 @@ void A5::updateShaderUniforms(
 
 	shader.enable();
 	{
+
 		if(pass == 2){
 			//-- Set ModelView matrix:
 			GLint location = shader.getUniformLocation("ModelView");
@@ -930,8 +946,15 @@ void A5::updateShaderUniforms(
 				CHECK_GL_ERRORS;
 			}
 			else{
+				if(display_shadow){
+					location = shader.getUniformLocation("shadow_enabled");
+					glUniform1i( location, 1 );
+				}else{
+					location = shader.getUniformLocation("shadow_enabled");
+					glUniform1i( location, 0 );
+				}
 				//-- Set Material values:
-				if(node.textureId == 0){
+				if(node.textureId == 0 || display_texture == 0){
 					location = shader.getUniformLocation("texture_enabled");
 					glUniform1i( location, 0 );
 					location = shader.getUniformLocation("material.kd");
@@ -1506,10 +1529,12 @@ void A5::resetVariables(){
 	lose = 0;
 	loseSoundPlayed = 0;
 	gamestage = 0;
-	int hard_c1 = 0; 
-	int hard_c2 = 0; 
-	float speed_c1 = 1.0f; 
-	float speed_c2 = 1.0f; 
+	hard_c1 = 0; 
+	hard_c2 = 0; 
+	speed_c1 = 1.0f; 
+	speed_c2 = 1.0f; 
+	display_texture = true;
+	display_shadow = true;
 }
 
 void A5::resetMouseLocation(){
