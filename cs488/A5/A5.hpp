@@ -268,8 +268,16 @@ protected:
 	int prev_life_c2 = 100;
 	void updateLifeValue();
 
-	bool gamePaused;
 
+	int gamestage; // 0 for need to display first popup 1 for game play 2 for someone lose 3 for paused 4 for instruction
+	int hard_c1; // 0 for default 1 for medium 2 for hard
+	int hard_c2; // 0 for default 1 for medium 2 for hard
+	float speed_c1; // 0.5 ~ 1.5
+	float speed_c2; // 0.5 ~ 1.5
+
+	void updateCharacterSetting();
+	unsigned int loadTexture2(const char* path);
+	unsigned int instructionId;
 
 	
 

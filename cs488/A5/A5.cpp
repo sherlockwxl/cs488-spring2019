@@ -145,7 +145,12 @@ A5::A5(const std::string & luaSceneFile)
 	particleModel = ParticleModel(1.0f, color);
 	SoundEngine = createIrrKlangDevice();
     backGroundSound = SoundEngine->play2D("Assets/background.wav", GL_TRUE);
-	gamePaused = false;
+	gamestage = 0;
+	hard_c1 = 0; // 0 for default 1 for medium 2 for hard
+	hard_c2 = 0; // 0 for default 1 for medium 2 for hard
+	speed_c1 = 1.0f; // 0.5 ~ 1.5
+	speed_c2 = 1.0f; // 0.5 ~ 1.5
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -178,6 +183,7 @@ void A5::init()
 	loadTexture("Assets/asphalt.jpg");
 	loadTexture("Assets/container.jpg");
 	loadTexture("Assets/fighter_background_2.jpg");
+	instructionId = loadTexture2("Assets/blue-sky.jpg");
 
 	// Load and decode all .obj files at once here.  You may add additional .obj files to
 	// this list in order to support rendering additional mesh types.  All vertex
@@ -772,108 +778,114 @@ void A5::guiLogic()
 		ImGui::SetNextWindowPos(ImVec2(50, 50));
 		firstRun = false;
 	}
-
+	ImGuiStyle * style = &ImGui::GetStyle();
+	style->WindowTitleAlign = ImGuiAlign_Center;
 	static bool showDebugWindow(true);
 	ImGuiWindowFlags windowFlags(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 	float opacity(0.5f);
-	
-	 ImGui::Begin("Properties", &showDebugWindow, ImVec2(100,100), opacity,
-			windowFlags);
+	if(gamestage == 0){// display menus for game start
+		ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiSetCond_Once);
+		ImGui::OpenPopup("Welcome to The King of Cute Fighters!");
+		if(ImGui::BeginPopupModal("Welcome to The King of Cute Fighters!", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
 
-	ImGui::SetWindowFontScale(2.0f);
-		// Add more gui elements here here ...
+			ImGui::Spacing ();
+			ImGui::SameLine(100.0f);
+			ImGui::SetWindowFontScale(2.0f);
+			ImGui::Text("Difficulty Setting for Player 1");
+			ImGui::Spacing ();
+			ImGui::SameLine(120.0f);
+			ImGui::RadioButton("Default", &hard_c1, 0);
+			ImGui::SameLine();
+			ImGui::RadioButton("Medium", &hard_c1, 1);
+			ImGui::SameLine();
+			ImGui::RadioButton("Hard", &hard_c1, 2);
+			ImGui::SliderFloat("Movement Speed", &speed_c1, 0.5f, 1.5f);
 
+			ImGui::Dummy(ImVec2(0.0f, 20.0f));
+			ImGui::Spacing ();
+			ImGui::SameLine(100.0f);
+			ImGui::Text("Difficulty Setting for Player 2");
+			ImGui::Spacing ();
+			ImGui::SameLine(120.0f);
+			ImGui::RadioButton("Default##P2", &hard_c2, 0);
+			ImGui::SameLine();
+			ImGui::RadioButton("Medium##P2", &hard_c2, 1);
+			ImGui::SameLine();
+			ImGui::RadioButton("Hard##P2", &hard_c2, 2);
+			ImGui::SliderFloat("Movement Speed##P2", &speed_c2, 0.5f, 1.5f);
 
-		// Create Button, and check if it was clicked
+			ImGui::Dummy(ImVec2(0.0f, 40.0f));
+			ImGui::Spacing ();
+			ImGui::SameLine((ImGui::GetWindowWidth() - 300) / 2);
+			if(ImGui::Button("Start", ImVec2(300, 40))) {
+				updateCharacterSetting();
+				gamestage = 1;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
 
+	}
+	if(gamestage == 1){
 		if(ImGui::BeginMainMenuBar()){
 			ImGui::SetWindowFontScale(2.0f);
 			// Application Menu
-			if(ImGui::BeginMenu("Application")){
-				if(ImGui::MenuItem("Reset Position (I)")) {
-					resetHandler(0);
-				}
-				if(ImGui::MenuItem("Reset Orientation (O)")) {
-					resetHandler(1);
-				}
-				if(ImGui::MenuItem("Reset Joints (S)")) {
-					resetHandler(2);
-				}
-				if(ImGui::MenuItem("Reset All (A)")) {
-					resetHandler(3);
-				}
-				if(ImGui::MenuItem("Quit (Q)")) {
-					glfwSetWindowShouldClose(m_window, GL_TRUE);
-				}
+			if(ImGui::BeginMenu("Pause")){
+				gamestage = 3;
 				ImGui::EndMenu();
 			}
 
 			// Edit Menu
-			if(ImGui::BeginMenu("Edit")){
-				if(ImGui::MenuItem("Undo (U)")) {
-					undo();
-				}
-				if(ImGui::MenuItem("Redo (R)")) {
-					redo();
-				}
+			if(ImGui::BeginMenu("Restart")){
+				resetAll();
 				ImGui::EndMenu();
 			}
 
-			// Options Menu
-			if(ImGui::BeginMenu("Options")){
-				if(ImGui::Checkbox("Circle (C)", &circle)) {
-				}
-				if(ImGui::Checkbox("Z-buffer (Z)", &z_buffer)) {
-				}
-				if(ImGui::Checkbox("Backface culling (B)", &backface_culling)) {
-				}
-				if(ImGui::Checkbox("Frontface culling (F)", &frontface_culling)) {
-				}
+			if(ImGui::BeginMenu("Instruction")){
+				gamestage = 4;
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
 		}
-		
-		if (ImGui::RadioButton("Position/Orientation (P)", &i_mode, 0)) {
-                
-        }
 
-		if (ImGui::RadioButton("Joints (J)", &i_mode, 1)) {
-                
-        }
-
-
-		if(!undo_succeed) {
-			ImGui::OpenPopup("Undo Fail");
-		}
-
-		if(ImGui::BeginPopupModal("Undo Fail")) {
-			ImGui::Text("Undo operation is not availiable");
-			if(ImGui::Button("OK", ImVec2(100, 10))) {
+	}
+	if(gamestage == 3){
+		ImGui::SetNextWindowSize(ImVec2(600, 200));
+		ImGui::OpenPopup("Game Paused");
+		if(ImGui::BeginPopupModal("Game Paused", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
+			ImGui::Spacing ();
+			ImGui::SameLine(100.0f);
+			ImGui::SetWindowFontScale(2.0f);
+			ImGui::Text("You wanna take a break?");
+			ImGui::Dummy(ImVec2(0.0f, 40.0f));
+			ImGui::Spacing ();
+			ImGui::SameLine((ImGui::GetWindowWidth() - 300) / 2);
+			if(ImGui::Button("I'm ready", ImVec2(300, 40))) {
+				gamestage = 1;
 				ImGui::CloseCurrentPopup();
-				undo_succeed = true;
 			}
-
 			ImGui::EndPopup();
-		}
 
-		if(!redo_succeed) {
-			ImGui::OpenPopup("Redo Fail");
 		}
+	}
+	if(gamestage == 4){
+		ImGui::SetNextWindowSize(ImVec2(600, 200));
 
-		if(ImGui::BeginPopupModal("Redo Fail")) {
-			ImGui::Text("Redo operation is not availiable");
-			if(ImGui::Button("OK", ImVec2(120, 0))) {
+		ImGui::OpenPopup("Instruction");
+		if(ImGui::BeginPopupModal("Instruction", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
+			
+
+			GLuint my_opengl_texture;
+			my_opengl_texture = instructionId;
+			//ImGui::Image((void*)(intptr_t)my_opengl_texture, ImGui::GetContentRegionAvail());
+			if(ImGui::ImageButton((void*)(intptr_t)my_opengl_texture,  ImVec2(600, 200), ImVec2(1,1),ImVec2(0,0),2)){
+				gamestage = 1;
 				ImGui::CloseCurrentPopup();
-				redo_succeed = true;
 			}
-
 			ImGui::EndPopup();
+
 		}
-
-		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
-
-	ImGui::End(); 
+	}
 }
 
 //----------------------------------------------------------------------------------------
@@ -1330,96 +1342,17 @@ bool A5::keyInputEvent (
 		int mods
 ) {
 	bool eventHandled(false);
-	if(!gamePaused){
+	if(gamestage == 1){
 			if( action == GLFW_PRESS ) {
 			// Respond to some key events.
-			
-			// reset position
-			if (key == GLFW_KEY_I){
-
-				eventHandled = true;
-
-				resetHandler(0);
-			} 
-
-			
-
-			//reset Joints
-			if (key == GLFW_KEY_S){
-
-				eventHandled = true;
-
-				resetHandler(2);
-			} 
-
-			
-
-			// Exit
-			if (key == GLFW_KEY_Q){
-
-				eventHandled = true;
-
-				glfwSetWindowShouldClose(m_window, GL_TRUE);
-			}
-
-
-			// Undo
-			if(key == GLFW_KEY_U){
-				eventHandled = true;
-				undo();
-			}
-
-			// Redo
-			if(key == GLFW_KEY_R){
-				eventHandled = true;
-				redo();
-			}
-
-			// circle
-			if(key == GLFW_KEY_C){
-				eventHandled = true;
-				circle = !circle;
-			}
-
-			// z_buffer
-			if(key == GLFW_KEY_Z){
-				eventHandled = true;
-				z_buffer = !z_buffer;
-			}
-
-			// Backface culling
-	/* 		if(key == GLFW_KEY_B){
-				eventHandled = true;
-				backface_culling = !backface_culling;
-			} */
-
-			// Frontface culling
-			if(key == GLFW_KEY_F){
-				eventHandled = true;
-				frontface_culling = !frontface_culling;
-			}
-			// Position/Orientation (P)
+			// game pause
 			if(key == GLFW_KEY_P){
-				eventHandled = true;
-				i_mode = 0;
+				gamestage = 3;
 			}
 
-			// Joints (J)
-			if(key == GLFW_KEY_J){
-				eventHandled = true;
-				i_mode = 1;
+			if(key == GLFW_KEY_R){
+				resetAll();
 			}
-
-			// Joints (J)
-			if(key == GLFW_KEY_M){
-				eventHandled = true;
-				show_gui = !show_gui;
-			}
-
-	/* 		if(key == GLFW_KEY_0){
-				printAll(*character_1.m_rootNode);
-			} */
-
 
 			// character control
 
@@ -1502,27 +1435,6 @@ bool A5::keyInputEvent (
 				character_2.move(4, 0);
 			}
 			
-			if(key == GLFW_KEY_4){
-				m_light.position.z += 3.0f;
-				cout<<m_light.position<<endl;
-			}
-			if(key == GLFW_KEY_5){
-				m_light.position.z -= 3.0f;
-				cout<<m_light.position<<endl;
-			}
-
-			if(key == GLFW_KEY_6){
-				m_light.position.x += 3.0f;
-				cout<<m_light.position<<endl;
-			}
-			if(key == GLFW_KEY_7){
-				m_light.position.x -= 3.0f;
-				cout<<m_light.position<<endl;
-			}
-			if(key == GLFW_KEY_8){
-				character_1.resetCharacter();
-				character_2.resetCharacter();
-			}
 			
 			
 		}else if(action == GLFW_RELEASE){
@@ -1593,7 +1505,11 @@ void A5::resetVariables(){
 	mouse_right_pressed = false;
 	lose = 0;
 	loseSoundPlayed = 0;
-	gamePaused = false;
+	gamestage = 0;
+	int hard_c1 = 0; 
+	int hard_c2 = 0; 
+	float speed_c1 = 1.0f; 
+	float speed_c2 = 1.0f; 
 }
 
 void A5::resetMouseLocation(){
@@ -2227,10 +2143,10 @@ void A5::updateLifeValue(){
 		lose = 1;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player1 lost!");
-		gamePaused = true;
+		gamestage = 2;
 		if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
 			ImGui::Spacing ();
-			ImGui::SameLine(100.0f);
+			ImGui::SameLine(120.0f);
 			ImGui::SetWindowFontScale(2.0f);
 			ImGui::Text("Player1 lost!");
 			ImGui::Spacing ();
@@ -2247,10 +2163,10 @@ void A5::updateLifeValue(){
 		lose = 1;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player2 lost!");
-		gamePaused = true;
+		gamestage = 2;
 		if(ImGui::BeginPopupModal("Player2 lost!")) {
 			ImGui::Spacing ();
-			ImGui::SameLine(100.0f);
+			ImGui::SameLine(120.0f);
 			ImGui::SetWindowFontScale(2.0f);
 			ImGui::Text("Player2 lost!");
 			ImGui::Spacing ();
@@ -2290,9 +2206,40 @@ void A5::updateLifeValue(){
 
 
 
+void A5::updateCharacterSetting(){
+	character_1.lifeValue -= hard_c1 * 20;
+	character_2.lifeValue -= hard_c2 * 20;
+	character_1.startSpeed *= speed_c1;
+	character_2.startSpeed *= speed_c2;
+}
 
 
-
+unsigned int A5::loadTexture2(const char* path){
+	unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+	return texture;
+}
 
 
 
