@@ -30,6 +30,8 @@ Character::Character(SceneNode m_rootNode){
     moveUpFrameCounter = 0;
     moveLeftFrameCounter = 0;
     moveRecord = glm::vec3(0.0f);
+    isOntheGround = false;
+    isOntheGroundStrict = false;
 }
 
 void Character::move(int direction, int type){
@@ -88,6 +90,7 @@ void Character::move(int direction, int type){
 
             break;
         case 4: // jump
+            //cout<<"jump called on :"<<jump<<endl;
             if(jump == 0){
                 jump = 1;
             }
@@ -104,11 +107,11 @@ void Character::update(){
     checkOntheGround();
     GLfloat v_up; 
     if(jump == 1){ // jump triggered
-        if(isOntheGround){
+        //if(isOntheGround){
             v_upOrDown = jumpstartSpeed;
             jump = 2;
-        }
-    }else if (jump == 2){
+       // }
+    }else if (jump == 2){// during jump
         v_upOrDown -= g;
        // cout << " v " << v_upOrDown<<endl;
         box leftFootBox = getBoundingBox(leftFoot_Node.get());
@@ -119,11 +122,10 @@ void Character::update(){
                 v_upOrDown = (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
                 //cout<<baseBox.max_y<< " min : "<<baseBox.min_y<<endl;
                 //cout<<  std::min(leftFootBox.min_y, rightFootBox.min_y)<<endl;
-                //cout<<"gap : " << (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
+                //cout<<"gap : " << (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y))<<endl;
+                
             }
-        }
-            
-            
+        }    
         if(isOntheGround){
             jumpSound = SoundEngine->play2D("Assets/walk_sound.wav",GL_FALSE);
             v_upOrDown = 0.0f;
@@ -167,6 +169,22 @@ void Character::update(){
     if(moveLeftFrameCounter == 0){
         moveLeftOrRight = 0;
     }
+    checkOntheGroundStrict();
+    if( isOntheGroundStrict){// touch the ground after last move
+        box leftFootBox = getBoundingBox(leftFoot_Node.get());
+        box rightFootBox = getBoundingBox(rightFoot_Node.get());
+        box baseBox = getBoundingBox(ground_Node.get());
+        GLfloat gap = (baseBox.max_y - std::min(leftFootBox.min_y, rightFootBox.min_y));
+        //cout<<"current gap: "<< gap<<endl;
+        if(gap > 0){// need to move back
+            //cout<<"need to move back: "<< gap<<endl;
+            m_rootNode->translate(glm::vec3(0.0f, gap, 0.0f));
+            jump = 0;
+        }
+
+    }
+
+
     if(checkCollisions()){
         m_rootNode->translate(glm::vec3(temp * -1.0f));
         moveRecord = moveRecord+vec3(temp);
@@ -229,7 +247,7 @@ bool Character::checkCollisions(){
         for(auto const& other_id: other_geoIndexVector){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
-                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
                 if(status == -1){
                     enemy->gotHit(other_id);
                 }
@@ -245,7 +263,7 @@ bool Character::checkCollisions(){
         if(isCollision(node, back_Node.get())||
            isCollision(node, left_Node.get())||
            isCollision(node, right_Node.get())){
-            cout<<"collision"<<endl;
+            //cout<<"collision"<<endl;
             return true;
 
         }
@@ -289,7 +307,7 @@ box Character::getBoundingBox(SceneNode* node){
     if(GeoNode->meshId == "cube"){
         Mult = 0.5f;
     }else{
-        Mult = 0.6f;
+        Mult = 0.65f;
     }
     glm::vec3 Box_base[] = {glm::vec3(-1.0f*Mult, -1.0f*Mult, -1.0f*Mult),
                            glm::vec3(-1.0f*Mult, -1.0f*Mult, 1.0f*Mult),
@@ -428,6 +446,40 @@ void Character::resetCharacter(){
     jump = 2;
 
 
+}
+
+bool Character::isCollisionStrict(SceneNode * LeftNode, SceneNode * RightNode){
+
+    
+    box leftBox = getBoundingBox(LeftNode);
+    box rightBox = getBoundingBox(RightNode);
+    if( (leftBox.min_x <= rightBox.max_x && leftBox.max_x >= rightBox.min_x) &&
+         (leftBox.min_y <= rightBox.max_y && leftBox.max_y >= rightBox.min_y) &&
+         (leftBox.min_z <= rightBox.max_z && leftBox.max_z >= rightBox.min_z))
+         {
+/*                cout<<LeftNode->trans<<endl;
+               cout<<RightNode->trans<<endl;
+               cout<<"left y : " << leftBox.min_y << " max y : " << leftBox.max_y<<endl;
+               cout<<"right y : " << rightBox.min_y << " max  y : " << rightBox.max_y<<endl;
+               cout<<"left x : " << leftBox.min_x << " max x : " << leftBox.max_x<<endl;
+               cout<<"right x : " << rightBox.min_x << " max  x : " << rightBox.max_x<<endl;
+               cout<<"left z : " << leftBox.min_z << " max z: " << leftBox.max_z<<endl;
+               cout<<"right z : " << rightBox.min_z << " max z : " << rightBox.max_z<<endl; */
+               //exit(0);
+         }
+    return (leftBox.min_x < rightBox.max_x && leftBox.max_x > rightBox.min_x) &&
+         (leftBox.min_y < rightBox.max_y && leftBox.max_y > rightBox.min_y) &&
+         (leftBox.min_z < rightBox.max_z && leftBox.max_z > rightBox.min_z);
+}
+
+void Character::checkOntheGroundStrict(){
+    if(isCollisionStrict(leftFoot_Node.get(), ground_Node.get()) || isCollisionStrict(rightFoot_Node.get(), ground_Node.get())){
+        isOntheGroundStrict = true;
+        //cout<<"on the ground strict"<<endl;
+       // exit(0);
+    }else{
+        isOntheGroundStrict = false;
+    }
 }
 // backup box generation code
 /* GeometryNode * LeftGeoNode = static_cast<GeometryNode *>(LeftNode);

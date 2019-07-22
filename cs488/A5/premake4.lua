@@ -10,7 +10,8 @@ includeDirList = {
 }
 
 libDirectories = { 
-    "../lib"
+    "../lib",
+    "./lib"
 }
 
 

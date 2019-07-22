@@ -91,6 +91,9 @@ class Character{
         void updatecurrentStatus();
 
         void resetCharacter();
+        bool isCollisionStrict(SceneNode * LeftNode, SceneNode * RightNode);
+        void checkOntheGroundStrict();
+        bool isOntheGroundStrict;
 };
 
 

@@ -22,7 +22,7 @@ lightgray = gr.material({0.64, 0.68, 0.68}, {0.1, 0.1, 0.1}, 10)
 
 platform = gr.mesh('cube', 'platform', 2)
 rootnode:add_child(platform)
-platform:scale(60.0, 25.0, 0.5)
+platform:scale(60.0, 25.0, 2.5)
 platform:translate(0.0, 0.0, 5.0)
 platform:rotate('x',90)
 platform:set_material(darkgray)
@@ -157,7 +157,7 @@ leftAnkleJoint:translate(-0.6, -3.6, 0.0)
 
 leftFoot = gr.mesh('sphere', 'leftFoot')
 leftAnkleJoint:add_child(leftFoot)
-leftFoot:scale(0.2, 0.15, 0.2)
+leftFoot:scale(0.25, 0.15, 0.25)
 leftFoot:translate(-0.6, -3.9, 0.0)
 leftFoot:set_material(white)
 
@@ -192,7 +192,7 @@ rightAnkleJoint:translate(0.6, -3.6, 0.0)
 
 rightFoot = gr.mesh('sphere', 'rightFoot')
 rightAnkleJoint:add_child(rightFoot)
-rightFoot:scale(0.2, 0.15, 0.2)
+rightFoot:scale(0.25, 0.15, 0.25)
 rightFoot:translate(0.6, -3.9, 0.0)
 rightFoot:set_material(white)
 -- right hip done
@@ -475,7 +475,7 @@ leftAnkleJoint_baymax:translate(-0.6, -3.6, 0.0)
 
 leftFoot_baymax = gr.mesh('sphere', 'leftFoot_baymax')
 leftAnkleJoint_baymax:add_child(leftFoot_baymax)
-leftFoot_baymax:scale(0.2, 0.15, 0.2)
+leftFoot_baymax:scale(0.25, 0.15, 0.25)
 leftFoot_baymax:translate(-0.6, -3.9, 0.0)
 leftFoot_baymax:set_material(white)
 
@@ -510,7 +510,7 @@ rightAnkleJoint_baymax:translate(0.6, -3.6, 0.0)
 
 rightFoot_baymax = gr.mesh('sphere', 'rightFoot_baymax')
 rightAnkleJoint_baymax:add_child(rightFoot_baymax)
-rightFoot_baymax:scale(0.2, 0.15, 0.2)
+rightFoot_baymax:scale(0.25, 0.15, 0.25)
 rightFoot_baymax:translate(0.6, -3.9, 0.0)
 rightFoot_baymax:set_material(white)
 -- right hip done
