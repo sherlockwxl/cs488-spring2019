@@ -247,7 +247,7 @@ bool Character::checkCollisions(){
         for(auto const& other_id: other_geoIndexVector){
             SceneNode * other_node = findNodeById(*other_rootNode, other_id);
             if(isCollision(node, other_node)){
-                cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
+                //cout<<" collision :" << node->m_name << " with : " << other_node->m_name<<endl;
                 if(status == -1){
                     enemy->gotHit(other_id);
                 }

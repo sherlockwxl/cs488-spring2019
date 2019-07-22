@@ -152,6 +152,7 @@ A5::A5(const std::string & luaSceneFile)
 	speed_c2 = 1.0f; // 0.5 ~ 1.5
 	display_shadow = true;
 	display_texture = true;
+	lose = 0;
 
 }
 
@@ -865,7 +866,7 @@ void A5::guiLogic()
 
 	}
 	if(gamestage == 3){
-		ImGui::SetNextWindowSize(ImVec2(600, 200));
+		ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Game Paused");
 		if(ImGui::BeginPopupModal("Game Paused", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
 			ImGui::Spacing ();
@@ -884,7 +885,7 @@ void A5::guiLogic()
 		}
 	}
 	if(gamestage == 4){
-		ImGui::SetNextWindowSize(ImVec2(800, 600));
+		ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiSetCond_Once);
 
 		ImGui::OpenPopup("Instruction");
 		if(ImGui::BeginPopupModal("Instruction", 0 , ImGuiWindowFlags_NoResize|ImGuiWindowFlags_AlwaysAutoResize )) {
@@ -2163,12 +2164,13 @@ void A5::renderBar_c2(){
 
 void A5::updateLifeValue(){
 	int c1_life = character_1.lifeValue;
-	int c2_life = character_2.lifeValue;
-	if(c1_life == 0){
+
+
+	if(c1_life == 0 &&  (lose == 0 || lose == 1)){
+		gamestage = 2;
 		lose = 1;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player1 lost!");
-		gamestage = 2;
 		if(ImGui::BeginPopupModal("Player1 lost!", 0 , ImGuiWindowFlags_NoResize)) {
 			ImGui::Spacing ();
 			ImGui::SameLine(120.0f);
@@ -2184,12 +2186,13 @@ void A5::updateLifeValue(){
 			ImGui::EndPopup();
 		}
 	}
-	if(c2_life == 0){
-		lose = 1;
+	int c2_life = character_2.lifeValue;
+	if(c2_life == 0 &&  (lose == 0 || lose == 2)){
+		gamestage = 2;
+		lose = 2;
 		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiSetCond_Once);
 		ImGui::OpenPopup("Player2 lost!");
-		gamestage = 2;
-		if(ImGui::BeginPopupModal("Player2 lost!")) {
+		if(ImGui::BeginPopupModal("Player2 lost!", 0 , ImGuiWindowFlags_NoResize)) {
 			ImGui::Spacing ();
 			ImGui::SameLine(120.0f);
 			ImGui::SetWindowFontScale(2.0f);
@@ -2205,7 +2208,7 @@ void A5::updateLifeValue(){
 		}
 	}
 
-	if( lose == 1 && loseSoundPlayed == 0){
+	if( lose != 0 && loseSoundPlayed == 0){
 		loseSoundPlayed =1;
 		loseSound = SoundEngine->play2D("Assets/lose.wav", GL_FALSE);
 	}

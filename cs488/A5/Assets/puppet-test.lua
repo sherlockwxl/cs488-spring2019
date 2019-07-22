@@ -321,7 +321,7 @@ leftWingJoint:add_child(leftWing)
 leftWing:scale(1.2, 0.3, 0.1)
 leftWing:rotate('z',20.0)
 leftWing:translate(-1.8, 1.1, -0.6)
-leftWing:set_material(red)
+leftWing:set_material(lightBlue)
 
 -- left wing base and wing done
 
@@ -351,7 +351,7 @@ rightWingJoint:add_child(rightWing)
 rightWing:scale(1.2, 0.3, 0.1)
 rightWing:rotate('z',-20.0)
 rightWing:translate(1.8, 1.1, -0.6)
-rightWing:set_material(red)
+rightWing:set_material(lightBlue)
 -- add second puppet
 
 
