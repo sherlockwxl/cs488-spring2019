@@ -152,6 +152,8 @@ A5::A5(const std::string & luaSceneFile)
 	speed_c2 = 1.0f; // 0.5 ~ 1.5
 	display_shadow = true;
 	display_texture = true;
+	apply_u = true;
+	apply_g = true;
 	lose = 0;
 
 }
@@ -881,6 +883,16 @@ void A5::guiLogic()
                 
         }
 
+		if(ImGui::Checkbox("Apply Fraction", &apply_u)) {
+			character_1.u_enabled = apply_u;
+			character_2.u_enabled = apply_u;
+		}
+
+		if(ImGui::Checkbox("Apply G force", &apply_g)) {
+                character_1.g_enabled = apply_g;
+				character_2.g_enabled = apply_g;
+        }
+
 		ImGui::Text( "Framerate: %.1f FPS", ImGui::GetIO().Framerate );
 
 		ImGui::End();
@@ -1569,6 +1581,8 @@ void A5::resetVariables(){
 	speed_c2 = 1.0f; 
 	display_texture = true;
 	display_shadow = true;
+	apply_g = true;
+	apply_u = true;
 }
 
 void A5::resetMouseLocation(){

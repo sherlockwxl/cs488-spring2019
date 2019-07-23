@@ -282,6 +282,8 @@ protected:
 
 	bool display_texture;
 	bool display_shadow;
+	bool apply_u;
+	bool apply_g;
 
 
 	// ball

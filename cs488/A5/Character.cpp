@@ -125,7 +125,7 @@ void Character::update(){
             jump = 2;
        // }
     }else if (jump == 2){// during jump
-        v_upOrDown -= g;
+        v_upOrDown -= (g*g_enabled);
        // cout << " v " << v_upOrDown<<endl;
         box leftFootBox = getBoundingBox(leftFoot_Node.get());
         box rightFootBox = getBoundingBox(rightFoot_Node.get());
@@ -152,7 +152,7 @@ void Character::update(){
     if(moveUpFrameCounter == -1){// keep moving
         v_forOrBack = startSpeed;
     }else{
-        v_forOrBack = std::max(v_forOrBack - g*u, 0.0f);
+        v_forOrBack = std::max(v_forOrBack - (g*g_enabled)*(u*u_enabled), 0.0f);
     }
     v_for = v_forOrBack;
 
@@ -160,7 +160,7 @@ void Character::update(){
     if(moveLeftFrameCounter == -1){// keep moving
         v_leftOrRight = startSpeed;
     }else{
-        v_leftOrRight = std::max(v_leftOrRight - g*u, 0.0f);
+        v_leftOrRight = std::max(v_leftOrRight - (g*g_enabled)*(u*u_enabled), 0.0f);
     }
     v_left = v_leftOrRight;
 
@@ -171,10 +171,10 @@ void Character::update(){
    // std::cout<<"translate " <<temp<<std::endl;
     m_rootNode->translate(glm::vec3(temp));
     if(moveUpFrameCounter > 0 ){
-        moveUpFrameCounter--;
+       // moveUpFrameCounter--;
     }
     if(moveLeftFrameCounter > 0){
-        moveLeftFrameCounter--;
+       // moveLeftFrameCounter--;
     }
     if(moveUpFrameCounter == 0){
         moveUpOrDown = 0;
@@ -535,6 +535,8 @@ void Character::resetCharacter(){
     startSpeed = 0.1f;
     jumpstartSpeed = 0.6f;
 
+    u_enabled = 1;
+    g_enabled = 1;
 
 }
 

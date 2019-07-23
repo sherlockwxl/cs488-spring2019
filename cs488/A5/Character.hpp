@@ -33,8 +33,10 @@ class Character{
         GLfloat startSpeed = 0.1f;
         GLfloat jumpstartSpeed = 0.6f;
         GLfloat u = 0.1f;
+        int u_enabled = 1;
         int persistence = 40;
         GLfloat g = 0.098f;
+        int g_enabled = 1;
         std::shared_ptr<SceneNode> m_rootNode;
         glm::mat4 ori_trans;
         glm::vec3 moveRecord;
