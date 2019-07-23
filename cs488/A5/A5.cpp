@@ -1410,6 +1410,7 @@ bool A5::keyInputEvent (
 				character_1.hitwithLeftHand();
 			}
 			if(key == GLFW_KEY_B){
+				character_1.stopMovement();
 				character_1.hitwithLeftLeg();
 			}
 			if(key == GLFW_KEY_N){

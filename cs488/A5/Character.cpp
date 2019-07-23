@@ -455,20 +455,24 @@ irrklang::vec3df Character::getPosition(){
 
 
 
-void Character::hitwithLeftHand(){
-    if(animationDuration<40){
+void Character::hitwithLeftHand(){// 45
+    if(animationDuration<30){
          animationDuration += keyFrameHandler->addKeyFrameforLeftHit(*animationModel, id);
+    }else{
+         //cout <<" left hit dropped"<<endl;
     }
 }
 
-void Character::hitwithLeftLeg(){
-    if(animationDuration<40){
+void Character::hitwithLeftLeg(){ // 55
+    if(animationDuration<30){
          animationDuration += keyFrameHandler->addKeyFrameforLeftLegHit(*animationModel, id);
+    }else{
+        //cout <<" left leg dropped"<<endl;
     }
 }
 
 void Character::defend(){
-    if(animationDuration<40){
+    if(animationDuration<70){
          animationDuration += keyFrameHandler->addKeyFrameforDefend(*animationModel, id);
     }
 }

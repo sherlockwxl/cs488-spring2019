@@ -19,18 +19,20 @@ int  KeyFrameHandler::addKeyFrameforLeftHit(AnimationModel &animationModel,int c
     glm::vec3 s1_rotation3 = glm::vec3(-1.4f, 0.0f, 0.0f);
     glm::vec3 s1_rotation4 = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+
+    // 36
+    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait 5 up arm retive first
-    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 5, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 4, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
 
     // retive up arm
-    KeyFrame s1_kf4 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf4 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait
-    KeyFrame s1_kf5 = KeyFrame(keyFrameName, s1, 5, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s1_kf6 = KeyFrame(keyFrameName, s1, 5, 1, -1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf5 = KeyFrame(keyFrameName, s1, 4, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf6 = KeyFrame(keyFrameName, s1, 4, 1, -1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
 
     glm::vec3 s2_rotation1 = glm::vec3(-1.4f, 0.0f, 0.0f);
     glm::vec3 s2_rotation2 = glm::vec3(-1.4f, 0.0f, 0.0f);
@@ -38,17 +40,17 @@ int  KeyFrameHandler::addKeyFrameforLeftHit(AnimationModel &animationModel,int c
     glm::vec3 s2_rotation4 = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-    KeyFrame s2_kf1 = KeyFrame(keyFrameName, s2, 10, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s2_kf2 = KeyFrame(keyFrameName, s2, 10, 1, -1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf1 = KeyFrame(keyFrameName, s2, 8, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf2 = KeyFrame(keyFrameName, s2, 8, 1, -1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait 5
-    KeyFrame s2_kf3 = KeyFrame(keyFrameName, s2,  5, 1, -1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf3 = KeyFrame(keyFrameName, s2,  4, 1, -1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
 
     // keep post 5 
-    KeyFrame s2_kf4 = KeyFrame(keyFrameName, s2,  15, 1, -1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf4 = KeyFrame(keyFrameName, s2,  12, 1, -1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
 
     // retrive
-    KeyFrame s2_kf5 = KeyFrame(keyFrameName, s2,  5, 1, -1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf5 = KeyFrame(keyFrameName, s2,  4, 1, -1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
 
     int size;
     std::vector<SceneNode *> *JointPointers_v;
@@ -83,7 +85,7 @@ int  KeyFrameHandler::addKeyFrameforLeftHit(AnimationModel &animationModel,int c
         }
     }
 
-    return 45;
+    return 36;
     //cout<<"after add size is "<<animationModel.keyFrame_v_ani_c1.size()<<endl;
 }
 
@@ -157,49 +159,69 @@ int KeyFrameHandler::addKeyFrameforRunForward(AnimationModel &animationModel,int
     int size;
     std::vector<SceneNode *> *JointPointers_v;
     std::vector<std::vector<KeyFrame>> *keyFrame_v;
+    std::vector<std::vector<KeyFrame>> *keyFrame_v_animation;
 
     if(character == 1){
         size = animationModel.JointPointers_v_c1.size();
         JointPointers_v = &animationModel.JointPointers_v_c1;
         keyFrame_v = &animationModel.keyFrame_v_move_c1;
+        keyFrame_v_animation = &animationModel.keyFrame_v_ani_c1;
     }else{
         size = animationModel.JointPointers_v_c2.size();
         JointPointers_v = &animationModel.JointPointers_v_c2;
         keyFrame_v = &animationModel.keyFrame_v_move_c2;
+        keyFrame_v_animation = &animationModel.keyFrame_v_ani_c2;
     }
-
-
+    bool legHitDone = true;
 
     for(int i = 0 ; i < size; i ++){
-        SceneNode * node = JointPointers_v->at(i);
-        if(node->m_name == s1){
-            keyFrame_v->at(i).push_back(s1_kf1);
-            keyFrame_v->at(i).push_back(s1_kf2);
-            keyFrame_v->at(i).push_back(s1_kf3);
-            keyFrame_v->at(i).push_back(s1_kf4);
-
-        }
-        if(node->m_name == s2){ // push for leftElbow
-            keyFrame_v->at(i).push_back(s2_kf1);
-            keyFrame_v->at(i).push_back(s2_kf2);
-            keyFrame_v->at(i).push_back(s2_kf3);
-            keyFrame_v->at(i).push_back(s2_kf4);
-        }
-        if(node->m_name == s3){ // push for leftElbow
-            keyFrame_v->at(i).push_back(s3_kf1);
-            keyFrame_v->at(i).push_back(s3_kf2);
-            keyFrame_v->at(i).push_back(s3_kf3);
-            keyFrame_v->at(i).push_back(s3_kf4);
-        }
-        if(node->m_name == s4){ // push for leftElbow
-            keyFrame_v->at(i).push_back(s4_kf1);
-            keyFrame_v->at(i).push_back(s4_kf2);
-            keyFrame_v->at(i).push_back(s4_kf3);
-            keyFrame_v->at(i).push_back(s4_kf4);
+        if(keyFrame_v_animation->at(i).back().KeyFrameName == "leftLegHit"){
+            legHitDone = false;
         }
     }
+    if(legHitDone == true){
+        for(int i = 0 ; i < size; i ++){
+            SceneNode * node = JointPointers_v->at(i);
+            if(node->m_name == s1){
 
-    return 40;
+                keyFrame_v->at(i).push_back(s1_kf1);
+                keyFrame_v->at(i).push_back(s1_kf2);
+                keyFrame_v->at(i).push_back(s1_kf3);
+                keyFrame_v->at(i).push_back(s1_kf4);
+
+            }
+            if(node->m_name == s2){ // push for leftElbow
+
+                keyFrame_v->at(i).push_back(s2_kf1);
+                keyFrame_v->at(i).push_back(s2_kf2);
+                keyFrame_v->at(i).push_back(s2_kf3);
+                keyFrame_v->at(i).push_back(s2_kf4);
+
+            }
+            if(node->m_name == s3){ // push for leftElbow
+
+                keyFrame_v->at(i).push_back(s3_kf1);
+                keyFrame_v->at(i).push_back(s3_kf2);
+                keyFrame_v->at(i).push_back(s3_kf3);
+                keyFrame_v->at(i).push_back(s3_kf4);
+
+            }
+            if(node->m_name == s4){ // push for leftElbow
+                
+                keyFrame_v->at(i).push_back(s4_kf1);
+                keyFrame_v->at(i).push_back(s4_kf2);
+                keyFrame_v->at(i).push_back(s4_kf3);
+                keyFrame_v->at(i).push_back(s4_kf4);
+
+            }
+        }
+
+        return 40;
+    }else{
+        //cout<<"run dropped"<<endl;
+        return 0;
+    }
+    
 }
 
 
@@ -218,34 +240,35 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
     }
 
 
-    glm::vec3 s1_rotation1 = glm::vec3(0.1f,  0.2f, -0.5f);
+    glm::vec3 s1_rotation6 = glm::vec3(0.1f,  0.2f, -0.5f);
 
     // testing 
 
 
     //testing done
     
-    glm::vec3 s1_rotation2 = glm::vec3(-0.7f, 0.2f, -0.3f);
-    glm::vec3 s1_rotation3 = glm::vec3(-1.35f, 0.1f, -0.8f);
-    glm::vec3 s1_rotation4 = glm::vec3(-1.35f, 0.5f, -0.8f);
-    glm::vec3 s1_rotation5 = glm::vec3(-0.7f, 0.5f, -0.8f);
-    glm::vec3 s1_rotation6 = glm::vec3(0.0f, 0.5f, -0.7f);
+    // use 0 1 3 4 5 7 = 10 + 8 + 8 + 8 + 8 + 13 = 55
+    glm::vec3 s1_rotation5 = glm::vec3(-0.7f, 0.2f, -0.3f);
+    glm::vec3 s1_rotation4 = glm::vec3(-1.35f, 0.1f, -0.8f);
+    glm::vec3 s1_rotation3 = glm::vec3(-1.35f, 0.5f, -0.8f);
+    glm::vec3 s1_rotation2 = glm::vec3(-0.7f, 0.5f, -0.8f);
+    glm::vec3 s1_rotation1 = glm::vec3(0.0f, 0.5f, -0.7f);
     glm::vec3 s1_rotation7 = glm::vec3(0.0f, 0.0f, 0.0f);
 
-
-    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf0 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation7, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf1 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf2 = KeyFrame(keyFrameName, s1, 13, 1, 1, s1_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait 5 up arm retive first
-    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf3 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
 
     // retive up arm
-    KeyFrame s1_kf4 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf4 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait
-    KeyFrame s1_kf5 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation5, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s1_kf6 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation6, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s1_kf7 = KeyFrame(keyFrameName, s1, 10, 1, 1, s1_rotation7, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf5 = KeyFrame(keyFrameName, s1, 8, 1, 1, s1_rotation5, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf6 = KeyFrame(keyFrameName, s1, 13, 1, 1, s1_rotation6, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s1_kf7 = KeyFrame(keyFrameName, s1, 13, 1, 1, s1_rotation7, glm::vec3(0.0f, 0.0f,0.0f));
     
     
     glm::vec3 s2_rotation1 = glm::vec3(0.6f, 0.0f, 0.0f);
@@ -253,14 +276,14 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
     glm::vec3 s2_rotation3 = glm::vec3(0.15f, 0.3f, 0.2f);
     glm::vec3 s2_rotation4 = glm::vec3(0.0f, 0.0f, 0.0f);
 
-
-    KeyFrame s2_kf1 = KeyFrame(keyFrameName, s2, 10, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s2_kf2 = KeyFrame(keyFrameName, s2, 40, 1, 1, s2_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf0 = KeyFrame(keyFrameName, s2, 10, 1, 1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf1 = KeyFrame(keyFrameName, s2, 8, 1, 1, s2_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf2 = KeyFrame(keyFrameName, s2, 19, 1, 1, s2_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait 5
-    KeyFrame s2_kf3 = KeyFrame(keyFrameName, s2,  10, 1, 1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf3 = KeyFrame(keyFrameName, s2,  8, 1, 1, s2_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
     // keep post 5 
-    KeyFrame s2_kf4 = KeyFrame(keyFrameName, s2,  13, 1, 1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s2_kf4 = KeyFrame(keyFrameName, s2,  10, 1, 1, s2_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
 
 
     glm::vec3 s3_rotation1 = glm::vec3(0.001f, 0.001f, 0.001f);
@@ -268,14 +291,14 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
     glm::vec3 s3_rotation3 = glm::vec3(0.15f, -1.0f, 0.1f);
     glm::vec3 s3_rotation4 = glm::vec3(0.0f, 0.0f, 0.0f);
 
-
-    KeyFrame s3_kf1 = KeyFrame(keyFrameName, s3, 40, 1, 1, s3_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
-    KeyFrame s3_kf2 = KeyFrame(keyFrameName, s3, 10, 1, 1, s3_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf0 = KeyFrame(keyFrameName, s3, 10, 1, 1, s3_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf1 = KeyFrame(keyFrameName, s3, 19, 1, 1, s3_rotation1, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf2 = KeyFrame(keyFrameName, s3, 8, 1, 1, s3_rotation2, glm::vec3(0.0f, 0.0f,0.0f));
 
     // wait 5
-    KeyFrame s3_kf3 = KeyFrame(keyFrameName, s3,  10, 1, 1, s3_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf3 = KeyFrame(keyFrameName, s3,  8, 1, 1, s3_rotation3, glm::vec3(0.0f, 0.0f,0.0f));
     // keep post 5 
-    KeyFrame s3_kf4 = KeyFrame(keyFrameName, s3,  15, 1, 1, s3_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
+    KeyFrame s3_kf4 = KeyFrame(keyFrameName, s3,  10, 1, 1, s3_rotation4, glm::vec3(0.0f, 0.0f,0.0f));
 
     int size;
     std::vector<SceneNode *> *JointPointers_v;
@@ -294,15 +317,17 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
     for(int i = 0 ; i < size; i ++){
         SceneNode * node = JointPointers_v->at(i);
         if(node->m_name == s1){
+            keyFrame_v->at(i).push_back(s1_kf0);
             keyFrame_v->at(i).push_back(s1_kf1);
-            keyFrame_v->at(i).push_back(s1_kf2);
+            //keyFrame_v->at(i).push_back(s1_kf2);
             keyFrame_v->at(i).push_back(s1_kf3);
             keyFrame_v->at(i).push_back(s1_kf4);
             keyFrame_v->at(i).push_back(s1_kf5);
-            keyFrame_v->at(i).push_back(s1_kf6);
+            //keyFrame_v->at(i).push_back(s1_kf6);
             keyFrame_v->at(i).push_back(s1_kf7);
         }
         if(node->m_name == s2){ // push for leftElbow
+            keyFrame_v->at(i).push_back(s2_kf0);    
             keyFrame_v->at(i).push_back(s2_kf1);
             keyFrame_v->at(i).push_back(s2_kf2);
             keyFrame_v->at(i).push_back(s2_kf3);
@@ -310,6 +335,7 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
 
         }
          if(node->m_name == s3){ // push for leftElbow
+            keyFrame_v->at(i).push_back(s3_kf0);
             keyFrame_v->at(i).push_back(s3_kf1);
             keyFrame_v->at(i).push_back(s3_kf2);
             keyFrame_v->at(i).push_back(s3_kf3);
@@ -318,7 +344,7 @@ int  KeyFrameHandler::addKeyFrameforLeftLegHit(AnimationModel &animationModel,in
         }  
     }
 
-    return 75;
+    return 55;
     //cout<<"after add size is "<<animationModel.keyFrame_v_ani_c1.size()<<endl;
 }
 
@@ -452,12 +478,16 @@ void KeyFrameHandler::stopMovement(AnimationModel &animationModel, int character
     string s2 = "leftKneeJoint";
     string s3 = "rightHipJoint";
     string s4 = "rightKneeJoint";
+    string s5 = "leftAnkleJoint";
+    string s6 = "leftAnkleJoint";
     
     if(character == 2){
         s1.append("_baymax");
         s2.append("_baymax");
         s3.append("_baymax");
         s4.append("_baymax");
+        s5.append("_baymax");
+        s6.append("_baymax");
     }
     
 
@@ -509,6 +539,18 @@ void KeyFrameHandler::stopMovement(AnimationModel &animationModel, int character
         }
         if(node->m_name == s4){ // push for leftElbow
             KeyFrame s_kf_reset = KeyFrame("stopMovement", s4, 10, 1, 1, s_rotation, glm::vec3(0.0f, 0.0f,0.0f));
+            keyFrame_v->at(i).clear();
+            keyFrame_v->at(i).push_back(kf_dummy);
+            keyFrame_v->at(i).push_back(s_kf_reset);
+        }
+        if(node->m_name == s5){ // push for leftElbow
+            KeyFrame s_kf_reset = KeyFrame("stopMovement", s5, 10, 1, 1, s_rotation, glm::vec3(0.0f, 0.0f,0.0f));
+            keyFrame_v->at(i).clear();
+            keyFrame_v->at(i).push_back(kf_dummy);
+            keyFrame_v->at(i).push_back(s_kf_reset);
+        }
+        if(node->m_name == s6){ // push for leftElbow
+            KeyFrame s_kf_reset = KeyFrame("stopMovement", s6, 10, 1, 1, s_rotation, glm::vec3(0.0f, 0.0f,0.0f));
             keyFrame_v->at(i).clear();
             keyFrame_v->at(i).push_back(kf_dummy);
             keyFrame_v->at(i).push_back(s_kf_reset);
