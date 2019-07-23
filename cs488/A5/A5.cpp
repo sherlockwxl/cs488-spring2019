@@ -883,7 +883,7 @@ void A5::guiLogic()
                 
         }
 
-		if(ImGui::Checkbox("Apply Fraction", &apply_u)) {
+		if(ImGui::Checkbox("Apply Friction", &apply_u)) {
 			character_1.u_enabled = apply_u;
 			character_2.u_enabled = apply_u;
 		}
