@@ -7,7 +7,7 @@ Steps:
     4. $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./lib/  
     5. $ ./A5 Assets/puppet.lua
 
-Machine: gl36
+Machine: gl30
 ===============================================================================
 Manual:
 1. Setting window:

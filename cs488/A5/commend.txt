@@ -1,4 +1,0 @@
-
-
-
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/xilingwu/Documents/cs488-spring2019/cs488/A5/lib/
